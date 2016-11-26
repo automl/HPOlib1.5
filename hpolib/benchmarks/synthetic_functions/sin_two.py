@@ -15,12 +15,12 @@ class SinTwo(AbstractBenchmark):
     """
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x):
+    def objective_function(self, x, **kwargs):
         y = (0.5 * np.sin(13 * x[0]) * np.sin(27 * x[0]) + 0.5) * (0.5 * np.sin(13 * x[1]) * np.sin(27 * x[1]) + 0.5)
 
         return {'function_value': y}
 
-    def objective_function_test(self, x):
+    def objective_function_test(self, x, **kwargs):
         return self.objective_function(x)
 
     @staticmethod
