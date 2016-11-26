@@ -20,8 +20,12 @@ class LogisticRegression(AbstractBenchmark):
 
     def __init__(self, path=None):
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
-        self.num_classes = len(np.unique(self.train_targets))
         self.num_epochs = 100
+
+        # Use 10 time the number of classes as lower bound for the dataset fraction
+        self.num_classes = np.unique(self.train_targets).shape[0]
+        #self.s_min = float(10 * self.num_classes) / self.train.shape[0]
+        self.s_min = 2000  # Minimum batch size
         super(LogisticRegression, self).__init__()
 
     def get_data(self, path):
