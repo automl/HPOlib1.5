@@ -8,14 +8,14 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 class Levy(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x):
+    def objective_function(self, x, **kwargs):
         z = 1 + ((x[0] - 1.) / 4.)
         s = np.power((np.sin(np.pi * z)), 2)
         y = (s + ((z - 1) ** 2) * (1 + np.power((np.sin(2 * np.pi * z)), 2)))
 
         return {'function_value': y}
 
-    def objective_function_test(self, x):
+    def objective_function_test(self, x, **kwargs):
         return self.objective_function(x)
 
     @staticmethod
