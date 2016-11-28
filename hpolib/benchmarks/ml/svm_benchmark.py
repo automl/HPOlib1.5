@@ -18,6 +18,13 @@ class SupportVectorMachine(AbstractBenchmark):
         concatenated to form the whole training data set.
     """
     def __init__(self, path=None):
+        """
+
+        Parameters
+        ----------
+        path: str
+            directory to find or download dataset to
+        """
 
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
 
