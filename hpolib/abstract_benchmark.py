@@ -133,7 +133,7 @@ class AbstractBenchmark(object):
 
     @staticmethod
     @abc.abstractmethod
-    def get_meta_information(self):
+    def get_meta_information():
         """ Provides some meta information about the benchmark.
 
         Returns
