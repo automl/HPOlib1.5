@@ -20,7 +20,7 @@ with open("hpolib/__version__.py") as fh:
 setuptools.setup(
     name='hpolib2',
     description='Automated machine learning.',
-    version=hpolib.__version__,
+    version=version,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=requirements,
     test_suite='nose.collector',
