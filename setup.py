@@ -3,18 +3,14 @@ import hpolib
 
 import setuptools
 
-requirements = [
-    "numpy>=1.9.0",
-    "scipy>=0.14.1",
-    "theano",
-    "lasagne",
-    "nose",
-    "scikit-learn",
-    "ConfigSpace"
-]
-
 with open("hpolib/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
+
+with open('requirements.txt') as fh:
+    requirements = fh.read()
+requirements = requirements.split('\n')
+requirements = [requirement.strip() for requirement in requirements]
+
 
 
 setuptools.setup(
