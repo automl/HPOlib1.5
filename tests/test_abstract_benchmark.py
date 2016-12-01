@@ -12,13 +12,18 @@ import hpolib.abstract_benchmark as abstract_benchmark
 
 
 class Benchmark(abstract_benchmark.AbstractBenchmark):
-    def objective_function(self, configuration):
+    def objective_function(self, configuration, **kwargs):
         pass
 
-    def objective_function_test(self, configuration):
+    def objective_function_test(self, configuration, **kwargs):
         pass
 
-    def get_configuration_space(cls):
+    @staticmethod
+    def get_configuration_space():
+        pass
+
+    @staticmethod
+    def get_meta_information():
         pass
 
 
