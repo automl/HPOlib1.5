@@ -3,3 +3,4 @@ __authors__ = ["Katharina Eggensperger", "Matthias Feurer", "Aaron Klein",
 __contact__ = "automl.org"
 
 from hpolib.__version__ import __version__
+import hpolib.config
