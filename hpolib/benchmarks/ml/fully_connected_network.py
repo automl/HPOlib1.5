@@ -15,10 +15,9 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
         self.max_num_epochs = max_num_epochs
-        # Use 10 time the number of classes as lower bound for the dataset fraction
+
         self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
-        #self.s_min = float(10 * self.num_classes) / self.train.shape[0]
-        self.s_min = 512
+        self.s_min = 512  # Minimum dataset size is equal to the maximum batch size
         super(FullyConnectedNetwork, self).__init__()
 
     def get_data(self, path):
