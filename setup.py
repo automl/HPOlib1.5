@@ -13,6 +13,9 @@ requirements = [
     "ConfigSpace"
 ]
 
+with open("hpolib/__version__.py") as fh:
+    version = fh.readlines()[-1].split()[-1].strip("\"'")
+
 
 setuptools.setup(
     name='hpolib2',
@@ -28,6 +31,7 @@ setuptools.setup(
     platforms=['Linux'],
     classifiers=[
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Development Status :: 3 - Alpha',
         'Natural Language :: English',
         'Environment :: Console',
