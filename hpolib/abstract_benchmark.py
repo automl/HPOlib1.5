@@ -4,8 +4,7 @@ import numpy as np
 import ConfigSpace
 
 
-class AbstractBenchmark(object):
-    __metaclass__ = abc.ABCMeta
+class AbstractBenchmark(object, metaclass=abc.ABCMeta):
 
     def __init__(self):
         """Interface for benchmarks.
@@ -129,7 +128,7 @@ class AbstractBenchmark(object):
         ConfigSpace.ConfigurationSpace
             A valid configuration space for the benchmark's parameters
         """
-        pass
+        raise NotImplementedError()
 
     @staticmethod
     @abc.abstractmethod
@@ -142,4 +141,4 @@ class AbstractBenchmark(object):
             some human-readable information
 
         """
-        return {}
+        raise NotImplementedError()
