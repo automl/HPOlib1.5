@@ -14,12 +14,20 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 
 class FullyConnectedNetwork(AbstractBenchmark):
 
-    def __init__(self, path=None, max_num_epochs=100):
+    def __init__(self, path=None, max_num_epochs=100, rng=None):
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data(path)
         self.max_num_epochs = max_num_epochs
-        self.num_classes = len(np.unique(self.train_targets))
+
+        self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
+        self.s_min = 512  # Minimum dataset size is equal to the maximum batch size
+        if rng is None:
+            self.rng = np.random.RandomState()
+        else:
+            self.rng = rng
+
+        lasagne.random.set_rng(self.rng)
         super(FullyConnectedNetwork, self).__init__()
 
     def get_data(self, path):
@@ -27,24 +35,33 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x, steps=1, **kwargs):
-        print(x)
+    def objective_function(self, x, dataset_fraction=1, steps=1, **kwargs):
+
+        x = np.array(x, dtype=np.float32)
+
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
-        lc_curve, cost_curve, train_loss, valid_loss = \
-            self.train_net(self.train, self.train_targets,
-                           self.valid, self.valid_targets,
-                           init_learning_rate=np.power(10., x[0]),
-                           l2_reg=np.power(10., x[1]),
-                           batch_size=int(x[2]),
-                           gamma=np.power(10., x[3]),
-                           power=x[4],
-                           momentum=x[5],
-                           n_units_1=int(np.power(2, x[6])),
-                           n_units_2=int(np.power(2, x[7])),
-                           dropout_rate_1=x[8],
-                           dropout_rate_2=x[9],
-                           num_epochs=num_epochs)
+        # Shuffle training data
+        shuffle = self.rng.permutation(self.train.shape[0])
+        size = int(dataset_fraction * self.train.shape[0])
+
+        # Split of dataset subset
+        train = self.train[shuffle[:size]]
+        train_targets = self.train_targets[shuffle[:size]]
+
+        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
+                                                                      self.valid, self.valid_targets,
+                                                                      init_learning_rate=np.float32(np.power(10., x[0])),
+                                                                      l2_reg=np.float32(np.power(10., x[1])),
+                                                                      batch_size=np.int32(x[2]),
+                                                                      gamma=np.float32(np.power(10, x[3])),
+                                                                      power=np.float32(x[4]),
+                                                                      momentum=np.float32(x[5]),
+                                                                      n_units_1=np.int32(np.power(2, x[6])),
+                                                                      n_units_2=np.int32(np.power(2, x[7])),
+                                                                      dropout_rate_1=np.float32(x[8]),
+                                                                      dropout_rate_2=np.float32(x[9]),
+                                                                      num_epochs=np.int32(num_epochs))
 
         y = lc_curve[-1]
         c = cost_curve[-1]
@@ -63,23 +80,22 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         train = np.concatenate((self.train, self.valid))
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
-        learning_curve, cost, train_loss, valid_loss = \
-            self.train_net(train, train_targets,
-                           self.test, self.test_targets,
-                           init_learning_rate=np.power(10., x[0]),
-                           l2_reg=np.power(10., x[1]),
-                           batch_size=int(x[2]),
-                           gamma=np.power(10., x[3]),
-                           power=x[4],
-                           momentum=x[5],
-                           n_units_1=int(np.power(2, x[6])),
-                           n_units_2=int(np.power(2, x[7])),
-                           dropout_rate_1=x[8],
-                           dropout_rate_2=x[9],
-                           num_epochs=num_epochs)
-        y = learning_curve[-1]
-        c = cost[-1]
-        return {'function_value': y, "cost": c, "learning_curve": learning_curve}
+        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
+                                              self.test, self.test_targets,
+                                              init_learning_rate=np.float32(np.power(10., x[0])),
+                                              l2_reg=np.float32(np.power(10., x[1])),
+                                              batch_size=np.int32(x[2]),
+                                              gamma=np.float32(np.power(10, x[3])),
+                                              power=np.float32(x[4]),
+                                              momentum=np.float32(x[5]),
+                                              n_units_1=np.int32(np.power(2, x[6])),
+                                              n_units_2=np.int32(np.power(2, x[7])),
+                                              dropout_rate_1=np.float32(x[8]),
+                                              dropout_rate_2=np.float32(x[9]),
+                                              num_epochs=np.int32(num_epochs))
+        y = lc_curve[-1]
+        c = cost_curve[-1]
+        return {'function_value': y, "cost": c, "learning_curve": lc_curve}
 
     @staticmethod
     def get_configuration_space():
@@ -100,14 +116,20 @@ class FullyConnectedNetwork(AbstractBenchmark):
                            [5, 12],  # n_units_1
                            [5, 12],  # n_units_2
                            [0.0, 0.99],  # dropout_rate_1
-                           [0.0, 0.99]]  # dropout_rate_2
+                           [0.0, 0.99]],  # dropout_rate_2
+                'references': ["@article{klein-bnn16a,"
+                               "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
+                               "title = {Bayesian Neural Network for Predicting Learning Curves},"
+                               "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
+                               "month = dec,"
+                               "year = {2016}}"]
                 }
 
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
         assert len(inputs) == len(targets)
         if shuffle:
             indices = np.arange(len(inputs))
-            np.random.shuffle(indices)
+            self.rng.shuffle(indices)
         for start_idx in range(0, len(inputs) - batch_size + 1, batch_size):
             if shuffle:
                 excerpt = indices[start_idx:start_idx + batch_size]
@@ -125,7 +147,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         start_time = time.time()
 
-        input_var = T.dmatrix('inputs')
+        input_var = T.fmatrix('inputs')
         target_var = T.ivector('targets')
 
         # Build net
@@ -175,18 +197,15 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         learning_rate = theano.shared(init_learning_rate)
         epoch = T.fscalar("epoch")
-        inv_policy = T.power((1 + gamma * epoch), (-power))
+        inv_policy = (1 + gamma * epoch) ** (-power)
 
-        adapt_lr = theano.function([epoch], learning_rate,
-                                   updates=[(learning_rate,
-                                             init_learning_rate * inv_policy)])
+        adapt_lr = theano.function([epoch], learning_rate, updates=[(learning_rate, init_learning_rate * inv_policy)])
 
         updates = lasagne.updates.momentum(loss, params,
                                            learning_rate=learning_rate,
                                            momentum=momentum)
 
-        train_fn = theano.function([input_var, target_var], loss,
-                                   updates=updates)
+        train_fn = theano.function([input_var, target_var], loss, updates=updates)
 
         val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
 
