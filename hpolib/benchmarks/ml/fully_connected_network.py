@@ -1,4 +1,7 @@
+import os
+import sys
 import time
+
 import numpy as np
 import lasagne
 import theano
@@ -11,11 +14,20 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 
 class FullyConnectedNetwork(AbstractBenchmark):
 
-    def __init__(self, path=None, max_num_epochs=100):
+    def __init__(self, path=None, max_num_epochs=100, rng=None):
 
-        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
+        self.train, self.train_targets, self.valid, self.valid_targets, \
+            self.test, self.test_targets = self.get_data(path)
         self.max_num_epochs = max_num_epochs
-        self.num_classes = len(np.unique(self.train_targets))
+
+        self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
+        self.s_min = 512  # Minimum dataset size is equal to the maximum batch size
+        if rng is None:
+            self.rng = np.random.RandomState()
+        else:
+            self.rng = rng
+
+        lasagne.random.set_rng(self.rng)
         super(FullyConnectedNetwork, self).__init__()
 
     def get_data(self, path):
@@ -23,23 +35,33 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x, steps=1, **kwargs):
-        print(x)
+    def objective_function(self, x, dataset_fraction=1, steps=1, **kwargs):
+
+        x = np.array(x, dtype=np.float32)
+
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
-        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(self.train, self.train_targets,
+        # Shuffle training data
+        shuffle = self.rng.permutation(self.train.shape[0])
+        size = int(dataset_fraction * self.train.shape[0])
+
+        # Split of dataset subset
+        train = self.train[shuffle[:size]]
+        train_targets = self.train_targets[shuffle[:size]]
+
+        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
                                                                       self.valid, self.valid_targets,
-                                                                      init_learning_rate=np.power(10., x[0]),
-                                                                      l2_reg=np.power(10., x[1]),
-                                                                      batch_size=int(x[2]),
-                                                                      gamma=np.power(10., x[3]),
-                                                                      power=x[4],
-                                                                      momentum=x[5],
-                                                                      n_units_1=int(np.power(2, x[6])),
-                                                                      n_units_2=int(np.power(2, x[7])),
-                                                                      dropout_rate_1=x[8],
-                                                                      dropout_rate_2=x[9],
-                                                                      num_epochs=num_epochs)
+                                                                      init_learning_rate=np.float32(np.power(10., x[0])),
+                                                                      l2_reg=np.float32(np.power(10., x[1])),
+                                                                      batch_size=np.int32(x[2]),
+                                                                      gamma=np.float32(np.power(10, x[3])),
+                                                                      power=np.float32(x[4]),
+                                                                      momentum=np.float32(x[5]),
+                                                                      n_units_1=np.int32(np.power(2, x[6])),
+                                                                      n_units_2=np.int32(np.power(2, x[7])),
+                                                                      dropout_rate_1=np.float32(x[8]),
+                                                                      dropout_rate_2=np.float32(x[9]),
+                                                                      num_epochs=np.int32(num_epochs))
 
         y = lc_curve[-1]
         c = cost_curve[-1]
@@ -58,19 +80,19 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         train = np.concatenate((self.train, self.valid))
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
-        lc_curve, cost_curve = self.train_net(train, train_targets,
+        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
                                               self.test, self.test_targets,
-                                              init_learning_rate=np.power(10., x[0]),
-                                              l2_reg=np.power(10., x[1]),
-                                              batch_size=int(x[2]),
-                                              gamma=np.power(10., x[3]),
-                                              power=x[4],
-                                              momentum=x[5],
-                                              n_units_1=int(np.power(2, x[6])),
-                                              n_units_2=int(np.power(2, x[7])),
-                                              dropout_rate_1=x[8],
-                                              dropout_rate_2=x[9],
-                                              num_epochs=num_epochs)
+                                              init_learning_rate=np.float32(np.power(10., x[0])),
+                                              l2_reg=np.float32(np.power(10., x[1])),
+                                              batch_size=np.int32(x[2]),
+                                              gamma=np.float32(np.power(10, x[3])),
+                                              power=np.float32(x[4]),
+                                              momentum=np.float32(x[5]),
+                                              n_units_1=np.int32(np.power(2, x[6])),
+                                              n_units_2=np.int32(np.power(2, x[7])),
+                                              dropout_rate_1=np.float32(x[8]),
+                                              dropout_rate_2=np.float32(x[9]),
+                                              num_epochs=np.int32(num_epochs))
         y = lc_curve[-1]
         c = cost_curve[-1]
         return {'function_value': y, "cost": c, "learning_curve": lc_curve}
@@ -78,7 +100,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
     @staticmethod
     def get_configuration_space():
         cs = CS.ConfigurationSpace(seed=np.random.randint(1, 100000))
-        cs.generate_all_continuous_from_bounds(FullyConnectedNetwork.get_meta_information()['bounds'])
+        cs.generate_all_continuous_from_bounds(FullyConnectedNetwork.
+                                               get_meta_information()['bounds'])
         return cs
 
     @staticmethod
@@ -93,14 +116,20 @@ class FullyConnectedNetwork(AbstractBenchmark):
                            [5, 12],  # n_units_1
                            [5, 12],  # n_units_2
                            [0.0, 0.99],  # dropout_rate_1
-                           [0.0, 0.99]]  # dropout_rate_2
+                           [0.0, 0.99]],  # dropout_rate_2
+                'references': ["@article{klein-bnn16a,"
+                               "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
+                               "title = {Bayesian Neural Network for Predicting Learning Curves},"
+                               "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
+                               "month = dec,"
+                               "year = {2016}}"]
                 }
 
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
         assert len(inputs) == len(targets)
         if shuffle:
             indices = np.arange(len(inputs))
-            np.random.shuffle(indices)
+            self.rng.shuffle(indices)
         for start_idx in range(0, len(inputs) - batch_size + 1, batch_size):
             if shuffle:
                 excerpt = indices[start_idx:start_idx + batch_size]
@@ -118,7 +147,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         start_time = time.time()
 
-        input_var = T.dmatrix('inputs')
+        input_var = T.fmatrix('inputs')
         target_var = T.ivector('targets')
 
         # Build net
@@ -143,8 +172,9 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         network = lasagne.layers.DropoutLayer(network, p=dropout_rate_2)
 
-        network = lasagne.layers.DenseLayer(network, num_units=self.num_classes,
-                                            nonlinearity=lasagne.nonlinearities.softmax)
+        network = lasagne.layers.\
+            DenseLayer(network, num_units=self.num_classes,
+                       nonlinearity=lasagne.nonlinearities.softmax)
 
         # Define Theano functions
         params = lasagne.layers.get_all_params(network, trainable=True)
@@ -152,7 +182,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
         loss = lasagne.objectives.categorical_crossentropy(prediction,
                                                            target_var)
         # Add l2 regularization for the weights
-        l2_penalty = l2_reg * lasagne.regularization.regularize_network_params(network, lasagne.regularization.l2)
+        l2_penalty = l2_reg * lasagne.regularization.\
+            regularize_network_params(network, lasagne.regularization.l2)
         loss += l2_penalty
         loss = loss.mean()
 
@@ -166,7 +197,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         learning_rate = theano.shared(init_learning_rate)
         epoch = T.fscalar("epoch")
-        inv_policy = T.power((1 + gamma * epoch), (-power))
+        inv_policy = (1 + gamma * epoch) ** (-power)
 
         adapt_lr = theano.function([epoch], learning_rate, updates=[(learning_rate, init_learning_rate * inv_policy)])
 
@@ -191,7 +222,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
             train_err = 0
             train_batches = 0
 
-            for batch in self.iterate_minibatches(train, train_targets, batch_size, shuffle=True):
+            for batch in self.iterate_minibatches(train, train_targets,
+                                                  batch_size, shuffle=True):
                 inputs, targets = batch
                 train_err += train_fn(inputs, targets)
                 train_batches += 1
@@ -199,7 +231,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
             val_err = 0
             val_acc = 0
             val_batches = 0
-            for batch in self.iterate_minibatches(valid, valid_targets, batch_size, shuffle=False):
+            for batch in self.iterate_minibatches(valid, valid_targets,
+                                                  batch_size, shuffle=False):
                 inputs, targets = batch
                 err, acc = val_fn(inputs, targets)
                 val_err += err
@@ -219,3 +252,81 @@ class FullyConnectedNetwork(AbstractBenchmark):
             adapt_lr(e + 1)
 
         return learning_curve, cost, train_loss, valid_loss
+
+
+class FCNetOnMnist(FullyConnectedNetwork):
+
+    def get_data(self, path):
+        # This function loads the MNIST data, it's copied from the Lasagne
+        # tutorial. We first define a download function, supporting both
+        # Python 2 and 3.
+        if sys.version_info[0] == 2:
+            from urllib import urlretrieve
+        else:
+            from urllib.request import urlretrieve
+
+        def download(filename, save_to,
+                     source='http://yann.lecun.com/exdb/mnist/'):
+            print("Downloading %s" % filename)
+            urlretrieve(source + filename, save_to)
+
+        # We then define functions for loading MNIST images and labels.
+        # For convenience, they also download the requested files if needed.
+        import gzip
+
+        def load_mnist_images(filename, save_to):
+            save_fl = os.path.join(save_to, filename)
+
+            if not os.path.exists(save_fl):
+                download(filename=filename, save_to=save_fl)
+
+            # Read the inputs in Yann LeCun's binary format.
+            with gzip.open(save_fl, 'rb') as f:
+                data = np.frombuffer(f.read(), np.uint8, offset=16)
+            # The inputs are vectors now, we reshape them to monochrome 2D
+            # images, following the shape convention:
+            # (examples, channels, rows, columns)
+            data = data.reshape(-1, 1, 28, 28)
+            # The inputs come as bytes, we convert them to float32 in range
+            # [0,1]. (Actually to range [0, 255/256], for compatibility to the
+            # version provided at:
+            #  http://deeplearning.net/data/mnist/mnist.pkl.gz.)
+            return data / np.float32(256)
+
+        def load_mnist_labels(filename, save_to):
+            save_fl = os.path.join(os.path.join(save_to, filename))
+
+            if not os.path.exists(save_fl):
+                download(filename=filename, save_to=save_fl)
+
+            # Read the labels in Yann LeCun's binary format.
+            with gzip.open(save_fl, 'rb') as f:
+                data = np.frombuffer(f.read(), np.uint8, offset=8)
+            # Labels are vectors of integers now, that's exactly what we want.
+            return data
+
+        if not os.path.isdir(path):
+                os.makedirs(path)
+
+        # We can now download and read the training and test set images and
+        # labels.
+        X_train = load_mnist_images(filename='train-images-idx3-ubyte.gz',
+                                    save_to=path)
+        y_train = load_mnist_labels(filename='train-labels-idx1-ubyte.gz',
+                                    save_to=path)
+        X_test = load_mnist_images(filename='t10k-images-idx3-ubyte.gz',
+                                   save_to=path)
+        y_test = load_mnist_labels(filename='t10k-labels-idx1-ubyte.gz',
+                                   save_to=path)
+
+        # We reserve the last 10000 training examples for validation.
+        X_train, X_val = X_train[:-10000], X_train[-10000:]
+        y_train, y_val = y_train[:-10000], y_train[-10000:]
+
+        X_train = X_train.reshape(X_train.shape[0], 28 * 28)
+        X_val = X_val.reshape(X_val.shape[0], 28 * 28)
+        X_test = X_test.reshape(X_test.shape[0], 28 * 28)
+
+        # We just return all the arrays in order, as expected in main().
+        # (It doesn't matter how we do this as long as we can read them again.)
+        return X_train, y_train, X_val, y_val, X_test, y_test

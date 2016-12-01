@@ -18,11 +18,18 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         The tunable hyperparameters are the learning rate (on a log scale), the batch size and
         the number of units in each layer (on a log2 scale).
     """
-    def __init__(self, path=None, max_num_epochs=40):
+    def __init__(self, path=None, max_num_epochs=40, rng=None):
 
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
         self.max_num_epochs = max_num_epochs
         self.num_classes = len(np.unique(self.train_targets))
+
+        if rng is None:
+            self.rng = np.random.RandomState()
+        else:
+            self.rng = rng
+
+        lasagne.random.set_rng(self.rng)
         super(ConvolutionalNeuralNetwork, self).__init__()
 
     def get_data(self, path):
@@ -30,11 +37,19 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x, steps=1, **kwargs):
+    def objective_function(self, x, steps=1, dataset_fraction=1, **kwargs):
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
-        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(self.train, self.train_targets,
+        # Shuffle training data
+        shuffle = self.rng.permutation(self.train.shape[0])
+        size = int(dataset_fraction * self.train.shape[0])
+
+        # Split of dataset subset
+        train = self.train[shuffle[:size]]
+        train_targets = self.train_targets[shuffle[:size]]
+
+        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
                                                                       self.valid, self.valid_targets,
                                                                       init_learning_rate=np.power(10., x[0]),
                                                                       batch_size=int(x[1]),
@@ -79,7 +94,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
     @staticmethod
     def get_configuration_space():
-        cs = CS.ConfigurationSpace(seed=np.random.randint(1, 100000))
+        cs = CS.ConfigurationSpace()
         cs.generate_all_continuous_from_bounds(ConvolutionalNeuralNetwork.get_meta_information()['bounds'])
         return cs
 
@@ -90,14 +105,20 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                            [32, 512],  # batch_size
                            [4, 10],  # n_units_1
                            [4, 10],  # n_units_2
-                           [4, 10]  # n_units_3
-                           ]}
+                           [4, 10]],  # n_units_3
+                'references': ["@article{klein-bnn16a,"
+                               "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
+                               "title = {Bayesian Neural Network for Predicting Learning Curves},"
+                               "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
+                               "month = dec,"
+                               "year = {2016}}"]
+                }
 
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
         assert len(inputs) == len(targets)
         if shuffle:
             indices = np.arange(len(inputs))
-            np.random.shuffle(indices)
+            self.rng.shuffle(indices)
         for start_idx in range(0, len(inputs) - batch_size + 1, batch_size):
             if shuffle:
                 excerpt = indices[start_idx:start_idx + batch_size]
