@@ -24,7 +24,6 @@ class LogisticRegression(AbstractBenchmark):
 
         # Use 10 time the number of classes as lower bound for the dataset fraction
         self.num_classes = np.unique(self.train_targets).shape[0]
-        #self.s_min = float(10 * self.num_classes) / self.train.shape[0]
         self.s_min = 2000  # Minimum batch size
         super(LogisticRegression, self).__init__()
 

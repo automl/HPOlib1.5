@@ -16,6 +16,9 @@ class SupportVectorMachine(AbstractBenchmark):
         The test data set is only used for a final offline evaluation of
         a configuration. For that the validation and training data is
         concatenated to form the whole training data set.
+
+        This benchmark was used in the following paper:
+
     """
     def __init__(self, path=None):
         """
