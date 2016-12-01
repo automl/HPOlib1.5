@@ -63,3 +63,18 @@ class SvmOnMnist(SupportVectorMachine):
         # We just return all the arrays in order, as expected in main().
         # (It doesn't matter how we do this as long as we can read them again.)
         return X_train, y_train, X_val, y_val, X_test, y_test
+
+
+class SvmOnMnistLocal(SupportVectorMachine):
+
+    def get_data(self, path="/home/kleinaa/data/mnist_npy"):
+        X_train = np.load(os.path.join(path, "x_train.npy"))
+        X_train = X_train.reshape(X_train.shape[0], 28 * 28)
+        X_test = np.load(os.path.join(path, "x_test.npy"))
+        X_test = X_test.reshape(X_test.shape[0], 28 * 28)
+        X_valid = np.load(os.path.join(path, "x_valid.npy"))
+        X_valid = X_valid.reshape(X_valid.shape[0], 28 * 28)
+        Y_train = np.load(os.path.join(path, "y_train.npy"))
+        Y_test = np.load(os.path.join(path, "y_test.npy"))
+        Y_valid = np.load(os.path.join(path, "y_valid.npy"))
+        return X_train, Y_train, X_valid, Y_valid, X_test, Y_test

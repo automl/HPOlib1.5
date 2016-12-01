@@ -16,7 +16,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
         self.max_num_epochs = max_num_epochs
         # Use 10 time the number of classes as lower bound for the dataset fraction
-        self.num_classes = np.unique(self.train_targets).shape[0]
+        self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
         #self.s_min = float(10 * self.num_classes) / self.train.shape[0]
         self.s_min = 512
         super(FullyConnectedNetwork, self).__init__()
@@ -27,6 +27,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, steps=1, **kwargs):
+
+        x = np.array(x, dtype=np.float32)
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
@@ -40,17 +42,17 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
                                                                       self.valid, self.valid_targets,
-                                                                      init_learning_rate=np.power(10., x[0]),
-                                                                      l2_reg=np.power(10., x[1]),
-                                                                      batch_size=int(x[2]),
-                                                                      gamma=np.power(10., x[3]),
-                                                                      power=x[4],
-                                                                      momentum=x[5],
-                                                                      n_units_1=int(np.power(2, x[6])),
-                                                                      n_units_2=int(np.power(2, x[7])),
-                                                                      dropout_rate_1=x[8],
-                                                                      dropout_rate_2=x[9],
-                                                                      num_epochs=num_epochs)
+                                                                      init_learning_rate=np.float32(np.power(10., x[0])),
+                                                                      l2_reg=np.float32(np.power(10., x[1])),
+                                                                      batch_size=np.int32(x[2]),
+                                                                      gamma=np.float32(np.power(10, x[3])),
+                                                                      power=np.float32(x[4]),
+                                                                      momentum=np.float32(x[5]),
+                                                                      n_units_1=np.int32(np.power(2, x[6])),
+                                                                      n_units_2=np.int32(np.power(2, x[7])),
+                                                                      dropout_rate_1=np.float32(x[8]),
+                                                                      dropout_rate_2=np.float32(x[9]),
+                                                                      num_epochs=np.int32(num_epochs))
 
         y = lc_curve[-1]
         c = cost_curve[-1]
@@ -69,19 +71,19 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         train = np.concatenate((self.train, self.valid))
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
-        lc_curve, cost_curve = self.train_net(train, train_targets,
+        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
                                               self.test, self.test_targets,
-                                              init_learning_rate=np.power(10., x[0]),
-                                              l2_reg=np.power(10., x[1]),
-                                              batch_size=int(x[2]),
-                                              gamma=np.power(10., x[3]),
-                                              power=x[4],
-                                              momentum=x[5],
-                                              n_units_1=int(np.power(2, x[6])),
-                                              n_units_2=int(np.power(2, x[7])),
-                                              dropout_rate_1=x[8],
-                                              dropout_rate_2=x[9],
-                                              num_epochs=num_epochs)
+                                              init_learning_rate=np.float32(np.power(10., x[0])),
+                                              l2_reg=np.float32(np.power(10., x[1])),
+                                              batch_size=np.int32(x[2]),
+                                              gamma=np.float32(np.power(10, x[3])),
+                                              power=np.float32(x[4]),
+                                              momentum=np.float32(x[5]),
+                                              n_units_1=np.int32(np.power(2, x[6])),
+                                              n_units_2=np.int32(np.power(2, x[7])),
+                                              dropout_rate_1=np.float32(x[8]),
+                                              dropout_rate_2=np.float32(x[9]),
+                                              num_epochs=np.int32(num_epochs))
         y = lc_curve[-1]
         c = cost_curve[-1]
         return {'function_value': y, "cost": c, "learning_curve": lc_curve}
@@ -129,7 +131,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         start_time = time.time()
 
-        input_var = T.dmatrix('inputs')
+        input_var = T.fmatrix('inputs')
         target_var = T.ivector('targets')
 
         # Build net
@@ -177,7 +179,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         learning_rate = theano.shared(init_learning_rate)
         epoch = T.fscalar("epoch")
-        inv_policy = T.power((1 + gamma * epoch), (-power))
+        inv_policy = (1 + gamma * epoch) ** (-power)
 
         adapt_lr = theano.function([epoch], learning_rate, updates=[(learning_rate, init_learning_rate * inv_policy)])
 
