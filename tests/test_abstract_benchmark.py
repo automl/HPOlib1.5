@@ -56,5 +56,10 @@ class TestAbstractBenchmark(unittest.TestCase):
         self.assertEqual(benchmark_mock.call_count, 10)
         self.assertEqual(test_mock.call_count, 10)
 
-
-
+    def test_abstractness(self):
+        self.assertRaisesRegex(TypeError,
+                               "Can't instantiate abstract class "
+                               "AbstractBenchmark with abstract methods "
+                               "get_configuration_space, get_meta_information, "
+                               "objective_function, objective_function_test",
+                               abstract_benchmark.AbstractBenchmark)
