@@ -1,0 +1,55 @@
+language: python
+
+matrix:
+
+  include:
+  - os: linux
+    env: PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh"
+  - os: linux
+    env: PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh"
+
+  # Set language to generic to not break travis-ci
+  # https://github.com/travis-ci/travis-ci/issues/2312#issuecomment-195620855
+  # so far, this issue is still open and there is no good solution
+  # python will then be installed by anaconda
+  - os: osx
+    sudo: required
+    language: generic
+    env: PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
+  - os: osx
+    sudo: required
+    language: generic
+    env: PYTHON_VERSION="3.5" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+  pip: true
+
+sudo: false
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+before_install:
+  - wget $MINICONDA_URL -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
+  - conda update --yes conda
+  - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose
+  - source activate testenv
+  - conda install --yes gcc
+  - echo "Using GCC at "`which gcc`
+  - export CC=`which gcc`
+
+install:
+  - pip install coverage pep8 python-coveralls
+  - cat requirements.txt | xargs -n 1 -L 1 pip install
+  - python setup.py install
+
+# command to run tests, e.g. python setup.py test
+script:
+  - nosetests -sv --with-coverage --cover-package=smac
+after_success:
+  - coveralls
