@@ -30,11 +30,19 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x, steps=1, **kwargs):
+    def objective_function(self, x, steps=1, dataset_fraction=1, **kwargs):
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
-        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(self.train, self.train_targets,
+        # Shuffle training data
+        shuffle = np.random.permutation(self.train.shape[0])
+        size = int(dataset_fraction * self.train.shape[0])
+
+        # Split of dataset subset
+        train = self.train[shuffle[:size]]
+        train_targets = self.train_targets[shuffle[:size]]
+
+        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
                                                                       self.valid, self.valid_targets,
                                                                       init_learning_rate=np.power(10., x[0]),
                                                                       batch_size=int(x[1]),
