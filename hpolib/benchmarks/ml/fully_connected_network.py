@@ -11,13 +11,19 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 
 class FullyConnectedNetwork(AbstractBenchmark):
 
-    def __init__(self, path=None, max_num_epochs=100):
+    def __init__(self, path=None, max_num_epochs=100, rng=None):
 
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
         self.max_num_epochs = max_num_epochs
 
         self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
         self.s_min = 512  # Minimum dataset size is equal to the maximum batch size
+        if rng is None:
+            self.rng = np.random.RandomState()
+        else:
+            self.rng = rng
+
+        lasagne.random.set_rng(self.rng)
         super(FullyConnectedNetwork, self).__init__()
 
     def get_data(self, path):
@@ -32,7 +38,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
         # Shuffle training data
-        shuffle = np.random.permutation(self.train.shape[0])
+        shuffle = self.rng.permutation(self.train.shape[0])
         size = int(dataset_fraction * self.train.shape[0])
 
         # Split of dataset subset
@@ -112,7 +118,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         assert len(inputs) == len(targets)
         if shuffle:
             indices = np.arange(len(inputs))
-            np.random.shuffle(indices)
+            self.rng.shuffle(indices)
         for start_idx in range(0, len(inputs) - batch_size + 1, batch_size):
             if shuffle:
                 excerpt = indices[start_idx:start_idx + batch_size]

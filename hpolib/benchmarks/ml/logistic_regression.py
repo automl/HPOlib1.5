@@ -18,13 +18,21 @@ class LogisticRegression(AbstractBenchmark):
         the validation data set.
     """
 
-    def __init__(self, path=None):
+    def __init__(self, path=None, rng=None):
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
         self.num_epochs = 100
 
         # Use 10 time the number of classes as lower bound for the dataset fraction
         self.num_classes = np.unique(self.train_targets).shape[0]
         self.s_min = 2000  # Minimum batch size
+
+        if rng is None:
+            self.rng = np.random.RandomState()
+        else:
+            self.rng = rng
+
+        lasagne.random.set_rng(self.rng)
+
         super(LogisticRegression, self).__init__()
 
     def get_data(self, path):
@@ -37,7 +45,7 @@ class LogisticRegression(AbstractBenchmark):
         start_time = time.time()
 
         # Shuffle training data
-        shuffle = np.random.permutation(self.train.shape[0])
+        shuffle = self.rng.permutation(self.train.shape[0])
         size = int(dataset_fraction * self.train.shape[0])
 
         # Split of dataset subset
@@ -109,7 +117,7 @@ class LogisticRegression(AbstractBenchmark):
         assert len(inputs) == len(targets)
         if shuffle:
             indices = np.arange(len(inputs))
-            np.random.shuffle(indices)
+            self.rng.shuffle(indices)
         for start_idx in range(0, len(inputs) - batch_size + 1, batch_size):
             if shuffle:
                 excerpt = indices[start_idx:start_idx + batch_size]
@@ -173,7 +181,6 @@ class LogisticRegression(AbstractBenchmark):
 
         for e in range(num_epochs):
 
-            epoch_start_time = time.time()
             train_err = 0
             train_batches = 0
 
@@ -191,11 +198,6 @@ class LogisticRegression(AbstractBenchmark):
                 val_err += err
                 val_acc += acc
                 val_batches += 1
-
-            #print("Epoch {} of {} took {:.3f}s".format(e + 1, num_epochs, time.time() - epoch_start_time))
-            #print("  training loss:\t\t{:.6f}".format(train_err / train_batches))
-            #print("  validation loss:\t\t{:.6f}".format(val_err / val_batches))
-            #print("  validation accuracy:\t\t{:.2f} %".format(val_acc / val_batches * 100))
 
             learning_curve[e] = 1 - val_acc / val_batches
             cost[e] = time.time() - start_time
