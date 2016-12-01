@@ -15,19 +15,22 @@ class SvmOnMnist(SupportVectorMachine):
         else:
             from urllib.request import urlretrieve
 
-        def download(filename, source='http://yann.lecun.com/exdb/mnist/'):
+        def download(filename, save_to, source='http://yann.lecun.com/exdb/mnist/'):
             print("Downloading %s" % filename)
-            urlretrieve(source + filename, filename)
+            urlretrieve(source + filename, save_to)
 
         # We then define functions for loading MNIST images and labels.
         # For convenience, they also download the requested files if needed.
         import gzip
 
-        def load_mnist_images(filename):
-            if not os.path.exists(filename):
-                download(filename)
+        def load_mnist_images(filename, save_to):
+            save_fl = os.path.join(save_to, filename)
+
+            if not os.path.exists(save_fl):
+                download(filename=filename, save_to=save_fl)
+
             # Read the inputs in Yann LeCun's binary format.
-            with gzip.open(filename, 'rb') as f:
+            with gzip.open(save_fl, 'rb') as f:
                 data = np.frombuffer(f.read(), np.uint8, offset=16)
             # The inputs are vectors now, we reshape them to monochrome 2D images,
             # following the shape convention: (examples, channels, rows, columns)
@@ -37,20 +40,30 @@ class SvmOnMnist(SupportVectorMachine):
             # provided at http://deeplearning.net/data/mnist/mnist.pkl.gz.)
             return data / np.float32(256)
 
-        def load_mnist_labels(filename):
-            if not os.path.exists(filename):
-                download(filename)
+        def load_mnist_labels(filename, save_to):
+            save_fl = os.path.join(os.path.join(save_to, filename))
+
+            if not os.path.exists(save_fl):
+                download(filename=filename, save_to=save_fl)
+
             # Read the labels in Yann LeCun's binary format.
-            with gzip.open(filename, 'rb') as f:
+            with gzip.open(save_fl, 'rb') as f:
                 data = np.frombuffer(f.read(), np.uint8, offset=8)
             # The labels are vectors of integers now, that's exactly what we want.
             return data
 
+        if not os.path.isdir(path):
+                os.makedirs(path)
+
         # We can now download and read the training and test set images and labels.
-        X_train = load_mnist_images(os.path.join(path, 'train-images-idx3-ubyte.gz'))
-        y_train = load_mnist_labels(os.path.join(path, 'train-labels-idx1-ubyte.gz'))
-        X_test = load_mnist_images(os.path.join(path, 't10k-images-idx3-ubyte.gz'))
-        y_test = load_mnist_labels(os.path.join(path, 't10k-labels-idx1-ubyte.gz'))
+        X_train = load_mnist_images(filename='train-images-idx3-ubyte.gz',
+                                    save_to=path)
+        y_train = load_mnist_labels(filename='train-labels-idx1-ubyte.gz',
+                                    save_to=path)
+        X_test = load_mnist_images(filename='t10k-images-idx3-ubyte.gz',
+                                   save_to=path)
+        y_test = load_mnist_labels(filename='t10k-labels-idx1-ubyte.gz',
+                                   save_to=path)
 
         # We reserve the last 10000 training examples for validation.
         X_train, X_val = X_train[:-10000], X_train[-10000:]
