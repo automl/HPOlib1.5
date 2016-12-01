@@ -20,7 +20,7 @@ class SupportVectorMachine(AbstractBenchmark):
         a configuration. For that the validation and training data is
         concatenated to form the whole training data set.
     """
-    def __init__(self, path=None):
+    def __init__(self, path=None, rng=None):
         """
 
         Parameters
@@ -41,6 +41,11 @@ class SupportVectorMachine(AbstractBenchmark):
 
         self.n_calls = 0
 
+        if rng is None:
+            self.rng = np.random.RandomState()
+        else:
+            self.rng = rng
+
     def get_data(self, path):
         pass
 
@@ -50,7 +55,7 @@ class SupportVectorMachine(AbstractBenchmark):
         start_time = time.time()
 
         # Shuffle training data
-        shuffle = np.random.permutation(self.train.shape[0])
+        shuffle = self.rng.permutation(self.train.shape[0])
         size = int(dataset_fraction * self.train.shape[0])
 
         # Split of dataset subset
@@ -62,7 +67,7 @@ class SupportVectorMachine(AbstractBenchmark):
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C)
+        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng)
         clf.fit(train, train_targets)
 
         # Compute validation error
@@ -85,7 +90,7 @@ class SupportVectorMachine(AbstractBenchmark):
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C)
+        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng)
         clf.fit(train, train_targets)
 
         # Compute test error
@@ -96,16 +101,22 @@ class SupportVectorMachine(AbstractBenchmark):
 
     @staticmethod
     def get_configuration_space():
-        cs = CS.ConfigurationSpace(seed=np.random.randint(1, 100000))
-        cs.generate_all_continuous_from_bounds(SupportVectorMachine.
-                                               get_meta_information()['bounds'])
+        cs = CS.ConfigurationSpace()
+        cs.generate_all_continuous_from_bounds(SupportVectorMachine.get_meta_information()['bounds'])
         return cs
 
     @staticmethod
     def get_meta_information():
         return {'name': 'Support Vector Machine',
                 'bounds': [[-10, 10],  # C
-                           [-10, 10]]  # gamma
+                           [-10, 10]],  # gamma
+                'references': ["@article{klein-corr16,"
+                               "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
+                               "title = {Fast Bayesian Optimization of Machine Learning"
+                               "Hyperparameters on Large Datasets},"
+                               "journal = corr,"
+                               "llvolume = {abs/1605.07079},"
+                               "lurl = {http://arxiv.org/abs/1605.07079}, year = {2016} }"]
                 }
 
 class SvmOnMnist(SupportVectorMachine):

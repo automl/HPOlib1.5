@@ -25,7 +25,7 @@ class Hartmann3(AbstractBenchmark):
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x):
+    def objective_function(self, x, **kwargs):
         external_sum = 0
         for i in range(4):
             internal_sum = 0
@@ -39,7 +39,7 @@ class Hartmann3(AbstractBenchmark):
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function_test(self, x):
+    def objective_function_test(self, x, **kwargs):
         return self.objective_function(x)
         
         
