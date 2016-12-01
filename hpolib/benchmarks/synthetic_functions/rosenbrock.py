@@ -6,7 +6,7 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 class Rosenbrock(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x):
+    def objective_function(self, x, **kwargs):
         y = 0
         d = 2
         for i in range(d - 1):
@@ -15,7 +15,7 @@ class Rosenbrock(AbstractBenchmark):
 
         return {'function_value': y}
 
-    def objective_function_test(self, x):
+    def objective_function_test(self, x, **kwargs):
         return self.objective_function(x)
 
     @staticmethod
