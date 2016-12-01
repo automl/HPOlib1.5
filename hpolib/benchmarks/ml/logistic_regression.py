@@ -110,8 +110,14 @@ class LogisticRegression(AbstractBenchmark):
                 'bounds': [[-6, 0],  # learning rate
                            [0, 1],  # l2 regularization
                            [20, 2000],  # batch size
-                           [0, .75]  # dropout rate
-                           ]}
+                           [0, .75]],  # dropout rate
+                'references': ["@article{klein-bnn16a,"
+                               "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
+                               "title = {Bayesian Neural Network for Predicting Learning Curves},"
+                               "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
+                               "month = dec,"
+                               "year = {2016}}"]
+                }
 
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
         assert len(inputs) == len(targets)

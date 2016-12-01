@@ -111,7 +111,13 @@ class FullyConnectedNetwork(AbstractBenchmark):
                            [5, 12],  # n_units_1
                            [5, 12],  # n_units_2
                            [0.0, 0.99],  # dropout_rate_1
-                           [0.0, 0.99]]  # dropout_rate_2
+                           [0.0, 0.99]],  # dropout_rate_2
+                'references': ["@article{klein-bnn16a,"
+                               "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
+                               "title = {Bayesian Neural Network for Predicting Learning Curves},"
+                               "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
+                               "month = dec,"
+                               "year = {2016}}"]
                 }
 
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
