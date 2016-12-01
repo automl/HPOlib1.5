@@ -1,7 +1,13 @@
+unittest2
+setuptools
+nose
+
+six
+
 numpy>=1.9.0
 scipy>=0.14.1
+
 theano
 lasagne
-nose
 scikit-learn
 ConfigSpace
