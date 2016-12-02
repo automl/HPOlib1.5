@@ -1,12 +1,8 @@
 language: python
+python:
+  - "3.4"
+  - "3.5"
 os: linux
-
-matrix:
-
-  include:
-  - env: PYTHON_VERSION="3.4"
-  - env: PYTHON_VERSION="3.5"
-
 
 cache:
   directories:
@@ -24,7 +20,7 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
   - conda update --yes conda
-  - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose
+  - conda create -n testenv --yes python=$TRAVIS_PYTHON_VERSION pip wheel nose
   - source activate testenv
   - conda install --yes gcc
   - echo "Using GCC at "`which gcc`
