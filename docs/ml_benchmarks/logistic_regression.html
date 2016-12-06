@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Logistic Regression Benchmarks &#8212; HPOlib2 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HPOlib2 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="The Machine Learning Benchmarks" href="../ml_benchmarks.html" />
+    <link rel="next" title="Support Vector Machine Benchmarks" href="svm.html" />
+    <link rel="prev" title="Fully Connected Neural Network Benchmarks" href="fc_net.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hpolib.benchmarks.ml.logistic_regression">
+<span id="logistic-regression-benchmarks"></span><h1>Logistic Regression Benchmarks<a class="headerlink" href="#module-hpolib.benchmarks.ml.logistic_regression" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.logistic_regression.</code><code class="descname">LogisticRegression</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hpolib.abstract_benchmark.AbstractBenchmark</span></code></p>
+<p>Logistic regression benchmark which resembles the benchmark used in the MTBO / Freeze Thaw paper.
+The hyperparameters are the learning rate (on log scale), L2 regularization, batch size and the
+dropout ratio on the inputs.
+The weights are optimized with stochastic gradient descent and we do NOT perform early stopping on
+the validation data set.</p>
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_configuration_space">
+<em class="property">static </em><code class="descname">get_configuration_space</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.get_configuration_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_configuration_space" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_meta_information">
+<em class="property">static </em><code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_meta_information" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.iterate_minibatches">
+<code class="descname">iterate_minibatches</code><span class="sig-paren">(</span><em>inputs</em>, <em>targets</em>, <em>batch_size</em>, <em>shuffle=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.iterate_minibatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.iterate_minibatches" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.objective_function">
+<code class="descname">objective_function</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.objective_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.objective_function_test">
+<code class="descname">objective_function_test</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.objective_function_test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>train</em>, <em>train_targets</em>, <em>valid</em>, <em>valid_targets</em>, <em>learning_rate=1</em>, <em>l2_reg=0.0</em>, <em>batch_size=200</em>, <em>dropout_rate=0.1</em>, <em>num_epochs=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../ml_benchmarks.html">The Machine Learning Benchmarks</a><ul>
+      <li>Previous: <a href="fc_net.html" title="previous chapter">Fully Connected Neural Network Benchmarks</a></li>
+      <li>Next: <a href="svm.html" title="next chapter">Support Vector Machine Benchmarks</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ml_benchmarks/logistic_regression.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/ml_benchmarks/logistic_regression.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
