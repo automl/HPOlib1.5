@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hpolib.abstract_benchmark &#8212; HPOlib2 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="top" title="HPOlib2 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hpolib.abstract_benchmark</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">ConfigSpace</span>
+
+
+<span class="k">class</span> <span class="nc">AbstractBenchmark</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Interface for benchmarks.</span>
+
+<span class="sd">        A benchmark contains of two building blocks, the target function and</span>
+<span class="sd">        the configuration space. Furthermore it can contain additional</span>
+<span class="sd">        benchmark-specific information such as the location and the function</span>
+<span class="sd">        value of the global optima. New benchmarks should be derived from</span>
+<span class="sd">        this base class or one of its child classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configuration_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_configuration_space</span><span class="p">()</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Objective function.</span>
+
+<span class="sd">        Override this function to provide your benchmark function. This</span>
+<span class="sd">        function will be called by one of the evaluate functions. For</span>
+<span class="sd">        flexibility you have to return a dictionary with the only mandatory</span>
+<span class="sd">        key being `function_value`, the objective function value for the</span>
+<span class="sd">        configuration which was passed. By convention, all benchmarks are</span>
+<span class="sd">        minimization problems.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        configuration : dict-like</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Must contain at least the key `function_value`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">objective_function_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If there is a different objective function for offline testing, e.g</span>
+<span class="sd">        testing a machine learning on a hold extra test set instead</span>
+<span class="sd">        on a validation set override this function here.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        configuration : dict-like</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Must contain at least the key `function_value`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_check_configuration</span><span class="p">(</span><span class="n">foo</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Decorator to enable checking the input configuration</span>
+
+<span class="sd">            Uses the check_configuration of the ConfigSpace class to ensure</span>
+<span class="sd">            that all specified values are valid, and no conditionals are violated</span>
+
+<span class="sd">            Can be combined with the _configuration_as_array decorator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">ConfigSpace</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">squirtle</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">configuration</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration_space</span><span class="p">)}</span>
+                    <span class="n">wartortle</span> <span class="o">=</span> <span class="n">ConfigSpace</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configuration_space</span><span class="p">,</span> <span class="n">squirtle</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error during the conversion of the provided &#39;</span>
+                                    <span class="s1">&#39;into a ConfigSpace.Configuration object&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wartortle</span> <span class="o">=</span> <span class="n">configuration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">configuration_space</span><span class="o">.</span><span class="n">check_configuration</span><span class="p">(</span><span class="n">wartortle</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">wrapper</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_configuration_as_array</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Decorator to allow the first input argument to &#39;objective_function&#39; to be an array.</span>
+
+<span class="sd">            For all continuous benchmarks it is often required that the input to the benchmark</span>
+<span class="sd">            can be a (NumPy) array. By adding this to the objective function, both inputs types,</span>
+<span class="sd">            ConfigSpace.Configuration and array, are possible.</span>
+
+<span class="sd">            Can be combined with the _check_configuration decorator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="n">ConfigSpace</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+                <span class="n">blastoise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span> <span class="n">configuration</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">configuration</span><span class="p">],</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span>
+                <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">blastoise</span> <span class="o">=</span> <span class="n">configuration</span>
+            <span class="k">return</span><span class="p">(</span> <span class="n">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blastoise</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">wrapper</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Provides interface to use, e.g., SciPy optimizers &quot;&quot;&quot;</span>
+        <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective_function</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)[</span><span class="s1">&#39;function_value&#39;</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_runs</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Draws some random configuration and call objective_fucntion(_test).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_runs : int</span>
+<span class="sd">            number of random configurations to draw and evaluate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_runs</span><span class="p">):</span>
+            <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration_space</span><span class="o">.</span><span class="n">sample_configuration</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objective_function</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objective_function_test</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot; Defines the configuration space for each benchmark.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ConfigSpace.ConfigurationSpace</span>
+<span class="sd">            A valid configuration space for the benchmark&#39;s parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_meta_information</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot; Provides some meta information about the benchmark.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            some human-readable information</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

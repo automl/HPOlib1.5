@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Hartmann 6 function &#8212; HPOlib2 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HPOlib2 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="The Synthetic Benchmarks" href="../synthetic_benchmarks.html" />
+    <link rel="next" title="Levy function" href="levy.html" />
+    <link rel="prev" title="Hartmann 3 function" href="hartmann3.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-hpolib.benchmarks.synthetic_functions.hartmann6">
+<span id="hartmann-6-function"></span><h1>Hartmann 6 function<a class="headerlink" href="#module-hpolib.benchmarks.synthetic_functions.hartmann6" title="Permalink to this headline">¶</a></h1>
+<p>Created on 08.09.2016</p>
+<p>&#64;author: Stefan Falkner</p>
+<dl class="class">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.synthetic_functions.hartmann6.</code><code class="descname">Hartmann6</code><a class="reference internal" href="../_modules/hpolib/benchmarks/synthetic_functions/hartmann6.html#Hartmann6"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hpolib.abstract_benchmark.AbstractBenchmark</span></code></p>
+<dl class="attribute">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.A">
+<code class="descname">A</code><em class="property"> = array([[ 10.  ,   3.  ,  17.  ,   3.5 ,   1.7 ,   8.  ],        [  0.05,  10.  ,  17.  ,   0.1 ,   8.  ,  14.  ],        [  3.  ,   3.5 ,   1.7 ,  10.  ,  17.  ,   8.  ],        [ 17.  ,   8.  ,   0.05,  10.  ,   0.1 ,  14.  ]])</em><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.P">
+<code class="descname">P</code><em class="property"> = array([[ 0.1312,  0.1696,  0.5569,  0.0124,  0.8283,  0.5886],        [ 0.2329,  0.4135,  0.8307,  0.3736,  0.1004,  0.9991],        [ 0.2348,  0.1451,  0.3522,  0.2883,  0.3047,  0.665 ],        [ 0.4047,  0.8828,  0.8732,  0.5743,  0.1091,  0.0381]])</em><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.P" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.alpha">
+<code class="descname">alpha</code><em class="property"> = [1.0, 1.2, 3.0, 3.2]</em><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.alpha" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.get_configuration_space">
+<em class="property">static </em><code class="descname">get_configuration_space</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/synthetic_functions/hartmann6.html#Hartmann6.get_configuration_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.get_configuration_space" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.get_meta_information">
+<em class="property">static </em><code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/synthetic_functions/hartmann6.html#Hartmann6.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.get_meta_information" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.objective_function">
+<code class="descname">objective_function</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.objective_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.objective_function_test">
+<code class="descname">objective_function_test</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.objective_function_test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../synthetic_benchmarks.html">The Synthetic Benchmarks</a><ul>
+      <li>Previous: <a href="hartmann3.html" title="previous chapter">Hartmann 3 function</a></li>
+      <li>Next: <a href="levy.html" title="next chapter">Levy function</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/synthetic_benchmarks/hartmann6.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/synthetic_benchmarks/hartmann6.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
