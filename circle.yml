@@ -16,6 +16,8 @@ machine:
     # The email is to be used for commits in the Github Page
     EMAIL: "feurerm@informatik.uni-freiburg.de"
 
+    PATH: "$HOME/miniconda/bin:$PATH"
+
 dependencies:
 
   # Various dependencies
