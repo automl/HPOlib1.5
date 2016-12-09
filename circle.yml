@@ -43,9 +43,9 @@ dependencies:
     # upgrade pip and wheel to allow for fast installation
     - pip install wheel pip --upgrade
     # install numpy first as it is a compile time dependency for other packages
-    - pip install --upgrade numpy
+    - pip install numpy
     # install documentation building dependencies
-    - pip install --upgrade matplotlib nose coverage sphinx pillow sphinx-gallery sphinx_bootstrap_theme cython numpydoc
+    - pip install matplotlib nose coverage sphinx pillow sphinx-gallery sphinx_bootstrap_theme cython numpydoc
     # Installing required packages for `make -C doc check command` to work.
     - sudo -E apt-get -yq update
     - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install dvipng texlive-latex-base texlive-latex-extra
