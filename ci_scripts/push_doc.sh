@@ -20,6 +20,11 @@ fi
 # Copy the build docs to a temporary folder
 rm -rf tmp
 mkdir tmp
+ls $HOME
+ls $HOME/$DOC_REPO
+ls $HOME/$DOC_REPO/doc
+ls $HOME/$DOC_REPO/doc/build
+ls $HOME/$DOC_REPO/doc/build/html
 cp -R $HOME/$DOC_REPO/doc/build/html/* ./tmp/
 
 cd $DOC_REPO
