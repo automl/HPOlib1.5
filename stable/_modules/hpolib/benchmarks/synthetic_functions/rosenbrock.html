@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hpolib.benchmarks.synthetic_functions.rosenbrock &#8212; HPOlib2 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          HPOlib2</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../../introduction.html">Introduction</a></li>
+                <li><a href="../../../../quickstart.html">Quickstart guide</a></li>
+                <li><a href="../../../../synthetic_benchmarks.html">Synthetic benchmarks</a></li>
+                <li><a href="../../../../ml_benchmarks.html">ML benchmarks</a></li>
+                <li><a href="../../../../utility.html">Utility function</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../synthetic_benchmarks.html">The Synthetic Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ml_benchmarks.html">The Machine Learning Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../utility.html">Miscelanious utility functions</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for hpolib.benchmarks.synthetic_functions.rosenbrock</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">ConfigSpace</span> <span class="k">as</span> <span class="nn">CS</span>
+<span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
+
+
+<div class="viewcode-block" id="Rosenbrock"><a class="viewcode-back" href="../../../../synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock">[docs]</a><span class="k">class</span> <span class="nc">Rosenbrock</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
+    <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
+    <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_configuration_as_array</span>
+    <span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">+=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">y</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;function_value&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">}</span>
+
+<div class="viewcode-block" id="Rosenbrock.objective_function_test"><a class="viewcode-back" href="../../../../synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock.objective_function_test">[docs]</a>    <span class="k">def</span> <span class="nf">objective_function_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Rosenbrock.get_configuration_space"><a class="viewcode-back" href="../../../../synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock.get_configuration_space">[docs]</a>    <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">():</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">CS</span><span class="o">.</span><span class="n">ConfigurationSpace</span><span class="p">()</span>
+        <span class="n">cs</span><span class="o">.</span><span class="n">generate_all_continuous_from_bounds</span><span class="p">(</span><span class="n">Rosenbrock</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()[</span><span class="s1">&#39;bounds&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">cs</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Rosenbrock.get_meta_information"><a class="viewcode-back" href="../../../../synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock.get_meta_information">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_information</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Rosenbrock&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;num_function_evals&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                <span class="s1">&#39;optima&#39;</span><span class="p">:</span> <span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]),</span>
+                <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>
+                <span class="s1">&#39;f_opt&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
