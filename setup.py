@@ -3,21 +3,20 @@ import hpolib
 
 import setuptools
 
-requirements = [
-    "numpy>=1.9.0",
-    "scipy>=0.14.1",
-    "theano",
-    "lasagne",
-    "nose",
-    "scikit-learn",
-    "ConfigSpace"
-]
+with open("hpolib/__version__.py") as fh:
+    version = fh.readlines()[-1].split()[-1].strip("\"'")
+
+with open('requirements.txt') as fh:
+    requirements = fh.read()
+requirements = requirements.split('\n')
+requirements = [requirement.strip() for requirement in requirements]
+
 
 
 setuptools.setup(
     name='hpolib2',
     description='Automated machine learning.',
-    version=hpolib.__version__,
+    version=version,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=requirements,
     test_suite='nose.collector',
@@ -28,6 +27,7 @@ setuptools.setup(
     platforms=['Linux'],
     classifiers=[
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Development Status :: 3 - Alpha',
         'Natural Language :: English',
         'Environment :: Console',
