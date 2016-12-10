@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Fully Connected Neural Network Benchmarks &#8212; HPOlib2 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Logistic Regression Benchmarks" href="logistic_regression.html" />
+    <link rel="prev" title="Convolutional Neural Network Benchmarks" href="conv_net.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          HPOlib2</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../introduction.html">Introduction</a></li>
+                <li><a href="../quickstart.html">Quickstart guide</a></li>
+                <li><a href="../synthetic_benchmarks.html">Synthetic benchmarks</a></li>
+                <li><a href="../ml_benchmarks.html">ML benchmarks</a></li>
+                <li><a href="../utility.html">Utility function</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../synthetic_benchmarks.html">The Synthetic Benchmarks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../ml_benchmarks.html">The Machine Learning Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utility.html">Miscelanious utility functions</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="module-hpolib.benchmarks.ml.fully_connected_network">
+<span id="fully-connected-neural-network-benchmarks"></span><h1>Fully Connected Neural Network Benchmarks<a class="headerlink" href="#module-hpolib.benchmarks.ml.fully_connected_network" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.fully_connected_network.</code><code class="descname">FCNetOnMnist</code><span class="sig-paren">(</span><em>path=None</em>, <em>max_num_epochs=100</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FCNetOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork" title="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork"><code class="xref py py-class docutils literal"><span class="pre">hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork</span></code></a></p>
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FCNetOnMnist.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.fully_connected_network.</code><code class="descname">FullyConnectedNetwork</code><span class="sig-paren">(</span><em>path=None</em>, <em>max_num_epochs=100</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hpolib.abstract_benchmark.AbstractBenchmark</span></code></p>
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_configuration_space">
+<em class="property">static </em><code class="descname">get_configuration_space</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork.get_configuration_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_configuration_space" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_meta_information">
+<em class="property">static </em><code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_meta_information" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.iterate_minibatches">
+<code class="descname">iterate_minibatches</code><span class="sig-paren">(</span><em>inputs</em>, <em>targets</em>, <em>batch_size</em>, <em>shuffle=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork.iterate_minibatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.iterate_minibatches" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.objective_function">
+<code class="descname">objective_function</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.objective_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.objective_function_test">
+<code class="descname">objective_function_test</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.objective_function_test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.train_net">
+<code class="descname">train_net</code><span class="sig-paren">(</span><em>train</em>, <em>train_targets</em>, <em>valid</em>, <em>valid_targets</em>, <em>init_learning_rate</em>, <em>l2_reg</em>, <em>batch_size</em>, <em>gamma</em>, <em>power</em>, <em>momentum</em>, <em>n_units_1</em>, <em>n_units_2</em>, <em>dropout_rate_1</em>, <em>dropout_rate_2</em>, <em>num_epochs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork.train_net"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.train_net" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../_sources/ml_benchmarks/fc_net.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
