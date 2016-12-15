@@ -8,7 +8,7 @@ from sklearn import svm
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-
+import hpolib.config
 
 class SupportVectorMachine(AbstractBenchmark):
     """
@@ -29,8 +29,15 @@ class SupportVectorMachine(AbstractBenchmark):
             directory to find or download dataset to
         """
 
+        if path is None:
+            self.path = hpolib.config.get_data_directory()
+            print("Store data in %s" % hpolib.config.get_data_directory())
+        else:
+            self.path = path
+            print("Store data in %s" % path)
+
         self.train, self.train_targets, self.valid, self.valid_targets, \
-            self.test, self.test_targets = self.get_data(path)
+            self.test, self.test_targets = self.get_data()
 
         # Use 10 time the number of classes as lower bound for the dataset
         # fraction
@@ -46,7 +53,7 @@ class SupportVectorMachine(AbstractBenchmark):
         else:
             self.rng = rng
 
-    def get_data(self, path):
+    def get_data(self):
         pass
 
     @AbstractBenchmark._check_configuration
@@ -119,9 +126,10 @@ class SupportVectorMachine(AbstractBenchmark):
                                "lurl = {http://arxiv.org/abs/1605.07079}, year = {2016} }"]
                 }
 
+
 class SvmOnMnist(SupportVectorMachine):
 
-    def get_data(self, path):
+    def get_data(self):
         # This function loads the MNIST data, it's copied from the Lasagne
         # tutorial. We first define a download function, supporting both
         # Python 2 and 3.
@@ -170,18 +178,18 @@ class SvmOnMnist(SupportVectorMachine):
             # Labels are vectors of integers now, that's exactly what we want.
             return data
 
-        if not os.path.isdir(path):
-                os.makedirs(path)
+        if not os.path.isdir(self.path):
+                os.makedirs(self.path)
 
         # Download and read the training and test set images and labels.
         X_train = load_mnist_images(filename='train-images-idx3-ubyte.gz',
-                                    save_to=path)
+                                    save_to=self.path)
         y_train = load_mnist_labels(filename='train-labels-idx1-ubyte.gz',
-                                    save_to=path)
+                                    save_to=self.path)
         X_test = load_mnist_images(filename='t10k-images-idx3-ubyte.gz',
-                                   save_to=path)
+                                   save_to=self.path)
         y_test = load_mnist_labels(filename='t10k-labels-idx1-ubyte.gz',
-                                   save_to=path)
+                                   save_to=self.path)
 
         # We reserve the last 10000 training examples for validation.
         X_train, X_val = X_train[:-10000], X_train[-10000:]
