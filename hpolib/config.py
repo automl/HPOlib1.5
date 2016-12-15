@@ -3,6 +3,7 @@ import os
 from io import StringIO
 
 _default_data_dir = "~/.hpolib"
+_default_config_dir = os.path.expanduser("~/.hpolib/config")
 
 
 def _setup():
@@ -50,7 +51,7 @@ def _parse_config():
     defaults = {'verbosity': 0,
                 'data_dir': os.path.expanduser(_default_data_dir)}
 
-    config_file = os.path.expanduser('~/.hpolib/config')
+    config_file = _default_config_dir
     config = configparser.RawConfigParser(defaults=defaults)
 
     if not os.path.exists(config_file):
@@ -86,6 +87,17 @@ def get_data_directory():
     """
     return _data_dir
 
+
+def get_config_directory():
+    """ Return the current config directory
+
+    Returns
+    -------
+    dir : basestring
+        The current configuration directory
+
+    """
+    return _default_config_dir
 
 
 __all__ = ["set_data_directory", 'get_data_directory']
