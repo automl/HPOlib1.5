@@ -10,14 +10,21 @@ import theano.tensor as T
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+import hpolib.config
 
 
 class FullyConnectedNetwork(AbstractBenchmark):
 
     def __init__(self, path=None, max_num_epochs=100, rng=None):
+        if path is None:
+            self.path = hpolib.config.get_data_directory()
+            print("Store data in %s" % hpolib.config.get_data_directory())
+        else:
+            self.path = path
+            print("Store data in %s" % path)
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
-            self.test, self.test_targets = self.get_data(path)
+            self.test, self.test_targets = self.get_data()
         self.max_num_epochs = max_num_epochs
 
         self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
@@ -30,7 +37,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         lasagne.random.set_rng(self.rng)
         super(FullyConnectedNetwork, self).__init__()
 
-    def get_data(self, path):
+    def get_data(self):
         pass
 
     @AbstractBenchmark._check_configuration
@@ -256,10 +263,11 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
 class FCNetOnMnist(FullyConnectedNetwork):
 
-    def get_data(self, path):
+    def get_data(self):
         # This function loads the MNIST data, it's copied from the Lasagne
         # tutorial. We first define a download function, supporting both
         # Python 2 and 3.
+
         if sys.version_info[0] == 2:
             from urllib import urlretrieve
         else:
@@ -305,19 +313,19 @@ class FCNetOnMnist(FullyConnectedNetwork):
             # Labels are vectors of integers now, that's exactly what we want.
             return data
 
-        if not os.path.isdir(path):
-                os.makedirs(path)
+        if not os.path.isdir(self.path):
+                os.makedirs(self.path)
 
         # We can now download and read the training and test set images and
         # labels.
         X_train = load_mnist_images(filename='train-images-idx3-ubyte.gz',
-                                    save_to=path)
+                                    save_to=self.path)
         y_train = load_mnist_labels(filename='train-labels-idx1-ubyte.gz',
-                                    save_to=path)
+                                    save_to=self.path)
         X_test = load_mnist_images(filename='t10k-images-idx3-ubyte.gz',
-                                   save_to=path)
+                                   save_to=self.path)
         y_test = load_mnist_labels(filename='t10k-labels-idx1-ubyte.gz',
-                                   save_to=path)
+                                   save_to=self.path)
 
         # We reserve the last 10000 training examples for validation.
         X_train, X_val = X_train[:-10000], X_train[-10000:]
