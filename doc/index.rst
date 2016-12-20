@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    introduction.rst
+   installation.rst
    quickstart.rst
    synthetic_benchmarks.rst
    ml_benchmarks.rst
