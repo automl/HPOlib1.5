@@ -34,22 +34,20 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(setter_mock.call_count, 1)
         self.assertEqual(setter_mock.call_args[0][0], fixture)
 
-    @unittest.mock.patch('os.path.expanduser')
-    def test_parse_config(self, expand_mock):
+    def test_parse_config(self):
         # Config file exists
         config_file = tempfile.NamedTemporaryFile(mode='w', delete=False)
         config_file.write('key = value\n')
         config_file.write('data_dir = new_dir')
         config_file.close()
-        name = config_file.name
-        expand_mock.side_effect = ['default_dir', name]
 
+        hpolib.config.set_config_file(config_file.name)
         config = hpolib.config._parse_config()
         self.assertEqual(config.sections(), ['FAKE_SECTION'])
         self.assertEqual(config.get('FAKE_SECTION', 'key'), 'value')
         self.assertEqual(config.get('FAKE_SECTION', 'data_dir'), 'new_dir')
         try:
-            os.remove(name)
+            os.remove(config_file.name)
         except Exception:
             pass
 
@@ -58,8 +56,7 @@ class TestConfig(unittest.TestCase):
         name = config_file.name
         config_file.close()
 
-        expand_mock.side_effect = ['default_dir', name]
-
+        hpolib.config.set_config_file(config_file.name)
         config = hpolib.config._parse_config()
         self.assertEqual(config.sections(), ['FAKE_SECTION'])
         self.assertEqual(config.get('FAKE_SECTION', 'data_dir'), 'default_dir')
