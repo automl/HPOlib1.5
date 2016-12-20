@@ -8,7 +8,8 @@ from sklearn import svm
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-import hpolib.config
+import hpolib
+
 
 class SupportVectorMachine(AbstractBenchmark):
     """
@@ -20,21 +21,17 @@ class SupportVectorMachine(AbstractBenchmark):
         a configuration. For that the validation and training data is
         concatenated to form the whole training data set.
     """
-    def __init__(self, path=None, rng=None):
+    def __init__(self, rng=None):
         """
 
         Parameters
         ----------
-        path: str
-            directory to find or download dataset to
+        rng: str
+            set up rng
         """
 
-        if path is None:
-            self.path = hpolib.config.get_data_directory()
-            print("Store data in %s" % hpolib.config.get_data_directory())
-        else:
-            self.path = path
-            print("Store data in %s" % path)
+        self.path = hpolib._config.data_dir
+        print("Store data in %s" % self.path)
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
