@@ -3,7 +3,7 @@ import os
 from io import StringIO
 
 _default_data_dir = "~/.hpolib"
-_default_config_dir = os.path.expanduser("~/.hpolib/config")
+_default_config_file = os.path.expanduser("~/.hpolibrc")
 
 
 def _setup():
@@ -38,20 +38,21 @@ def set_data_directory(data_dir):
     get_data_directory
     """
 
-    global _data_dir
-    _data_dir = data_dir
+    global _default_data_dir
+    _default_data_dir = data_dir
 
-    if not os.path.exists(_data_dir) and not os.path.isdir(_data_dir):
-        os.mkdir(_data_dir)
+    if not os.path.exists(_default_data_dir) \
+            and not os.path.isdir(_default_data_dir):
+        os.mkdir(_default_data_dir)
 
 
 def _parse_config():
     """Parse the config file, set up defaults.
     """
     defaults = {'verbosity': 0,
-                'data_dir': os.path.expanduser(_default_data_dir)}
+                'data_dir': _default_data_dir}
 
-    config_file = _default_config_dir
+    config_file = _default_config_file
     config = configparser.RawConfigParser(defaults=defaults)
 
     if not os.path.exists(config_file):
@@ -85,21 +86,40 @@ def get_data_directory():
     --------
     set_data_directory
     """
-    return _data_dir
+    return _default_data_dir
 
 
-def get_config_directory():
-    """ Return the current config directory
+def get_config_file():
+    """ Return the current config file
 
     Returns
     -------
-    dir : basestring
+    file : basestring
         The current configuration directory
 
     """
-    return _default_config_dir
+    return _default_config_file
 
 
-__all__ = ["set_data_directory", 'get_data_directory']
+def set_config_file(config_file):
+    """Set module-wide cache file.
+
+    Parameters
+    ----------
+    config_file : str
+
+    See also
+    --------
+    get_config_file
+    """
+
+    global _default_config_file
+    _default_config_file = config_file
+    _setup()
+
+
+__all__ = ["set_data_directory", 'get_data_directory',
+           "set_config_directory", 'get_config_directory']
+
 
 _setup()
