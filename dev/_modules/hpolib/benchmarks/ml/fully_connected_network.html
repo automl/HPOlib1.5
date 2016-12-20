@@ -439,7 +439,20 @@
 
         <span class="c1"># We just return all the arrays in order, as expected in main().</span>
         <span class="c1"># (It doesn&#39;t matter how we do this as long as we can read them again.)</span>
-        <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span></div></div>
+        <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FCNetOnMnist.get_meta_information"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_meta_information">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_information</span><span class="p">():</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">FullyConnectedNetwork</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;@article{lecun-ieee98,&quot;</span>
+                               <span class="s2">&quot;title={Gradient-based learning applied to document recognition},&quot;</span>
+                               <span class="s2">&quot;author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},&quot;</span>
+                               <span class="s2">&quot;journal={Proceedings of the IEEE},&quot;</span>
+                               <span class="s2">&quot;pages={2278--2324},&quot;</span>
+                               <span class="s2">&quot;year=</span><span class="si">{1998}</span><span class="s2">,&quot;</span>
+                               <span class="s2">&quot;publisher=</span><span class="si">{IEEE}</span><span class="s2">&quot;</span>
+                               <span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span></div></div>
 </pre></div>
 
     </div>
