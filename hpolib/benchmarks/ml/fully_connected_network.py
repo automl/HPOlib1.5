@@ -330,3 +330,16 @@ class FCNetOnMnist(FullyConnectedNetwork):
         # We just return all the arrays in order, as expected in main().
         # (It doesn't matter how we do this as long as we can read them again.)
         return X_train, y_train, X_val, y_val, X_test, y_test
+
+    @staticmethod
+    def get_meta_information():
+        d = FullyConnectedNetwork.get_meta_information()
+        d["references"].append("@article{lecun-ieee98,"
+                               "title={Gradient-based learning applied to document recognition},"
+                               "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
+                               "journal={Proceedings of the IEEE},"
+                               "pages={2278--2324},"
+                               "year={1998},"
+                               "publisher={IEEE}"
+                               )
+        return d
