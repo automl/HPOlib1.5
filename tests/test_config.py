@@ -9,13 +9,17 @@ import hpolib.config
 
 class TestConfig(unittest.TestCase):
 
-    @unittest.mock.patch.object(hpolib.config.HPOlibConfig, '_HPOlibConfig__parse_config')
-    @unittest.mock.patch.object(hpolib.config.HPOlibConfig, '_HPOlibConfig__check_data_dir')
-    @unittest.mock.patch.object(hpolib.config.HPOlibConfig, '_HPOlibConfig__create_config_file')
-    @unittest.mock.patch.object(hpolib.config.HPOlibConfig, '_HPOlibConfig__make_abs_path')
+    @unittest.mock.patch.object(hpolib.config.HPOlibConfig,
+                                '_HPOlibConfig__parse_config')
+    @unittest.mock.patch.object(hpolib.config.HPOlibConfig,
+                                '_HPOlibConfig__check_data_dir')
+    @unittest.mock.patch.object(hpolib.config.HPOlibConfig,
+                                '_HPOlibConfig__create_config_file')
+    @unittest.mock.patch.object(hpolib.config.HPOlibConfig,
+                                '_HPOlibConfig__make_abs_path')
     @unittest.mock.patch('os.path.expanduser')
-    def test_automatic_startup(self, expand_mock, abs_mock, config_mock, data_mock,
-                               parser_mock):
+    def test_automatic_startup(self, expand_mock, abs_mock, config_mock,
+                               data_mock, parser_mock):
         fixture = '~/ureazpnblvxfrcmbpdatmbpdeai'
 
         # Set up mocks
@@ -71,9 +75,8 @@ class TestConfig(unittest.TestCase):
         except Exception:
             pass
 
-    @unittest.mock.patch('os.mkdir')
     @unittest.mock.patch('os.path.expanduser')
-    def test_parse_config_not_exist(self, expand_mock, mkdir_mock):
+    def test_parse_config_not_exist(self, expand_mock):
         # Set up tmp config file and delete it to get filename
         config_file = tempfile.NamedTemporaryFile(mode='w')
         config_file.close()
