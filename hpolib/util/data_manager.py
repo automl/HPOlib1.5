@@ -40,7 +40,7 @@ class MNISTData(DataManager):
 
         if not os.path.isdir(self.save_to):
             self.logger.debug("Create directory %s" % self.save_to)
-            os.mkdir(self.save_to)
+            os.makedirs(self.save_to)
 
         super(MNISTData, self).__init__()
 
