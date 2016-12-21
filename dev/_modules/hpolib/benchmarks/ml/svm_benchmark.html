@@ -118,6 +118,7 @@
 <span class="kn">import</span> <span class="nn">ConfigSpace</span> <span class="k">as</span> <span class="nn">CS</span>
 
 <span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
+<span class="kn">import</span> <span class="nn">hpolib</span>
 
 
 <div class="viewcode-block" id="SupportVectorMachine"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine">[docs]</a><span class="k">class</span> <span class="nc">SupportVectorMachine</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
@@ -130,17 +131,20 @@
 <span class="sd">        a configuration. For that the validation and training data is</span>
 <span class="sd">        concatenated to form the whole training data set.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        path: str</span>
-<span class="sd">            directory to find or download dataset to</span>
+<span class="sd">        rng: str</span>
+<span class="sd">            set up rng</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">hpolib</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">data_dir</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Store data in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_targets</span><span class="p">,</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
         <span class="c1"># Use 10 time the number of classes as lower bound for the dataset</span>
         <span class="c1"># fraction</span>
@@ -156,7 +160,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
 
-<div class="viewcode-block" id="SupportVectorMachine.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="SupportVectorMachine.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
@@ -232,7 +236,7 @@
 
 <div class="viewcode-block" id="SvmOnMnist"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist">[docs]</a><span class="k">class</span> <span class="nc">SvmOnMnist</span><span class="p">(</span><span class="n">SupportVectorMachine</span><span class="p">):</span>
 
-<div class="viewcode-block" id="SvmOnMnist.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="SvmOnMnist.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># This function loads the MNIST data, it&#39;s copied from the Lasagne</span>
         <span class="c1"># tutorial. We first define a download function, supporting both</span>
         <span class="c1"># Python 2 and 3.</span>
@@ -281,18 +285,18 @@
             <span class="c1"># Labels are vectors of integers now, that&#39;s exactly what we want.</span>
             <span class="k">return</span> <span class="n">data</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="c1"># Download and read the training and test set images and labels.</span>
         <span class="n">X_train</span> <span class="o">=</span> <span class="n">load_mnist_images</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;train-images-idx3-ubyte.gz&#39;</span><span class="p">,</span>
-                                    <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                    <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">y_train</span> <span class="o">=</span> <span class="n">load_mnist_labels</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;train-labels-idx1-ubyte.gz&#39;</span><span class="p">,</span>
-                                    <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                    <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">X_test</span> <span class="o">=</span> <span class="n">load_mnist_images</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;t10k-images-idx3-ubyte.gz&#39;</span><span class="p">,</span>
-                                   <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                   <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">y_test</span> <span class="o">=</span> <span class="n">load_mnist_labels</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;t10k-labels-idx1-ubyte.gz&#39;</span><span class="p">,</span>
-                                   <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                   <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="c1"># We reserve the last 10000 training examples for validation.</span>
         <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[:</span><span class="o">-</span><span class="mi">10000</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="o">-</span><span class="mi">10000</span><span class="p">:]</span>

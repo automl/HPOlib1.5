@@ -120,18 +120,34 @@
 <span class="kn">import</span> <span class="nn">ConfigSpace</span> <span class="k">as</span> <span class="nn">CS</span>
 
 <span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
+<span class="kn">import</span> <span class="nn">hpolib</span>
 
 
 <div class="viewcode-block" id="FullyConnectedNetwork"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork">[docs]</a><span class="k">class</span> <span class="nc">FullyConnectedNetwork</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_num_epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_num_epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes Fully connected network</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        max_num_epochs: int</span>
+<span class="sd">            set maximum number of epochs. Needed to calculate how many number</span>
+<span class="sd">            of epochs to use for training given number of steps in [0, 100].</span>
+
+<span class="sd">        rng: str</span>
+<span class="sd">            set up rng</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">hpolib</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">data_dir</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Store data in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_targets</span><span class="p">,</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_num_epochs</span> <span class="o">=</span> <span class="n">max_num_epochs</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">s_min</span> <span class="o">=</span> <span class="mi">512</span>  <span class="c1"># Minimum dataset size is equal to the maximum batch size</span>
+        <span class="c1"># Minimum dataset size is equal to the maximum batch size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s_min</span> <span class="o">=</span> <span class="mi">512</span>
         <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -140,7 +156,7 @@
         <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">FullyConnectedNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="FullyConnectedNetwork.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="FullyConnectedNetwork.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
@@ -159,19 +175,20 @@
         <span class="n">train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">[</span><span class="n">shuffle</span><span class="p">[:</span><span class="n">size</span><span class="p">]]</span>
         <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">[</span><span class="n">shuffle</span><span class="p">[:</span><span class="n">size</span><span class="p">]]</span>
 
-        <span class="n">lc_curve</span><span class="p">,</span> <span class="n">cost_curve</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">valid_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_net</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train_targets</span><span class="p">,</span>
-                                                                      <span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_targets</span><span class="p">,</span>
-                                                                      <span class="n">init_learning_rate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
-                                                                      <span class="n">l2_reg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
-                                                                      <span class="n">batch_size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
-                                                                      <span class="n">gamma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
-                                                                      <span class="n">power</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span>
-                                                                      <span class="n">momentum</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span>
-                                                                      <span class="n">n_units_1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>
-                                                                      <span class="n">n_units_2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>
-                                                                      <span class="n">dropout_rate_1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">8</span><span class="p">]),</span>
-                                                                      <span class="n">dropout_rate_2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">9</span><span class="p">]),</span>
-                                                                      <span class="n">num_epochs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">))</span>
+        <span class="n">lc_curve</span><span class="p">,</span> <span class="n">cost_curve</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">valid_loss</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_net</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train_targets</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_targets</span><span class="p">,</span>
+                           <span class="n">init_learning_rate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
+                           <span class="n">l2_reg</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+                           <span class="n">batch_size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                           <span class="n">gamma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+                           <span class="n">power</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span>
+                           <span class="n">momentum</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span>
+                           <span class="n">n_units_1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>
+                           <span class="n">n_units_2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>
+                           <span class="n">dropout_rate_1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">8</span><span class="p">]),</span>
+                           <span class="n">dropout_rate_2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">9</span><span class="p">]),</span>
+                           <span class="n">num_epochs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">))</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="n">lc_curve</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">cost_curve</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -366,10 +383,11 @@
 
 <div class="viewcode-block" id="FCNetOnMnist"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist">[docs]</a><span class="k">class</span> <span class="nc">FCNetOnMnist</span><span class="p">(</span><span class="n">FullyConnectedNetwork</span><span class="p">):</span>
 
-<div class="viewcode-block" id="FCNetOnMnist.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="FCNetOnMnist.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># This function loads the MNIST data, it&#39;s copied from the Lasagne</span>
         <span class="c1"># tutorial. We first define a download function, supporting both</span>
         <span class="c1"># Python 2 and 3.</span>
+
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">urlretrieve</span>
         <span class="k">else</span><span class="p">:</span>
@@ -415,19 +433,19 @@
             <span class="c1"># Labels are vectors of integers now, that&#39;s exactly what we want.</span>
             <span class="k">return</span> <span class="n">data</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="c1"># We can now download and read the training and test set images and</span>
         <span class="c1"># labels.</span>
         <span class="n">X_train</span> <span class="o">=</span> <span class="n">load_mnist_images</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;train-images-idx3-ubyte.gz&#39;</span><span class="p">,</span>
-                                    <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                    <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">y_train</span> <span class="o">=</span> <span class="n">load_mnist_labels</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;train-labels-idx1-ubyte.gz&#39;</span><span class="p">,</span>
-                                    <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                    <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">X_test</span> <span class="o">=</span> <span class="n">load_mnist_images</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;t10k-images-idx3-ubyte.gz&#39;</span><span class="p">,</span>
-                                   <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                   <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">y_test</span> <span class="o">=</span> <span class="n">load_mnist_labels</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;t10k-labels-idx1-ubyte.gz&#39;</span><span class="p">,</span>
-                                   <span class="n">save_to</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+                                   <span class="n">save_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="c1"># We reserve the last 10000 training examples for validation.</span>
         <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[:</span><span class="o">-</span><span class="mi">10000</span><span class="p">],</span> <span class="n">X_train</span><span class="p">[</span><span class="o">-</span><span class="mi">10000</span><span class="p">:]</span>
