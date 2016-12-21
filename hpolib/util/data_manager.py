@@ -21,8 +21,6 @@ class DataManager(object, metaclass=abc.ABCMeta):
 
         self.logger = logging.getLogger("DataManager")
 
-        pass
-
     @abc.abstractmethod
     def load(self):
         """
@@ -39,7 +37,7 @@ class MNISTData(DataManager):
         self.save_to = os.path.join(hpolib._config.data_dir, "MNIST")
 
         if not os.path.isdir(self.save_to):
-            self.logger.debug("Create directory %s" % self.save_to)
+            self.logger.debug("Create directory %s", self.save_to)
             os.makedirs(self.save_to)
 
         super(MNISTData, self).__init__()
@@ -104,11 +102,11 @@ class MNISTData(DataManager):
         # 1) If necessary download data
         save_fl = os.path.join(self.save_to, filename)
         if not os.path.exists(save_fl):
-            self.logger.debug("Downloading %s to %s" %
-                              (self.url_source + filename, save_fl))
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source + filename, save_fl)
             urlretrieve(self.url_source + filename, save_fl)
         else:
-            self.logger.debug("Load data %s" % save_fl)
+            self.logger.debug("Load data %s", save_fl)
 
         # 2) Read in data
         if images:
