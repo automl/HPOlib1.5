@@ -1,93 +1,109 @@
 import configparser
+import logging
 import os
 from io import StringIO
 
-_default_data_dir = "~/.hpolib"
 
+class HPOlibConfig:
 
-def _setup():
-    """Setup hpolib package. Called on first import.
-    Reads the config file and data directory accordingly.
-    The location of the data directory can be specified by:
-    hpolib.config.data_dir = DIR
-    """
-    global _default_data_dir
+    def __init__(self):
+        """ Holds configuration for HPOlib. When initialized reads (or creates)
+         the config file and data directory accordingly.
 
-    # read config file, create cache directory
-    try:
-        os.mkdir(os.path.expanduser(_default_data_dir))
-    except (IOError, OSError):
-        # TODO add debug information
-        pass
-    config = _parse_config()
-    new_data_dir = config.get('FAKE_SECTION', 'data_dir')
-    set_data_directory(new_data_dir)
+         Parameters:
+         -----------
 
+        config_file: str
+            Path to config file
+        """
 
-def set_data_directory(data_dir):
-    """Set module-wide cache directory.
-    Sets the hpolib data directory.
+        self.logger = logging.getLogger("HPOlibConfig")
+        self.config_file = "~/.hpolibrc"
 
-    Parameters
-    ----------
-    data_dir : str
+        self.config = None
+        self.data_dir = None
 
-    See also
-    --------
-    get_data_directory
-    """
+        self.defaults = {'verbosity': 0,
+                         'data_dir': os.path.expanduser("~/.hpolib/")}
 
-    global _data_dir
-    _data_dir = data_dir
+        self._setup(self.config_file)
 
-    if not os.path.exists(_data_dir) and not os.path.isdir(_data_dir):
-        os.mkdir(_data_dir)
+    def _setup(self, config_file):
+        """ Sets up config. Reads the config file and parses it.
 
+        Parameters:
+        -----------
 
-def _parse_config():
-    """Parse the config file, set up defaults.
-    """
-    defaults = {'verbosity': 0,
-                'data_dir': os.path.expanduser(_default_data_dir)}
+        config_file: str
+            Path to config file
+        """
 
-    config_file = os.path.expanduser('~/.hpolib/config')
-    config = configparser.RawConfigParser(defaults=defaults)
+        # Change current config file to new config file
+        config_file = self.__make_abs_path(config_file)
 
-    if not os.path.exists(config_file):
+        if config_file != self.config_file:
+            self.logger.debug("Change config file from %s to %s" %
+                              (self.config_file, config_file))
+            self.config_file = config_file
+
         # Create an empty config file if there was none so far
-        fh = open(config_file, "w")
-        fh.close()
-        print("Could not find a configuration file at %s. Going to "
-              "create an empty file there." % config_file)
+        if not os.path.exists(self.config_file):
+            self.__create_config_file()
 
-    # Cheat the ConfigParser module by adding a fake section header
-    config_file_ = StringIO()
-    config_file_.write("[FAKE_SECTION]\n")
-    with open(config_file) as fh:
-        for line in fh:
-            config_file_.write(line)
-    config_file_.seek(0)
-    config.read_file(config_file_)
+        # Parse config and store input in self.config
+        self.__parse_config()
 
-    return config
+        # Check whether data_dir exists, if not create
+        self.__check_data_dir()
+
+    @staticmethod
+    def __make_abs_path(path):
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            path = os.path.abspath(path)
+        return path
+
+    def __create_config_file(self):
+        try:
+            self.logger.debug("Create a new config file here: %s" %
+                              self.config_file)
+            fh = open(self.config_file, "w")
+            for k in self.defaults:
+                fh.write("%s=%s\n" % (k, self.defaults[k]))
+            fh.close()
+        except (IOError, OSError):
+            raise
+
+    def __parse_config(self):
+        """Parse the config file"""
+        config = configparser.RawConfigParser()
+
+        # Cheat the ConfigParser module by adding a fake section header
+        config_file_ = StringIO()
+        config_file_.write("[FAKE_SECTION]\n")
+        with open(self.config_file) as fh:
+            for line in fh:
+                config_file_.write(line)
+        config_file_.seek(0)
+        config.read_file(config_file_)
+
+        self.config = config
+
+        # Store configuration
+        self.data_dir = self.config.get('FAKE_SECTION', 'data_dir')
+
+    def __check_data_dir(self):
+        """ Check whether data dir exists and if not create it"""
+        try:
+            os.makedirs(self.data_dir)
+        except FileExistsError:
+            pass
+        except (IOError, OSError):
+            self.logger.debug("Could not create data directory here: %s" %
+                              self.data_dir)
+            raise
 
 
-def get_data_directory():
-    """Get the current data directory.
+_config = HPOlibConfig()
 
-    Returns
-    -------
-    cachedir : string
-        The current data directory.
-
-    See also
-    --------
-    set_data_directory
-    """
-    return _data_dir
-
-
-
-__all__ = ["set_data_directory", 'get_data_directory']
-
-_setup()
+__all__ = ['_config']
