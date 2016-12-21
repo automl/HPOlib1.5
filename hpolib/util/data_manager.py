@@ -70,9 +70,9 @@ class MNISTData(DataManager):
         X_train, X_val = X_train[:-10000], X_train[-10000:]
         y_train, y_val = y_train[:-10000], y_train[-10000:]
 
-        assert X_train.shape[0] == 50000
-        assert X_val.shape[0] == 10000
-        assert X_test.shape[0] == 10000
+        assert X_train.shape[0] == 50000, X_train.shape
+        assert X_val.shape[0] == 10000, X_val.shape
+        assert X_test.shape[0] == 10000, X_test.shape
 
         # Reshape data
         X_train = X_train.reshape(X_train.shape[0], 28 * 28)
@@ -111,7 +111,6 @@ class MNISTData(DataManager):
             self.logger.debug("Load data %s" % save_fl)
 
         # 2) Read in data
-
         if images:
             with gzip.open(save_fl, 'rb') as f:
                 data = np.frombuffer(f.read(), np.uint8, offset=16)
