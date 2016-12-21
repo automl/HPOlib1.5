@@ -42,8 +42,8 @@ class HPOlibConfig:
         config_file = self.__make_abs_path(config_file)
 
         if config_file != self.config_file:
-            self.logger.debug("Change config file from %s to %s" %
-                              (self.config_file, config_file))
+            self.logger.debug("Change config file from %s to %s",
+                              self.config_file, config_file)
             self.config_file = config_file
 
         # Create an empty config file if there was none so far
@@ -65,7 +65,7 @@ class HPOlibConfig:
 
     def __create_config_file(self):
         try:
-            self.logger.debug("Create a new config file here: %s" %
+            self.logger.debug("Create a new config file here: %s",
                               self.config_file)
             fh = open(self.config_file, "w")
             for k in self.defaults:
@@ -99,7 +99,7 @@ class HPOlibConfig:
         except FileExistsError:
             pass
         except (IOError, OSError):
-            self.logger.debug("Could not create data directory here: %s" %
+            self.logger.debug("Could not create data directory here: %s",
                               self.data_dir)
             raise
 
