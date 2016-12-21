@@ -45,7 +45,7 @@ class TestConfig(unittest.TestCase):
         # Check call arguments
         self.assertEqual(abs_mock.call_args[0][0], "~/.hpolibrc")
 
-    @unittest.mock.patch('os.mkdir')
+    @unittest.mock.patch('os.makedirs')
     @unittest.mock.patch('os.path.expanduser')
     def test_parse_config_exists(self, expand_mock, mkdir_mock):
         # Set up tmp config file with entries

@@ -95,7 +95,7 @@ class HPOlibConfig:
     def __check_data_dir(self):
         """ Check whether data dir exists and if not create it"""
         try:
-            os.mkdir(self.data_dir)
+            os.makedirs(self.data_dir)
         except FileExistsError:
             pass
         except (IOError, OSError):
