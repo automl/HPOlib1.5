@@ -10,18 +10,34 @@ import theano.tensor as T
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+import hpolib
 
 
 class FullyConnectedNetwork(AbstractBenchmark):
 
-    def __init__(self, path=None, max_num_epochs=100, rng=None):
+    def __init__(self, max_num_epochs=100, rng=None):
+        """
+        Initializes Fully connected network
+        Parameters
+        ----------
+
+        max_num_epochs: int
+            set maximum number of epochs. Needed to calculate how many number
+            of epochs to use for training given number of steps in [0, 100].
+
+        rng: str
+            set up rng
+        """
+        self.path = hpolib._config.data_dir
+        print("Store data in %s" % self.path)
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
-            self.test, self.test_targets = self.get_data(path)
+            self.test, self.test_targets = self.get_data()
         self.max_num_epochs = max_num_epochs
 
         self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
-        self.s_min = 512  # Minimum dataset size is equal to the maximum batch size
+        # Minimum dataset size is equal to the maximum batch size
+        self.s_min = 512
         if rng is None:
             self.rng = np.random.RandomState()
         else:
@@ -30,7 +46,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         lasagne.random.set_rng(self.rng)
         super(FullyConnectedNetwork, self).__init__()
 
-    def get_data(self, path):
+    def get_data(self):
         pass
 
     @AbstractBenchmark._check_configuration
@@ -49,19 +65,20 @@ class FullyConnectedNetwork(AbstractBenchmark):
         train = self.train[shuffle[:size]]
         train_targets = self.train_targets[shuffle[:size]]
 
-        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
-                                                                      self.valid, self.valid_targets,
-                                                                      init_learning_rate=np.float32(np.power(10., x[0])),
-                                                                      l2_reg=np.float32(np.power(10., x[1])),
-                                                                      batch_size=np.int32(x[2]),
-                                                                      gamma=np.float32(np.power(10, x[3])),
-                                                                      power=np.float32(x[4]),
-                                                                      momentum=np.float32(x[5]),
-                                                                      n_units_1=np.int32(np.power(2, x[6])),
-                                                                      n_units_2=np.int32(np.power(2, x[7])),
-                                                                      dropout_rate_1=np.float32(x[8]),
-                                                                      dropout_rate_2=np.float32(x[9]),
-                                                                      num_epochs=np.int32(num_epochs))
+        lc_curve, cost_curve, train_loss, valid_loss = \
+            self.train_net(train, train_targets,
+                           self.valid, self.valid_targets,
+                           init_learning_rate=np.float32(np.power(10., x[0])),
+                           l2_reg=np.float32(np.power(10., x[1])),
+                           batch_size=np.int32(x[2]),
+                           gamma=np.float32(np.power(10, x[3])),
+                           power=np.float32(x[4]),
+                           momentum=np.float32(x[5]),
+                           n_units_1=np.int32(np.power(2, x[6])),
+                           n_units_2=np.int32(np.power(2, x[7])),
+                           dropout_rate_1=np.float32(x[8]),
+                           dropout_rate_2=np.float32(x[9]),
+                           num_epochs=np.int32(num_epochs))
 
         y = lc_curve[-1]
         c = cost_curve[-1]
@@ -256,10 +273,11 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
 class FCNetOnMnist(FullyConnectedNetwork):
 
-    def get_data(self, path):
+    def get_data(self):
         # This function loads the MNIST data, it's copied from the Lasagne
         # tutorial. We first define a download function, supporting both
         # Python 2 and 3.
+
         if sys.version_info[0] == 2:
             from urllib import urlretrieve
         else:
@@ -305,19 +323,19 @@ class FCNetOnMnist(FullyConnectedNetwork):
             # Labels are vectors of integers now, that's exactly what we want.
             return data
 
-        if not os.path.isdir(path):
-                os.makedirs(path)
+        if not os.path.isdir(self.path):
+                os.makedirs(self.path)
 
         # We can now download and read the training and test set images and
         # labels.
         X_train = load_mnist_images(filename='train-images-idx3-ubyte.gz',
-                                    save_to=path)
+                                    save_to=self.path)
         y_train = load_mnist_labels(filename='train-labels-idx1-ubyte.gz',
-                                    save_to=path)
+                                    save_to=self.path)
         X_test = load_mnist_images(filename='t10k-images-idx3-ubyte.gz',
-                                   save_to=path)
+                                   save_to=self.path)
         y_test = load_mnist_labels(filename='t10k-labels-idx1-ubyte.gz',
-                                   save_to=path)
+                                   save_to=self.path)
 
         # We reserve the last 10000 training examples for validation.
         X_train, X_val = X_train[:-10000], X_train[-10000:]
