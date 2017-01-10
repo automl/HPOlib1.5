@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-import hpolib
-
 import setuptools
 
 with open("hpolib/__version__.py") as fh:
