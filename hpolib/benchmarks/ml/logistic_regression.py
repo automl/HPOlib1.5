@@ -5,7 +5,7 @@ import theano
 import theano.tensor as T
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-
+from hpolib.util.data_manager import DataManager
 import ConfigSpace as CS
 
 
@@ -209,3 +209,23 @@ class LogisticRegression(AbstractBenchmark):
             cost[e] = time.time() - start_time
 
         return learning_curve, cost
+
+
+class LogisticRegressionOnMnist(LogisticRegression):
+
+    def get_data(self):
+        dm = DataManager.MNISTData()
+        return dm.load()
+
+    @staticmethod
+    def get_meta_information():
+        d = LogisticRegression.get_meta_information()
+        d["references"].append("@article{lecun-ieee98,"
+                               "title={Gradient-based learning applied to document recognition},"
+                               "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
+                               "journal={Proceedings of the IEEE},"
+                               "pages={2278--2324},"
+                               "year={1998},"
+                               "publisher={IEEE}"
+                               )
+        return d
