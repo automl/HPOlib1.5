@@ -10,18 +10,33 @@ import theano.tensor as T
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+import hpolib.util.data_manager
+import hpolib
 
 
 class FullyConnectedNetwork(AbstractBenchmark):
 
-    def __init__(self, path=None, max_num_epochs=100, rng=None):
+    def __init__(self, max_num_epochs=100, rng=None):
+        """
+        Initializes Fully connected network
+        Parameters
+        ----------
+
+        max_num_epochs: int
+            set maximum number of epochs. Needed to calculate how many number
+            of epochs to use for training given number of steps in [0, 100].
+
+        rng: str
+            set up rng
+        """
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
-            self.test, self.test_targets = self.get_data(path)
+            self.test, self.test_targets = self.get_data()
         self.max_num_epochs = max_num_epochs
 
         self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
-        self.s_min = 512  # Minimum dataset size is equal to the maximum batch size
+        # Minimum dataset size is equal to the maximum batch size
+        self.s_min = 512
         if rng is None:
             self.rng = np.random.RandomState()
         else:
@@ -30,8 +45,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
         lasagne.random.set_rng(self.rng)
         super(FullyConnectedNetwork, self).__init__()
 
-    def get_data(self, path):
-        pass
+    def get_data(self):
+        raise NotImplementedError()
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
@@ -49,19 +64,20 @@ class FullyConnectedNetwork(AbstractBenchmark):
         train = self.train[shuffle[:size]]
         train_targets = self.train_targets[shuffle[:size]]
 
-        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
-                                                                      self.valid, self.valid_targets,
-                                                                      init_learning_rate=np.float32(np.power(10., x[0])),
-                                                                      l2_reg=np.float32(np.power(10., x[1])),
-                                                                      batch_size=np.int32(x[2]),
-                                                                      gamma=np.float32(np.power(10, x[3])),
-                                                                      power=np.float32(x[4]),
-                                                                      momentum=np.float32(x[5]),
-                                                                      n_units_1=np.int32(np.power(2, x[6])),
-                                                                      n_units_2=np.int32(np.power(2, x[7])),
-                                                                      dropout_rate_1=np.float32(x[8]),
-                                                                      dropout_rate_2=np.float32(x[9]),
-                                                                      num_epochs=np.int32(num_epochs))
+        lc_curve, cost_curve, train_loss, valid_loss = \
+            self.train_net(train, train_targets,
+                           self.valid, self.valid_targets,
+                           init_learning_rate=np.float32(np.power(10., x[0])),
+                           l2_reg=np.float32(np.power(10., x[1])),
+                           batch_size=np.int32(x[2]),
+                           gamma=np.float32(np.power(10, x[3])),
+                           power=np.float32(x[4]),
+                           momentum=np.float32(x[5]),
+                           n_units_1=np.int32(np.power(2, x[6])),
+                           n_units_2=np.int32(np.power(2, x[7])),
+                           dropout_rate_1=np.float32(x[8]),
+                           dropout_rate_2=np.float32(x[9]),
+                           num_epochs=np.int32(num_epochs))
 
         y = lc_curve[-1]
         c = cost_curve[-1]
@@ -199,13 +215,16 @@ class FullyConnectedNetwork(AbstractBenchmark):
         epoch = T.fscalar("epoch")
         inv_policy = (1 + gamma * epoch) ** (-power)
 
-        adapt_lr = theano.function([epoch], learning_rate, updates=[(learning_rate, init_learning_rate * inv_policy)])
+        adapt_lr = theano.function([epoch], learning_rate,
+                                   updates=[(learning_rate,
+                                             init_learning_rate * inv_policy)])
 
         updates = lasagne.updates.momentum(loss, params,
                                            learning_rate=learning_rate,
                                            momentum=momentum)
 
-        train_fn = theano.function([input_var, target_var], loss, updates=updates)
+        train_fn = theano.function([input_var, target_var], loss,
+                                   updates=updates)
 
         val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
 
@@ -256,77 +275,19 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
 class FCNetOnMnist(FullyConnectedNetwork):
 
-    def get_data(self, path):
-        # This function loads the MNIST data, it's copied from the Lasagne
-        # tutorial. We first define a download function, supporting both
-        # Python 2 and 3.
-        if sys.version_info[0] == 2:
-            from urllib import urlretrieve
-        else:
-            from urllib.request import urlretrieve
+    def get_data(self):
+        dm = hpolib.util.data_manager.MNISTData()
+        return dm.load()
 
-        def download(filename, save_to,
-                     source='http://yann.lecun.com/exdb/mnist/'):
-            print("Downloading %s" % filename)
-            urlretrieve(source + filename, save_to)
-
-        # We then define functions for loading MNIST images and labels.
-        # For convenience, they also download the requested files if needed.
-        import gzip
-
-        def load_mnist_images(filename, save_to):
-            save_fl = os.path.join(save_to, filename)
-
-            if not os.path.exists(save_fl):
-                download(filename=filename, save_to=save_fl)
-
-            # Read the inputs in Yann LeCun's binary format.
-            with gzip.open(save_fl, 'rb') as f:
-                data = np.frombuffer(f.read(), np.uint8, offset=16)
-            # The inputs are vectors now, we reshape them to monochrome 2D
-            # images, following the shape convention:
-            # (examples, channels, rows, columns)
-            data = data.reshape(-1, 1, 28, 28)
-            # The inputs come as bytes, we convert them to float32 in range
-            # [0,1]. (Actually to range [0, 255/256], for compatibility to the
-            # version provided at:
-            #  http://deeplearning.net/data/mnist/mnist.pkl.gz.)
-            return data / np.float32(256)
-
-        def load_mnist_labels(filename, save_to):
-            save_fl = os.path.join(os.path.join(save_to, filename))
-
-            if not os.path.exists(save_fl):
-                download(filename=filename, save_to=save_fl)
-
-            # Read the labels in Yann LeCun's binary format.
-            with gzip.open(save_fl, 'rb') as f:
-                data = np.frombuffer(f.read(), np.uint8, offset=8)
-            # Labels are vectors of integers now, that's exactly what we want.
-            return data
-
-        if not os.path.isdir(path):
-                os.makedirs(path)
-
-        # We can now download and read the training and test set images and
-        # labels.
-        X_train = load_mnist_images(filename='train-images-idx3-ubyte.gz',
-                                    save_to=path)
-        y_train = load_mnist_labels(filename='train-labels-idx1-ubyte.gz',
-                                    save_to=path)
-        X_test = load_mnist_images(filename='t10k-images-idx3-ubyte.gz',
-                                   save_to=path)
-        y_test = load_mnist_labels(filename='t10k-labels-idx1-ubyte.gz',
-                                   save_to=path)
-
-        # We reserve the last 10000 training examples for validation.
-        X_train, X_val = X_train[:-10000], X_train[-10000:]
-        y_train, y_val = y_train[:-10000], y_train[-10000:]
-
-        X_train = X_train.reshape(X_train.shape[0], 28 * 28)
-        X_val = X_val.reshape(X_val.shape[0], 28 * 28)
-        X_test = X_test.reshape(X_test.shape[0], 28 * 28)
-
-        # We just return all the arrays in order, as expected in main().
-        # (It doesn't matter how we do this as long as we can read them again.)
-        return X_train, y_train, X_val, y_val, X_test, y_test
+    @staticmethod
+    def get_meta_information():
+        d = FullyConnectedNetwork.get_meta_information()
+        d["references"].append("@article{lecun-ieee98,"
+                               "title={Gradient-based learning applied to document recognition},"
+                               "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
+                               "journal={Proceedings of the IEEE},"
+                               "pages={2278--2324},"
+                               "year={1998},"
+                               "publisher={IEEE}"
+                               )
+        return d
