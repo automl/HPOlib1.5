@@ -119,6 +119,7 @@ class SupportVectorMachine(AbstractBenchmark):
                                "lurl = {http://arxiv.org/abs/1605.07079}, year = {2016} }"]
                 }
 
+
 class SvmOnMnist(SupportVectorMachine):
 
     def get_data(self, path):
