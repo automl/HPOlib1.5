@@ -2,7 +2,9 @@ import abc
 import gzip
 import logging
 import openml
+import pickle
 import os
+import tarfile
 
 from urllib.request import urlretrieve
 from sklearn.cross_validation import train_test_split
@@ -199,8 +201,80 @@ class OpenMLData(DataManager):
         return X_train, y_train, X_valid, y_valid, X_test, y_test
 
     def __load_data(self, filename, images=False):
+        pass
+
+
+class CIFAR10Data(DataManager):
+
+    def __init__(self):
+        self.url_source = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
+        self.logger = logging.getLogger("DataManager")
+        self.save_to = os.path.join(hpolib._config.data_dir, "cifar10/")
+
+        if not os.path.isdir(self.save_to):
+            self.logger.debug("Create directory %s", self.save_to)
+            os.makedirs(self.save_to)
+
+        super(CIFAR10Data, self).__init__()
+
+    def load(self):
         """
-        Loads data from the OpenML website. If necessary downloads data, otherwise loads data from data_directory
+        Loads CIFAR10 from data directory as defined in _config.data_directory.
+        Downloads data if necessary. Code is copied and modified from the
+        Lasagne tutorial.
+
+        Returns
+        -------
+        X_train: np.array
+        y_train: np.array
+        X_val: np.array
+        y_val: np.array
+        X_test: np.array
+        y_test: np.array
+        """
+
+        xs = []
+        ys = []
+        for j in range(5):
+            fh = open(self.__load_data(filename='data_batch_%d' % (j + 1)), "rb")
+            d = pickle.load(fh, encoding='latin1')
+            fh.close()
+            x = d['data']
+            y = d['labels']
+            xs.append(x)
+            ys.append(y)
+
+        fh = open(self.__load_data(filename='test_batch'), "rb")
+        d = pickle.load(fh, encoding='latin1')
+        fh.close()
+
+        xs.append(d['data'])
+        ys.append(d['labels'])
+
+        x = np.concatenate(xs) / np.float32(255)
+        y = np.concatenate(ys)
+        x = np.dstack((x[:, :1024], x[:, 1024:2048], x[:, 2048:]))
+        x = x.reshape((x.shape[0], 32, 32, 3)).transpose(0, 3, 1, 2)
+
+        # subtract per-pixel mean
+        pixel_mean = np.mean(x[0:50000], axis=0)
+
+        x -= pixel_mean
+
+        X_train = x[:40000, :, :, :]
+        y_train = y[:40000]
+
+        X_valid = x[40000:50000, :, :, :]
+        y_valid = y[40000:50000]
+
+        X_test = x[50000:, :, :, :]
+        y_test = y[50000:]
+
+        return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+    def __load_data(self, filename):
+        """
+        Loads data in binary format as available under 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'.
 
         Parameters
         ----------
@@ -213,7 +287,18 @@ class OpenMLData(DataManager):
 
         Returns
         -------
-        data: array
+        filename: string
         """
-        data = None
-        return data
+
+        save_fl = os.path.join(self.save_to, "cifar-10-batches-py", filename)
+        if not os.path.exists(save_fl):
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source, save_fl)
+            urlretrieve(self.url_source, self.save_to + "cifar-10-python.tar.gz")
+            tar = tarfile.open(self.save_to + "cifar-10-python.tar.gz")
+            tar.extractall(self.save_to)
+
+        else:
+            self.logger.debug("Load data %s", save_fl)
+
+        return save_fl
