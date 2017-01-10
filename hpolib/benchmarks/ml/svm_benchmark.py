@@ -138,3 +138,17 @@ class SvmOnMnist(SupportVectorMachine):
                                "publisher={IEEE}"
                                )
         return d
+
+
+class SvmOnVehicle(SupportVectorMachine):
+
+    def get_data(self):
+        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=75191)
+        return dm.load()
+
+
+class SvmOnCovertype(SupportVectorMachine):
+
+    def get_data(self):
+        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=2118)
+        return dm.load()
