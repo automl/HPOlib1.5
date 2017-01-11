@@ -8,6 +8,7 @@ import tarfile
 
 from urllib.request import urlretrieve
 from sklearn.cross_validation import train_test_split
+from scipy.sparse.csr import csr_matrix
 
 import numpy as np
 
@@ -188,6 +189,9 @@ class OpenMLData(DataManager):
         train_indices, test_indices = task.get_train_test_split_indices()
 
         X, y = task.get_X_and_y()
+
+        if type(X) == csr_matrix:
+            X == X.todense()
 
         X_train = X[train_indices]
         y_train = y[train_indices]
