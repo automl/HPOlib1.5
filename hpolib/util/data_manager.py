@@ -1,13 +1,11 @@
 import abc
 import gzip
 import logging
-import openml
 import pickle
 import os
 import tarfile
 
 from urllib.request import urlretrieve
-from sklearn.cross_validation import train_test_split
 
 import numpy as np
 

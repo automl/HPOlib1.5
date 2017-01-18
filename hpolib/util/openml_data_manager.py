@@ -11,6 +11,7 @@ from hpolib.util.data_manager import DataManager
 
 class OpenMLData(DataManager):
     def __init__(self, openml_task_id, rng=None):
+
         self.logger = logging.getLogger("DataManager")
         self.save_to = os.path.join(hpolib._config.data_dir, "OpenML")
         self.task_id = openml_task_id
@@ -23,6 +24,9 @@ class OpenMLData(DataManager):
         if not os.path.isdir(self.save_to):
             self.logger.debug("Create directory %s", self.save_to)
             os.makedirs(self.save_to)
+
+        openml.config.apikey = '953f6621518c13791dbbfc6d3698f5ad'
+        openml.config.cachedir = self.save_to
 
         super(OpenMLData, self).__init__()
 
