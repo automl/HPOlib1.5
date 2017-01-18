@@ -143,8 +143,8 @@ html_theme_options = {
     # A list of tuples containting pages to link to.  The value should
     # be in the form [(name, page), ..]
     'navbar_links': [
-        ('Introduction', 'introduction'),
         ('Quickstart guide', 'quickstart'),
+        ('Installation', 'installation'),
         ('Synthetic benchmarks', 'synthetic_benchmarks'),
         ('ML benchmarks', 'ml_benchmarks'),
         ('Utility function', 'utility')
