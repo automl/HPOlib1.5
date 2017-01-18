@@ -1,0 +1,4 @@
+# Requirement for openml which is currently not on pypi
+git+https://github.com/renatopp/liac-arff
+# OpenML is currently not on pypi
+git+https://github.com/openml/openml-python
