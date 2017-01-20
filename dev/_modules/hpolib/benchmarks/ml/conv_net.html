@@ -116,6 +116,7 @@
 <span class="kn">import</span> <span class="nn">ConfigSpace</span> <span class="k">as</span> <span class="nn">CS</span>
 
 <span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
+<span class="kn">from</span> <span class="nn">hpolib.util.data_manager</span> <span class="k">import</span> <span class="n">CIFAR10Data</span>
 
 
 <div class="viewcode-block" id="ConvolutionalNeuralNetwork"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork">[docs]</a><span class="k">class</span> <span class="nc">ConvolutionalNeuralNetwork</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
@@ -351,6 +352,25 @@
             <span class="n">valid_loss</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_err</span> <span class="o">/</span> <span class="n">val_batches</span>
 
         <span class="k">return</span> <span class="n">learning_curve</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">valid_loss</span></div></div>
+
+
+<div class="viewcode-block" id="ConvolutionalNeuralNetworkOnCIFAR10"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10">[docs]</a><span class="k">class</span> <span class="nc">ConvolutionalNeuralNetworkOnCIFAR10</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ConvolutionalNeuralNetworkOnCIFAR10.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">CIFAR10Data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dm</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ConvolutionalNeuralNetworkOnCIFAR10.get_meta_information"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10.get_meta_information">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_information</span><span class="p">():</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">ConvolutionalNeuralNetwork</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;@Techreport{krizhevsky-tech09a,&quot;</span>
+                               <span class="s2">&quot;author = {A. Krizhevsky},&quot;</span>
+                               <span class="s2">&quot;title = {Learning multiple layers of features from tiny images},&quot;</span>
+                               <span class="s2">&quot;institution = {University of Toronto},&quot;</span>
+                               <span class="s2">&quot;year = </span><span class="si">{2009}</span><span class="s2">,&quot;</span>
+                               <span class="s2">&quot;keywords = </span><span class="si">{ML}</span><span class="s2">}&quot;</span>
+                               <span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span></div></div>
 </pre></div>
 
     </div>
