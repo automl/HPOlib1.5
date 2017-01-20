@@ -7,6 +7,7 @@ import theano.tensor as T
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.util.data_manager import CIFAR10Data
 
 
 class ConvolutionalNeuralNetwork(AbstractBenchmark):
@@ -242,3 +243,22 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
             valid_loss[e] = val_err / val_batches
 
         return learning_curve, cost, train_loss, valid_loss
+
+
+class ConvolutionalNeuralNetworkOnCIFAR10(ConvolutionalNeuralNetwork):
+
+    def get_data(self):
+        dm = CIFAR10Data()
+        return dm.load()
+
+    @staticmethod
+    def get_meta_information():
+        d = ConvolutionalNeuralNetwork.get_meta_information()
+        d["references"].append("@Techreport{krizhevsky-tech09a,"
+                               "author = {A. Krizhevsky},"
+                               "title = {Learning multiple layers of features from tiny images},"
+                               "institution = {University of Toronto},"
+                               "year = {2009},"
+                               "keywords = {ML}}"
+                               )
+        return d
