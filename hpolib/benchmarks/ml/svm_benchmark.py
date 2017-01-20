@@ -150,5 +150,5 @@ class SvmOnVehicle(SupportVectorMachine):
 class SvmOnCovertype(SupportVectorMachine):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=2118)
+        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=75191)
         return dm.load()
