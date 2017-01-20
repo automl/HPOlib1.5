@@ -19,9 +19,9 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         The tunable hyperparameters are the learning rate (on a log scale), the batch size and
         the number of units in each layer (on a log2 scale).
     """
-    def __init__(self, path=None, max_num_epochs=40, rng=None):
+    def __init__(self, max_num_epochs=40, rng=None):
 
-        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
+        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data()
         self.max_num_epochs = max_num_epochs
         self.num_classes = len(np.unique(self.train_targets))
 
