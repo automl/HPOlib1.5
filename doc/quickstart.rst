@@ -5,9 +5,9 @@ All benchmarks in HPOlib2 follow the same interface and run using **Python 3.5**
 It is designed to be easy to use and works out of the box with optimizers
 from the scipy.optimize module for continuous problems.
 
-----------------
+--------------------------
 Download & Install HPOlib2
-----------------
+--------------------------
 
 .. code-block:: bash
 
