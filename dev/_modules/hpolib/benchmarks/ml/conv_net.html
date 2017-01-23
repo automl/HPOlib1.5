@@ -140,7 +140,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
 
         <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ConvolutionalNeuralNetwork.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">pass</span></div>
@@ -238,7 +238,7 @@
 
 <div class="viewcode-block" id="ConvolutionalNeuralNetwork.train_net"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork.train_net">[docs]</a>    <span class="k">def</span> <span class="nf">train_net</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">train_targets</span><span class="p">,</span>
                   <span class="n">valid</span><span class="p">,</span> <span class="n">valid_targets</span><span class="p">,</span>
-                  <span class="n">init_learning_rate</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span>
+                  <span class="n">init_learning_rate</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="mf">1e-5</span><span class="p">,</span>
                   <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
                   <span class="n">n_units_1</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
                   <span class="n">n_units_2</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
@@ -388,7 +388,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
     </p>
   </div>
 </footer>

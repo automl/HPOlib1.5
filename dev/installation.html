@@ -109,33 +109,42 @@
     <div class="col-md-12 content">
       
   <div class="section" id="installing-hpolib2">
-<h1>Installing HPOlib2<a class="headerlink" href="#installing-hpolib2" title="Permalink to this headline">¶</a></h1>
+<span id="installation"></span><h1>Installing HPOlib2<a class="headerlink" href="#installing-hpolib2" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="installing-from-the-master-branch">
 <h2>Installing from the master branch<a class="headerlink" href="#installing-from-the-master-branch" title="Permalink to this headline">¶</a></h2>
 <p>As HPOlib2 is under development, there is not yet a stable release. We do our
 best to only merge to the master branch if the code is stable, but cannot
-give any guarantees. Thus</p>
+give any guarantees.</p>
+<p>Since we do not yet have a package in the python package index, you need to
+first clone the HPOlib2 repository:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone git@github.com:automl/HPOlib2.git
+<span class="nb">cd</span> HPOlib2
+</pre></div>
+</div>
 <p>The dependencies of <code class="docutils literal"><span class="pre">HPOlib2</span></code> are listed in the file <code class="docutils literal"><span class="pre">requirements.txt</span></code>
 and contain all dependencies which are necessary to run most of the
 benchmarks. To install these, execute:</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>Further dependencies are listed in <code class="docutils literal"><span class="pre">optional-requirements.txt</span></code> and can be
 installed with:</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">optional</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="n">optional</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">v</span> <span class="s1">&#39;#&#39;</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>Afterwards, you can install HPOlib2:</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="installing-from-the-development-branch">
 <h2>Installing from the development branch<a class="headerlink" href="#installing-from-the-development-branch" title="Permalink to this headline">¶</a></h2>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">development</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
-<span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">development</span><span class="o">/</span><span class="n">optional</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="nd">@development</span>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">HPOlib2</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">development</span>
+<span class="n">cat</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+<span class="n">cat</span> <span class="n">optional</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">grep</span> <span class="o">-</span><span class="n">v</span> <span class="s1">&#39;#&#39;</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+<span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
 </div>
@@ -172,7 +181,7 @@ guarantee any compability.</li>
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
     </p>
   </div>
 </footer>
