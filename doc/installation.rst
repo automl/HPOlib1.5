@@ -1,3 +1,5 @@
+.. _installation:
+
 ******************
 Installing HPOlib2
 ******************
@@ -13,7 +15,15 @@ Installing from the master branch
 
 As HPOlib2 is under development, there is not yet a stable release. We do our
 best to only merge to the master branch if the code is stable, but cannot
-give any guarantees. Thus
+give any guarantees.
+
+Since we do not yet have a package in the python package index, you need to
+first clone the HPOlib2 repository:
+
+.. code-block:: bash
+
+    git clone git@github.com:automl/HPOlib2.git
+    cd HPOlib2
 
 The dependencies of ``HPOlib2`` are listed in the file ``requirements.txt``
 and contain all dependencies which are necessary to run most of the
@@ -21,29 +31,32 @@ benchmarks. To install these, execute:
 
 .. code:: bash
 
-    curl https://raw.githubusercontent.com/automl/HPOlib2/master/requirements.txt | xargs -n 1 -L 1 pip install
+    cat requirements.txt | xargs -n 1 -L 1 pip install
 
 Further dependencies are listed in ``optional-requirements.txt`` and can be
 installed with:
 
 .. code:: bash
 
-    curl https://raw.githubusercontent.com/automl/HPOlib2/master/optional-requirements.txt | xargs -n 1 -L 1 pip install
+    cat optional-requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
 
 Afterwards, you can install HPOlib2:
 
 .. code:: bash
 
-    pip install git+https://github.com/automl/HPOlib2
+    python setup.py install
 
 Installing from the development branch
 **************************************
 
 .. code:: bash
 
-    curl https://raw.githubusercontent.com/automl/HPOlib2/development/requirements.txt | xargs -n 1 -L 1 pip install
-    curl https://raw.githubusercontent.com/automl/HPOlib2/development/optional-requirements.txt | xargs -n 1 -L 1 pip install
-    pip install git+https://github.com/automl/HPOlib2@development
+    git clone git@github.com:automl/HPOlib2.git
+    cd HPOlib2
+    git checkout development
+    cat requirements.txt | xargs -n 1 -L 1 pip install
+    cat optional-requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
+    python setup.py install
 
 Additional information
 **********************
