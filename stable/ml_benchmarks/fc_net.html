@@ -58,8 +58,8 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="../introduction.html">Introduction</a></li>
                 <li><a href="../quickstart.html">Quickstart guide</a></li>
+                <li><a href="../installation.html">Installation</a></li>
                 <li><a href="../synthetic_benchmarks.html">Synthetic benchmarks</a></li>
                 <li><a href="../ml_benchmarks.html">ML benchmarks</a></li>
                 <li><a href="../utility.html">Utility function</a></li>
@@ -74,8 +74,8 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing HPOlib2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../synthetic_benchmarks.html">The Synthetic Benchmarks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../ml_benchmarks.html">The Machine Learning Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../utility.html">Miscelanious utility functions</a></li>
@@ -112,18 +112,23 @@
 <span id="fully-connected-neural-network-benchmarks"></span><h1>Fully Connected Neural Network Benchmarks<a class="headerlink" href="#module-hpolib.benchmarks.ml.fully_connected_network" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist">
-<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.fully_connected_network.</code><code class="descname">FCNetOnMnist</code><span class="sig-paren">(</span><em>path=None</em>, <em>max_num_epochs=100</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FCNetOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.fully_connected_network.</code><code class="descname">FCNetOnMnist</code><span class="sig-paren">(</span><em>max_num_epochs=100</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FCNetOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork" title="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork"><code class="xref py py-class docutils literal"><span class="pre">hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork</span></code></a></p>
 <dl class="method">
 <dt id="hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data">
-<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FCNetOnMnist.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FCNetOnMnist.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_meta_information">
+<em class="property">static </em><code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FCNetOnMnist.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_meta_information" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork">
-<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.fully_connected_network.</code><code class="descname">FullyConnectedNetwork</code><span class="sig-paren">(</span><em>path=None</em>, <em>max_num_epochs=100</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.fully_connected_network.</code><code class="descname">FullyConnectedNetwork</code><span class="sig-paren">(</span><em>max_num_epochs=100</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hpolib.abstract_benchmark.AbstractBenchmark</span></code></p>
 <dl class="staticmethod">
 <dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_configuration_space">
@@ -132,7 +137,7 @@
 
 <dl class="method">
 <dt id="hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data">
-<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/fully_connected_network.html#FullyConnectedNetwork.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
@@ -184,7 +189,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
     </p>
   </div>
 </footer>

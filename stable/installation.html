@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installing HPOlib2 &#8212; HPOlib2 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Synthetic Benchmarks" href="synthetic_benchmarks.html" />
+    <link rel="prev" title="Quickstart Guide" href="quickstart.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          HPOlib2</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="quickstart.html">Quickstart guide</a></li>
+                <li><a href="#">Installation</a></li>
+                <li><a href="synthetic_benchmarks.html">Synthetic benchmarks</a></li>
+                <li><a href="ml_benchmarks.html">ML benchmarks</a></li>
+                <li><a href="utility.html">Utility function</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installing HPOlib2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synthetic_benchmarks.html">The Synthetic Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ml_benchmarks.html">The Machine Learning Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Miscelanious utility functions</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="installing-hpolib2">
+<h1>Installing HPOlib2<a class="headerlink" href="#installing-hpolib2" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installing-from-the-master-branch">
+<h2>Installing from the master branch<a class="headerlink" href="#installing-from-the-master-branch" title="Permalink to this headline">¶</a></h2>
+<p>As HPOlib2 is under development, there is not yet a stable release. We do our
+best to only merge to the master branch if the code is stable, but cannot
+give any guarantees. Thus</p>
+<p>The dependencies of <code class="docutils literal"><span class="pre">HPOlib2</span></code> are listed in the file <code class="docutils literal"><span class="pre">requirements.txt</span></code>
+and contain all dependencies which are necessary to run most of the
+benchmarks. To install these, execute:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Further dependencies are listed in <code class="docutils literal"><span class="pre">optional-requirements.txt</span></code> and can be
+installed with:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">optional</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Afterwards, you can install HPOlib2:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-from-the-development-branch">
+<h2>Installing from the development branch<a class="headerlink" href="#installing-from-the-development-branch" title="Permalink to this headline">¶</a></h2>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">development</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+<span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="o">/</span><span class="n">development</span><span class="o">/</span><span class="n">optional</span><span class="o">-</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">HPOlib2</span><span class="nd">@development</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="additional-information">
+<h2>Additional information<a class="headerlink" href="#additional-information" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>We recommend using <a class="reference external" href="https://virtualenv.pypa.io/en/stable/">virtual environments</a>
+or <a class="reference external" href="https://www.continuum.io/downloads">AnaConda</a> to set up one or more
+isolated python environments.</li>
+<li>We develop all our code with Ubuntu. We don&#8217;t run any tests to check
+whether our code runs on different operating systems and therefore cannot
+guarantee any compability.</li>
+</ul>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/installation.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

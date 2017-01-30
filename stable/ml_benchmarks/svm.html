@@ -58,8 +58,8 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="../introduction.html">Introduction</a></li>
                 <li><a href="../quickstart.html">Quickstart guide</a></li>
+                <li><a href="../installation.html">Installation</a></li>
                 <li><a href="../synthetic_benchmarks.html">Synthetic benchmarks</a></li>
                 <li><a href="../ml_benchmarks.html">ML benchmarks</a></li>
                 <li><a href="../utility.html">Utility function</a></li>
@@ -74,8 +74,8 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing HPOlib2</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../synthetic_benchmarks.html">The Synthetic Benchmarks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../ml_benchmarks.html">The Machine Learning Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../utility.html">Miscelanious utility functions</a></li>
@@ -112,7 +112,7 @@
 <span id="support-vector-machine-benchmarks"></span><h1>Support Vector Machine Benchmarks<a class="headerlink" href="#module-hpolib.benchmarks.ml.svm_benchmark" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine">
-<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.svm_benchmark.</code><code class="descname">SupportVectorMachine</code><span class="sig-paren">(</span><em>path=None</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SupportVectorMachine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.svm_benchmark.</code><code class="descname">SupportVectorMachine</code><span class="sig-paren">(</span><em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SupportVectorMachine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hpolib.abstract_benchmark.AbstractBenchmark</span></code></p>
 <p>Hyperparameter optimization task to optimize the regularization
 parameter C and the kernel parameter gamma of a support vector machine.
@@ -127,7 +127,7 @@ concatenated to form the whole training data set.</p>
 
 <dl class="method">
 <dt id="hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine.get_data">
-<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SupportVectorMachine.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine.get_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SupportVectorMachine.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine.get_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
@@ -148,12 +148,39 @@ concatenated to form the whole training data set.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="hpolib.benchmarks.ml.svm_benchmark.SvmOnCovertype">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.svm_benchmark.</code><code class="descname">SvmOnCovertype</code><span class="sig-paren">(</span><em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnCovertype"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnCovertype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine" title="hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine"><code class="xref py py-class docutils literal"><span class="pre">hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine</span></code></a></p>
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.svm_benchmark.SvmOnCovertype.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnCovertype.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnCovertype.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist">
-<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.svm_benchmark.</code><code class="descname">SvmOnMnist</code><span class="sig-paren">(</span><em>path=None</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.svm_benchmark.</code><code class="descname">SvmOnMnist</code><span class="sig-paren">(</span><em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine" title="hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine"><code class="xref py py-class docutils literal"><span class="pre">hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine</span></code></a></p>
 <dl class="method">
 <dt id="hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist.get_data">
-<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnMnist.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist.get_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnMnist.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist.get_meta_information">
+<em class="property">static </em><code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnMnist.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnMnist.get_meta_information" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hpolib.benchmarks.ml.svm_benchmark.SvmOnVehicle">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.svm_benchmark.</code><code class="descname">SvmOnVehicle</code><span class="sig-paren">(</span><em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnVehicle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnVehicle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine" title="hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine"><code class="xref py py-class docutils literal"><span class="pre">hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine</span></code></a></p>
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.svm_benchmark.SvmOnVehicle.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/svm_benchmark.html#SvmOnVehicle.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.svm_benchmark.SvmOnVehicle.get_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -180,7 +207,7 @@ concatenated to form the whole training data set.</p>
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
     </p>
   </div>
 </footer>
