@@ -1,5 +1,3 @@
-import os
-import sys
 import time
 
 import numpy as np
@@ -10,8 +8,7 @@ import theano.tensor as T
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-import hpolib.util.data_manager
-import hpolib
+from hpolib.util.data_manager import MNISTData
 
 
 class FullyConnectedNetwork(AbstractBenchmark):
@@ -277,7 +274,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
 class FCNetOnMnist(FullyConnectedNetwork):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod

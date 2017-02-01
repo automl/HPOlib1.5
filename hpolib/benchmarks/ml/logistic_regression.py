@@ -4,9 +4,10 @@ import lasagne
 import theano
 import theano.tensor as T
 
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util.data_manager import DataManager
 import ConfigSpace as CS
+
+from hpolib.util.data_manager import MNISTData
+from hpolib.abstract_benchmark import AbstractBenchmark
 
 
 class LogisticRegression(AbstractBenchmark):
@@ -214,7 +215,7 @@ class LogisticRegression(AbstractBenchmark):
 class LogisticRegressionOnMnist(LogisticRegression):
 
     def get_data(self):
-        dm = DataManager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod
