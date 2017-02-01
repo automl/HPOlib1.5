@@ -36,7 +36,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
         # Minimum dataset size is equal to the maximum batch size
-        self.s_min = 512
+        self.s_min = float(512) / self.train.shape[0]
+
         if rng is None:
             self.rng = np.random.RandomState()
         else:
@@ -83,7 +84,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         c = cost_curve[-1]
         return {'function_value': y,
                 "cost": c,
-                "learning_curve_valid_error": lc_curve,
+                "learning_curve": lc_curve,
                 "train_loss": train_loss,
                 "valid_loss": valid_loss,
                 "learning_curve_cost": cost_curve}
