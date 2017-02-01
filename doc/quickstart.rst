@@ -22,6 +22,8 @@ Download & Install HPOlib2
 
   nosetests tests
 
+A more detailed explanation can be found in the :ref:`installation` section.
+
 -------
 Example
 -------
