@@ -19,7 +19,7 @@ class LogisticRegression(AbstractBenchmark):
     """
 
     def __init__(self, path=None, rng=None):
-        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
+        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data()
         self.num_epochs = 100
 
         # Use 10 time the number of classes as lower bound for the dataset fraction
