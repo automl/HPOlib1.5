@@ -6,8 +6,8 @@ from sklearn import svm
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-import hpolib.util.data_manager
-import hpolib
+from hpolib.util.data_manager import MNISTData
+from hpolib.util.openml_data_manager import OpenMLData
 
 
 class SupportVectorMachine(AbstractBenchmark):
@@ -123,7 +123,7 @@ class SupportVectorMachine(AbstractBenchmark):
 class SvmOnMnist(SupportVectorMachine):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod
@@ -143,12 +143,12 @@ class SvmOnMnist(SupportVectorMachine):
 class SvmOnVehicle(SupportVectorMachine):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=75191)
+        dm = OpenMLData(openml_task_id=75191)
         return dm.load()
 
 
 class SvmOnCovertype(SupportVectorMachine):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=75191)
+        dm = OpenMLData(openml_task_id=75191)
         return dm.load()
