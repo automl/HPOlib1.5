@@ -6,7 +6,7 @@ import os
 import tarfile
 
 from urllib.request import urlretrieve
-
+from scipy.io import loadmat
 import numpy as np
 
 import hpolib
@@ -145,8 +145,7 @@ class CIFAR10Data(DataManager):
     def load(self):
         """
         Loads CIFAR10 from data directory as defined in _config.data_directory.
-        Downloads data if necessary. Code is copied and modified from the
-        Lasagne tutorial.
+        Downloads data if necessary.
 
         Returns
         -------
@@ -227,3 +226,102 @@ class CIFAR10Data(DataManager):
             self.logger.debug("Load data %s", save_fl)
 
         return save_fl
+
+
+class SVHNData(DataManager):
+
+    def __init__(self):
+        self.url_source = 'http://ufldl.stanford.edu/housenumbers/'
+        self.logger = logging.getLogger("DataManager")
+        self.save_to = os.path.join(hpolib._config.data_dir, "svhn/")
+
+        self.n_train_all = 73257
+        self.n_valid = 6000
+        self.n_train = self.n_train_all - self.n_valid
+        self.n_test = 26032
+
+        if not os.path.isdir(self.save_to):
+            self.logger.debug("Create directory %s", self.save_to)
+            os.makedirs(self.save_to)
+
+        super(SVHNData, self).__init__()
+
+    def load(self):
+        """
+        Loads SVHN from data directory as defined in _config.data_directory.
+        Downloads data if necessary.
+
+        Returns
+        -------
+        X_train: np.array
+        y_train: np.array
+        X_val: np.array
+        y_val: np.array
+        X_test: np.array
+        y_test: np.array
+        """
+        X, y, X_test, y_test = self.__load_data("train_32x32.mat", "test_32x32.mat")
+
+        # subtract per-pixel mean
+        pixel_mean = np.mean(X, axis=0)
+
+        X_train = X[:self.n_train, :, :, :] - pixel_mean
+        y_train = y[:self.n_train]
+        X_valid = X[self.n_train:self.n_train_all, :, :, :] - pixel_mean
+        y_valid = y[self.n_train:self.n_train_all]
+
+        X_train = np.array(X_train, dtype=np.float32)
+        X_valid = np.array(X_valid, dtype=np.float32)
+        X_test = np.array(X_test, dtype=np.float32)
+        X_test -= pixel_mean
+
+        return X_train, y_train[:, 0], X_valid, y_valid[:, 0], X_test, y_test[:, 0]
+
+    def __load_data(self, filename_train, filename_test):
+        """
+        Loads data in binary format as available under 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'.
+
+        Parameters
+        ----------
+        filename: str
+            file to download
+        save_to: str
+            directory to store file
+        images: bool
+            if True converts data to X
+
+        Returns
+        -------
+        filename: string
+        """
+        save_fl = os.path.join(self.save_to, filename_train)
+        if not os.path.exists(save_fl):
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source + filename_train, save_fl)
+            urlretrieve(self.url_source + filename_train, self.save_to + filename_train)
+
+        else:
+            self.logger.debug("Load data %s", save_fl)
+
+        train_data = loadmat(save_fl)
+
+        # access to the dict
+        X_train = train_data['X'].T
+        y_train = train_data['y']
+
+        save_fl = os.path.join(self.save_to, filename_test)
+        if not os.path.exists(save_fl):
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source + filename_test, save_fl)
+            urlretrieve(self.url_source + filename_test, self.save_to + filename_test)
+
+        else:
+            self.logger.debug("Load data %s", save_fl)
+
+        test_data = loadmat(save_fl)
+
+        # access to the dict
+        X_test = test_data['X'].T
+        y_test = test_data['y']
+
+        return X_train, y_train, X_test, y_test
