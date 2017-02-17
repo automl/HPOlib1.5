@@ -7,7 +7,7 @@ import theano.tensor as T
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util.data_manager import CIFAR10Data
+from hpolib.util.data_manager import CIFAR10Data, SVHNData
 
 
 class ConvolutionalNeuralNetwork(AbstractBenchmark):
@@ -273,5 +273,23 @@ class ConvolutionalNeuralNetworkOnCIFAR10(ConvolutionalNeuralNetwork):
                                "institution = {University of Toronto},"
                                "year = {2009},"
                                "keywords = {ML}}"
+                               )
+        return d
+
+
+class ConvolutionalNeuralNetworkOnSVHN(ConvolutionalNeuralNetwork):
+
+    def get_data(self):
+        dm = SVHNData()
+        return dm.load()
+
+    @staticmethod
+    def get_meta_information():
+        d = ConvolutionalNeuralNetwork.get_meta_information()
+        d["references"].append("@inproceedings{SVHN,"
+                               "title = {Reading Digits in Natural Images with Unsupervised Feature Learning},"
+                               "author  = {Y. Netzer and T. Wang and A. Coates and A. Bissacco and B. Wu and A. Y. Ng},"
+                               "year  = 2011,"
+                               "booktitle = {NIPS Workshop on Deep Learning and Unsupervised Feature Learning 2011}"
                                )
         return d
