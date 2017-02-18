@@ -3,7 +3,10 @@ import os
 
 import numpy as np
 import openml
-from sklearn.model_selection import train_test_split
+
+from scipy.sparse.csr import csr_matrix
+from sklearn.cross_validation import train_test_split
+#from sklearn.model_selection import train_test_split  # sklearn > 0.17
 
 import hpolib
 from hpolib.util.data_manager import DataManager
@@ -69,6 +72,9 @@ class OpenMLData(DataManager):
         train_indices, test_indices = task.get_train_test_split_indices()
 
         X, y = task.get_X_and_y()
+
+        if type(X) == csr_matrix:
+            X = X.toarray()
 
         X_train = X[train_indices]
         y_train = y[train_indices]
