@@ -140,7 +140,11 @@ class MNISTData(HoldoutDataManager):
         return data
 
 
-class CIFAR10Data(HoldoutDataManager):
+
+
+
+class CIFAR10Data(DataManager):
+
     def __init__(self):
         self.url_source = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
         self.logger = logging.getLogger("DataManager")
