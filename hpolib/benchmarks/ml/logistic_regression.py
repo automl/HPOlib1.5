@@ -286,6 +286,7 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
             configuration
         :param kwargs:
             fold: int in [0, 9]
+                if fold == 10, return test performance
             rng: rng, int or None
                 if not None overwrites current RandomState
 
@@ -294,7 +295,7 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
         start_time = time.time()
 
         fold = int(float(kwargs["fold"]))
-        assert 0 <= fold < self.folds
+        assert 0 <= fold < self.folds + 1
 
         arg_rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=arg_rng, self_rng=self.rng)
@@ -302,6 +303,9 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
         # if arg_rng was not not, set rng for lasagne
         if arg_rng is not None:
             lasagne.random.set_rng(self.rng)
+
+        if fold == self.folds+1:
+            return self.objective_function_test(x, **kwargs)
 
         # Compute crossvalidation splits
         kf = StratifiedKFold(y=self.train_targets, n_folds=self.folds,
