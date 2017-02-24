@@ -20,7 +20,7 @@ class LogisticRegression(AbstractBenchmark):
         the validation data set.
     """
 
-    def __init__(self, path=None, rng=None):
+    def __init__(self, rng=None):
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
         self.num_epochs = 100
@@ -262,8 +262,8 @@ class LogisticRegressionOnMnist(LogisticRegression):
 
 class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
 
-    def __init__(self, path=None, rng=None):
-        super(LogisticRegression10CVOnMnist, self).__init__()
+    def __init__(self, rng=None):
+        super(LogisticRegression10CVOnMnist, self).__init__(rng=rng)
 
         #  Use training AND validation data for crossvalidation
         self.train = np.concatenate([self.train, self.valid], axis=0)
