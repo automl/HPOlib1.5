@@ -6,10 +6,10 @@ import theano.tensor as T
 
 from sklearn.cross_validation import StratifiedKFold
 
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util.data_manager import DataManager
 import ConfigSpace as CS
 
+from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.util.data_manager import DataManager
 from hpolib.util import rng_helper
 
 
