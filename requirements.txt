@@ -10,5 +10,6 @@ matplotlib
 
 theano
 lasagne
-scikit-learn
+# Fix this for now to be compatible with autosklearn
+scikit-learn==0.17.1
 ConfigSpace
