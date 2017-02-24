@@ -305,7 +305,7 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
         if arg_rng is not None:
             lasagne.random.set_rng(self.rng)
 
-        if fold == self.folds+1:
+        if fold == self.folds:
             return self.objective_function_test(x, **kwargs)
 
         # Compute crossvalidation splits
