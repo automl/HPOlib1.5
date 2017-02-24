@@ -129,9 +129,6 @@ class MNISTData(DataManager):
         return data
 
 
-
-
-
 class CIFAR10Data(DataManager):
 
     def __init__(self):
