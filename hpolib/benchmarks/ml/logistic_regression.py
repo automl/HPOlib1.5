@@ -264,8 +264,8 @@ class LogisticRegressionOnMnist(LogisticRegression):
 
 class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
 
-    def __init__(self, rng=None):
-        super(LogisticRegression10CVOnMnist, self).__init__(rng=rng)
+    def __init__(self, path=None, rng=None):
+        super(LogisticRegression10CVOnMnist, self).__init__()
 
         #  Use training AND validation data for crossvalidation
         self.train = np.concatenate([self.train, self.valid], axis=0)
@@ -296,7 +296,7 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
         start_time = time.time()
 
         fold = int(float(kwargs["fold"]))
-        assert 0 <= fold < self.folds + 1
+        assert 0 <= fold < self.folds
 
         arg_rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=arg_rng, self_rng=self.rng)
