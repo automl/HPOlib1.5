@@ -51,6 +51,10 @@ class LogisticRegression(AbstractBenchmark):
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
+
         shuffle = self.rng.permutation(self.train.shape[0])
         size = int(dataset_fraction * self.train.shape[0])
 
@@ -75,6 +79,13 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
         start_time = time.time()
+
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
 
         train = np.concatenate((self.train, self.valid))
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
