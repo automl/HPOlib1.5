@@ -22,9 +22,14 @@ class LogisticRegression(AbstractBenchmark):
         the validation data set.
     """
 
+<<<<<<< HEAD
     def __init__(self, rng=None):
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
+=======
+    def __init__(self, path=None, rng=None):
+        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data()
+>>>>>>> development
         self.num_epochs = 100
 
         # Use 10 time the number of classes as lower bound for the dataset fraction
