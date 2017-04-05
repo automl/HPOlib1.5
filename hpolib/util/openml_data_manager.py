@@ -6,7 +6,6 @@ import openml
 
 from scipy.sparse.csr import csr_matrix
 from sklearn.cross_validation import train_test_split
-#from sklearn.model_selection import train_test_split  # sklearn > 0.17
 
 import hpolib
 from hpolib.util.data_manager import DataManager
@@ -28,7 +27,7 @@ class OpenMLData(DataManager):
             self.logger.debug("Create directory %s", self.save_to)
             os.makedirs(self.save_to)
 
-        openml.config.apikey = '953f6621518c13791dbbfc6d3698f5ad'
+        openml.config.apikey = '610344db6388d9ba34f6db45a3cf71de'
         openml.config.cachedir = self.save_to
 
         super(OpenMLData, self).__init__()
