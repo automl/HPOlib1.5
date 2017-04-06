@@ -13,15 +13,7 @@ import hpolib
 
 
 class DataManager(object, metaclass=abc.ABCMeta):
-
     def __init__(self):
-        self.X_train = None
-        self.y_train = None
-        self.X_val = None
-        self.y_val = None
-        self.X_test = None
-        self.y_test = None
-
         self.logger = logging.getLogger("DataManager")
 
     @abc.abstractmethod
@@ -32,8 +24,29 @@ class DataManager(object, metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
 
-class MNISTData(DataManager):
+class HoldoutDataManager(DataManager):
+    def __init__(self):
+        super().__init__()
 
+        self.X_train = None
+        self.y_train = None
+        self.X_val = None
+        self.y_val = None
+        self.X_test = None
+        self.y_test = None
+
+
+class CrossvalidationDataManager(DataManager):
+    def __init__(self):
+        super().__init__()
+
+        self.X_train = None
+        self.y_train = None
+        self.X_test = None
+        self.y_test = None
+
+
+class MNISTData(HoldoutDataManager):
     def __init__(self):
         self.url_source = 'http://yann.lecun.com/exdb/mnist/'
         self.logger = logging.getLogger("DataManager")
@@ -129,8 +142,7 @@ class MNISTData(DataManager):
         return data
 
 
-class CIFAR10Data(DataManager):
-
+class CIFAR10Data(HoldoutDataManager):
     def __init__(self):
         self.url_source = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
         self.logger = logging.getLogger("DataManager")
@@ -160,7 +172,8 @@ class CIFAR10Data(DataManager):
         xs = []
         ys = []
         for j in range(5):
-            fh = open(self.__load_data(filename='data_batch_%d' % (j + 1)), "rb")
+            fh = open(self.__load_data(filename='data_batch_%d' % (j + 1)),
+                      "rb")
             d = pickle.load(fh, encoding='latin1')
             fh.close()
             x = d['data']
@@ -218,7 +231,8 @@ class CIFAR10Data(DataManager):
         if not os.path.exists(save_fl):
             self.logger.debug("Downloading %s to %s",
                               self.url_source, save_fl)
-            urlretrieve(self.url_source, self.save_to + "cifar-10-python.tar.gz")
+            urlretrieve(self.url_source,
+                        self.save_to + "cifar-10-python.tar.gz")
             tar = tarfile.open(self.save_to + "cifar-10-python.tar.gz")
             tar.extractall(self.save_to)
 
