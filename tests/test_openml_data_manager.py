@@ -6,7 +6,7 @@ import hpolib.util.openml_data_manager
 class TestDataManager(unittest.TestCase):
     def test_load_openml(self):
         # Load Data
-        dm = hpolib.util.openml_data_manager.OpenMLData(openml_task_id=233)
+        dm = hpolib.util.openml_data_manager.OpenMLHoldoutDataManager(openml_task_id=233)
         X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
 
         # Assert array shape
