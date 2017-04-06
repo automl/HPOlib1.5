@@ -262,24 +262,28 @@ class SVHNData(DataManager):
         """
         X, y, X_test, y_test = self.__load_data("train_32x32.mat", "test_32x32.mat")
 
-        # subtract per-pixel mean
-        pixel_mean = np.mean(X, axis=0)
-
-        X_train = X[:self.n_train, :, :, :] - pixel_mean
+        X_train = X[:self.n_train, :, :, :]
         y_train = y[:self.n_train]
-        X_valid = X[self.n_train:self.n_train_all, :, :, :] - pixel_mean
+        X_valid = X[self.n_train:self.n_train_all, :, :, :]
         y_valid = y[self.n_train:self.n_train_all]
 
         X_train = np.array(X_train, dtype=np.float32)
         X_valid = np.array(X_valid, dtype=np.float32)
         X_test = np.array(X_test, dtype=np.float32)
-        X_test -= pixel_mean
+
+        all_X = [X_train, X_valid, X_test]
+
+        for X in all_X:
+            data_shape = X.shape
+            X = X.reshape(X.shape[0], np.product(X.shape[1:]))
+            X -= X.mean(axis=1)[:, np.newaxis]
+            X = X.reshape(data_shape)
 
         return X_train, y_train[:, 0], X_valid, y_valid[:, 0], X_test, y_test[:, 0]
 
     def __load_data(self, filename_train, filename_test):
         """
-        Loads data in binary format as available under 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'.
+        Loads data in binary format as available under 'http://ufldl.stanford.edu/housenumbers/'.
 
         Parameters
         ----------
