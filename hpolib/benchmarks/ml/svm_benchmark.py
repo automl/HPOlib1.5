@@ -143,12 +143,12 @@ class SvmOnMnist(SupportVectorMachine):
 class SvmOnVehicle(SupportVectorMachine):
 
     def get_data(self):
-        dm = OpenMLData(openml_task_id=75191)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75191)
         return dm.load()
 
 
 class SvmOnCovertype(SupportVectorMachine):
 
     def get_data(self):
-        dm = OpenMLData(openml_task_id=2118)
+        dm =  OpenMLHoldoutDataManager(openml_task_id=2118)
         return dm.load()
