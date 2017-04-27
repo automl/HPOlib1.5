@@ -53,7 +53,7 @@ class Hartmann6(AbstractBenchmark):
 
     @staticmethod
     def get_meta_information():
-        return {'name': 'Hartmann 3D',
+        return {'name': 'Hartmann 6D',
                 'num_function_evals': 200,
                 'optima': (
                 [[0.20169, 0.150011, 0.476874, 0.275332, 0.311652, 0.6573]]),
