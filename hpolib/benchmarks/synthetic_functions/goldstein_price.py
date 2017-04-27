@@ -1,4 +1,3 @@
-
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
