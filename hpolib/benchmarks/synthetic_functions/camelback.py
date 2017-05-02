@@ -1,5 +1,3 @@
-import numpy as np
-
 import ConfigSpace as CS
 from hpolib.abstract_benchmark import AbstractBenchmark
 
@@ -8,9 +6,8 @@ class Camelback(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, **kwargs):
-        y = (4 - 2.1 * (x[0] ** 2) + ((x[0] ** 4) / 3)) * (x[0] ** 2) + x[0] * x[1] + (-4 + 4 * (
-        x[1] ** 2)) * (x[1] ** 2)
-
+        y = (4 - 2.1 * (x[0] ** 2) + ((x[0] ** 4) / 3)) * \
+            (x[0] ** 2) + x[0] * x[1] + (-4 + 4 * (x[1] ** 2)) * (x[1] ** 2)
         return {'function_value': y}
 
     def objective_function_test(self, x, **kwargs):
@@ -19,7 +16,8 @@ class Camelback(AbstractBenchmark):
     @staticmethod
     def get_configuration_space():
         cs = CS.ConfigurationSpace()
-        cs.generate_all_continuous_from_bounds(Camelback.get_meta_information()['bounds'])
+        cs.generate_all_continuous_from_bounds(
+                Camelback.get_meta_information()['bounds'])
         return cs
 
     @staticmethod
