@@ -21,7 +21,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
     """
     def __init__(self, path=None, max_num_epochs=40, rng=None):
 
-        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
+        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data()
         self.max_num_epochs = max_num_epochs
         self.num_classes = len(np.unique(self.train_targets))
 
@@ -33,8 +33,8 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         lasagne.random.set_rng(self.rng)
         super(ConvolutionalNeuralNetwork, self).__init__()
 
-    def get_data(self, path):
-        pass
+    def get_data(self):
+        raise NotImplementedError()
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array

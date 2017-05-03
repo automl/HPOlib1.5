@@ -75,7 +75,7 @@ class SupportVectorMachine(AbstractBenchmark):
         c = time.time() - start_time
 
         return {'function_value': y, "cost": c}
-    
+
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
