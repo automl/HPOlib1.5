@@ -5,7 +5,7 @@ import theano
 import theano.tensor as T
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util.data_manager import DataManager
+from hpolib.util.data_manager import MNISTData
 import ConfigSpace as CS
 
 
@@ -19,7 +19,7 @@ class LogisticRegression(AbstractBenchmark):
     """
 
     def __init__(self, path=None, rng=None):
-        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
+        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data()
         self.num_epochs = 100
 
         # Use 10 time the number of classes as lower bound for the dataset fraction
@@ -35,7 +35,7 @@ class LogisticRegression(AbstractBenchmark):
 
         super(LogisticRegression, self).__init__()
 
-    def get_data(self, path):
+    def get_data(self):
         pass
 
     @AbstractBenchmark._check_configuration
@@ -214,7 +214,7 @@ class LogisticRegression(AbstractBenchmark):
 class LogisticRegressionOnMnist(LogisticRegression):
 
     def get_data(self):
-        dm = DataManager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod
