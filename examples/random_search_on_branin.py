@@ -2,6 +2,7 @@ import numpy as np
 
 from hpolib.benchmarks.synthetic_functions import Branin
 
+# Perform random search on the Branin function
 
 b = Branin()
 
