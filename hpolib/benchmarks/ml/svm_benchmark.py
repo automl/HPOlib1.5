@@ -7,7 +7,6 @@ import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.data_manager import MNISTData
-from hpolib.util.openml_data_manager import OpenMLData
 
 
 class SupportVectorMachine(AbstractBenchmark):
@@ -75,7 +74,7 @@ class SupportVectorMachine(AbstractBenchmark):
         c = time.time() - start_time
 
         return {'function_value': y, "cost": c}
-    
+
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):

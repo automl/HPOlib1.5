@@ -16,7 +16,7 @@ setuptools.setup(
     description='Automated machine learning.',
     version=version,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=requirements,
+    # install_requires=requirements,
     test_suite='nose.collector',
     scripts=[],
     #include_package_data=True,
