@@ -10,8 +10,8 @@ lasagne
 scikit-learn
 ConfigSpace
 mock
-liac-arff>=2.1.0
+liac-arff
 xmltodict
 requests
 nbformat
-git+https://github.com/openml/openml-python.git@develop
+openml
