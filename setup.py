@@ -19,6 +19,7 @@ setuptools.setup(
     install_requires=requirements,
     test_suite='nose.collector',
     scripts=[],
+    dependency_links=['http://github.com/openml/openml-python/tarball/develop#openml'],
     #include_package_data=True,
     author_email='eggenspk@informatik.uni-freiburg.de',
     license='GPLv3',
