@@ -80,7 +80,7 @@ class MNISTData(HoldoutDataManager):
                                   images=True)
         y_test = self.__load_data(filename='t10k-labels-idx1-ubyte.gz')
 
-        # Split data
+        # Split data in training and validation
         X_train, X_val = X_train[:-10000], X_train[-10000:]
         y_train, y_val = y_train[:-10000], y_train[-10000:]
 
@@ -88,7 +88,7 @@ class MNISTData(HoldoutDataManager):
         assert X_val.shape[0] == 10000, X_val.shape
         assert X_test.shape[0] == 10000, X_test.shape
 
-        # Reshape data
+        # Reshape data to NxD
         X_train = X_train.reshape(X_train.shape[0], 28 * 28)
         X_val = X_val.reshape(X_val.shape[0], 28 * 28)
         X_test = X_test.reshape(X_test.shape[0], 28 * 28)
@@ -105,8 +105,6 @@ class MNISTData(HoldoutDataManager):
         ----------
         filename: str
             file to download
-        save_to: str
-            directory to store file
         images: bool
             if True converts data to X
 
@@ -193,11 +191,12 @@ class CIFAR10Data(HoldoutDataManager):
         x = np.dstack((x[:, :1024], x[:, 1024:2048], x[:, 2048:]))
         x = x.reshape((x.shape[0], 32, 32, 3)).transpose(0, 3, 1, 2)
 
-        # subtract per-pixel mean
+        # Subtract per-pixel mean
         pixel_mean = np.mean(x[0:50000], axis=0)
 
         x -= pixel_mean
 
+        # Split in training, validation and test
         X_train = x[:40000, :, :, :]
         y_train = y[:40000]
 
@@ -217,10 +216,6 @@ class CIFAR10Data(HoldoutDataManager):
         ----------
         filename: str
             file to download
-        save_to: str
-            directory to store file
-        images: bool
-            if True converts data to X
 
         Returns
         -------
@@ -276,6 +271,7 @@ class SVHNData(DataManager):
         """
         X, y, X_test, y_test = self.__load_data("train_32x32.mat", "test_32x32.mat")
 
+        # Change the label encoding from [1, ... 10] to [0, ..., 9]
         y[y == 10] = 0
         y_test[y_test == 10] = 0
 
@@ -290,6 +286,7 @@ class SVHNData(DataManager):
 
         all_X = [X_train, X_valid, X_test]
 
+        # Subtract per pixel mean
         for X in all_X:
             data_shape = X.shape
             X = X.reshape(X.shape[0], np.product(X.shape[1:]))
@@ -304,12 +301,10 @@ class SVHNData(DataManager):
 
         Parameters
         ----------
-        filename: str
+        filename_train: str
             file to download
-        save_to: str
-            directory to store file
-        images: bool
-            if True converts data to X
+        filename_test: str
+            file to download
 
         Returns
         -------
@@ -326,7 +321,6 @@ class SVHNData(DataManager):
 
         train_data = loadmat(save_fl)
 
-        # access to the dict
         X_train = train_data['X'].T
         y_train = train_data['y']
 
@@ -341,7 +335,6 @@ class SVHNData(DataManager):
 
         test_data = loadmat(save_fl)
 
-        # access to the dict
         X_test = test_data['X'].T
         y_test = test_data['y']
 
