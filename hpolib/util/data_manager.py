@@ -276,6 +276,9 @@ class SVHNData(DataManager):
         """
         X, y, X_test, y_test = self.__load_data("train_32x32.mat", "test_32x32.mat")
 
+        y[y == 10] = 0
+        y_test[y_test == 10] = 0
+
         X_train = X[:self.n_train, :, :, :]
         y_train = y[:self.n_train]
         X_valid = X[self.n_train:self.n_train_all, :, :, :]
