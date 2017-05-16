@@ -7,7 +7,7 @@ import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.data_manager import MNISTData
-from hpolib.util.openml_data_manager import OpenMLData
+from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager
 
 
 class SupportVectorMachine(AbstractBenchmark):
