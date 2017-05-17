@@ -117,9 +117,9 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         return {'name': 'Convolutional Neural Network',
                 'bounds': [[-6, 0],  # init_learning_rate
                            [32, 512],  # batch_size
-                           [4, 9],  # n_units_1
-                           [4, 9],  # n_units_2
-                           [4, 9]],  # n_units_3
+                           [4, 8],  # n_units_1
+                           [4, 8],  # n_units_2
+                           [4, 8]],  # n_units_3
                 'references': ["@article{klein-bnn16a,"
                                "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
                                "title = {Bayesian Neural Network for Predicting Learning Curves},"
