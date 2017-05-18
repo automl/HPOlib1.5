@@ -1,9 +1,11 @@
 import time
 
 import numpy as np
+import ConfigSpace as CS
+
+from scipy import sparse
 from sklearn import svm
 
-import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.data_manager import MNISTData
@@ -82,7 +84,11 @@ class SupportVectorMachine(AbstractBenchmark):
         start_time = time.time()
 
         # Concatenate training and validation dataset
-        train = np.concatenate((self.train, self.valid))
+        if type(self.train) == sparse.csr.csr_matrix or type(self.valid) == sparse.csr.csr_matrix:
+            train = sparse.vstack((self.train, self.valid))
+        else:
+            train = np.concatenate((self.train, self.valid))
+
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
 
         # Transform hyperparameters to linear scale
@@ -150,5 +156,5 @@ class SvmOnVehicle(SupportVectorMachine):
 class SvmOnCovertype(SupportVectorMachine):
 
     def get_data(self):
-        dm =  OpenMLHoldoutDataManager(openml_task_id=2118)
+        dm = OpenMLHoldoutDataManager(openml_task_id=2118)
         return dm.load()
