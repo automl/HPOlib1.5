@@ -78,7 +78,6 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-
         start_time = time.time()
 
         rng = kwargs.get("rng", None)
