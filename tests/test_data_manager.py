@@ -21,7 +21,7 @@ class TestDataManager(unittest.TestCase):
                                  np.random.randn(10000, 28*28),
                                  np.random.randn(10000, 1)]
         join_mock.side_effect = ["tmp/MNIST"]
-        isdir_mock.return_vaue = True
+        isdir_mock.return_value = True
 
         # Load Data
         dm = hpolib.util.data_manager.MNISTData()
