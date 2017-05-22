@@ -140,7 +140,13 @@ class MNISTData(HoldoutDataManager):
         return data
 
 
+class MNISTDataCrossvalidation(MNISTData, CrossvalidationDataManager):
 
+    def load(self):
+        X_train, y_train, X_val, y_val, X_test, y_test = super(MNISTData, self).load()
+        X_train = np.concatenate([X_train, X_val], axis=0)
+        y_train = np.concatenate([y_train, y_val], axis=0)
+        return X_train, y_train, X_test, y_test
 
 
 class CIFAR10Data(DataManager):
