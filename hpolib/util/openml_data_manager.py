@@ -71,7 +71,7 @@ class OpenMLHoldoutDataManager(HoldoutDataManager):
             os.makedirs(self.save_to)
 
         openml.config.apikey = '610344db6388d9ba34f6db45a3cf71de'
-        openml.config.set_cache_directory(self.save_to, self.save_to)
+        openml.config.set_cache_directory(self.save_to)
 
         super(OpenMLHoldoutDataManager, self).__init__()
 
@@ -128,7 +128,7 @@ class OpenMLCrossvalidationDataManager(CrossvalidationDataManager):
             os.makedirs(self.save_to)
 
         openml.config.apikey = '610344db6388d9ba34f6db45a3cf71de'
-        openml.config.set_cache_directory(self.save_to, self.save_to)
+        openml.config.set_cache_directory(self.save_to)
 
         super(OpenMLCrossvalidationDataManager, self).__init__()
 
