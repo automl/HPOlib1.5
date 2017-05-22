@@ -46,8 +46,9 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         lasagne.random.set_rng(self.rng)
         super(ConvolutionalNeuralNetwork, self).__init__()
 
-    def get_data(self, path):
-        pass
+    def get_data(self):
+        raise NotImplementedError("Do not use this benchmark as this is only "
+                                  "a skeleton for further implementations.")
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array

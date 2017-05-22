@@ -44,7 +44,8 @@ class FullyConnectedNetwork(AbstractBenchmark):
         super(FullyConnectedNetwork, self).__init__()
 
     def get_data(self):
-        raise NotImplementedError()
+        raise NotImplementedError("Do not use this benchmark as this is only "
+                                  "a skeleton for further implementations.")
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
