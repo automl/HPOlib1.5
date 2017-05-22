@@ -269,7 +269,6 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
         X_train, y_train, X_test, y_test = dm.load()
         return X_train, y_train, None, None, X_test, y_test
 
-
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, **kwargs):
@@ -308,7 +307,7 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
         valid_idx = None
         for idx, split in enumerate(kf.split(X=self.train,
                                              y=self.train_targets)):
-            if idx+1 == fold:
+            if idx == fold:
                 train_idx = split[0]
                 valid_idx = split[1]
                 break
