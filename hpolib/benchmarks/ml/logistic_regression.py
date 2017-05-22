@@ -4,7 +4,7 @@ import lasagne
 import theano
 import theano.tensor as T
 
-from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 
 import ConfigSpace as CS
 
@@ -15,10 +15,11 @@ from hpolib.util import rng_helper
 
 class LogisticRegression(AbstractBenchmark):
     """
-        Logistic regression benchmark which resembles the benchmark used in the MTBO / Freeze Thaw paper.
-        The hyperparameters are the learning rate (on log scale), L2 regularization, batch size and the
-        dropout ratio on the inputs.
-        The weights are optimized with stochastic gradient descent and we do NOT perform early stopping on
+        Logistic regression benchmark which resembles the benchmark used in
+        the MTBO / Freeze Thaw paper. The hyperparameters are the learning
+        rate (on log scale), L2 regularization, batch size and the dropout
+        ratio on the inputs. The weights are optimized with stochastic
+        gradient descent and we do NOT perform early stopping on
         the validation data set.
     """
 
@@ -44,9 +45,6 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, **kwargs):
-
-        start_time = time.time()
-
         # Shuffle training data
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
@@ -67,10 +65,9 @@ class LogisticRegression(AbstractBenchmark):
                               train=train,
                               train_targets=train_targets,
                               valid=self.valid,
-                              valid_targets=self.valid_targets,
-                              rng=rng)
+                              valid_targets=self.valid_targets)
         y = lc_curve[-1]
-        c = time.time() - start_time
+        c = cost_curve[-1]
 
         return {'function_value': y, "cost": c,
                 "learning_curve": lc_curve, "cost_curve": cost_curve}
@@ -78,8 +75,6 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-
-        start_time = time.time()
 
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
@@ -96,7 +91,7 @@ class LogisticRegression(AbstractBenchmark):
                               valid=self.test,
                               valid_targets=self.test_targets)
         y = lc_curve[-1]
-        c = time.time() - start_time
+        c = cost_curve[-1]
 
         return {'function_value': y, "cost": c,
                 "learning_curve": lc_curve, "cost_curve": cost_curve}
@@ -133,15 +128,15 @@ class LogisticRegression(AbstractBenchmark):
         :param valid_targets: list
         :return: lc_curve, cost_curve
         """
-        learning_rate = np.float32(10 ** config[0])
-        l2_reg = np.float32(config[1])
-        batch_size = np.int32(config[2])
-        dropout_rate = np.float32(config[3])
+        learning_rate = float(10 ** config[0])
+        l2_reg = float(config[1])
+        batch_size = int(config[2])
+        dropout_rate = float(config[3])
 
         return self.run(train=train,
                         train_targets=train_targets,
-                        valid=self.test,
-                        valid_targets=self.test_targets,
+                        valid=valid,
+                        valid_targets=valid_targets,
                         learning_rate=learning_rate,
                         l2_reg=l2_reg,
                         batch_size=batch_size,
@@ -188,7 +183,8 @@ class LogisticRegression(AbstractBenchmark):
         loss = lasagne.objectives.categorical_crossentropy(prediction,
                                                            target_var)
         # Add L2 regularization for the weights
-        l2_penalty = l2_reg * lasagne.regularization.regularize_network_params(lr, lasagne.regularization.l2)
+        l2_penalty = l2_reg * lasagne.regularization.\
+            regularize_network_params(lr, lasagne.regularization.l2)
 
         loss += l2_penalty
         loss = loss.mean()
@@ -266,16 +262,13 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
 
     def __init__(self, rng=None):
         super(LogisticRegression10CVOnMnist, self).__init__(rng=rng)
-
-        #  Use training AND validation data for crossvalidation
-        self.train = np.concatenate([self.train, self.valid], axis=0)
-        self.train_targets = np.concatenate([self.train_targets,
-                                             self.valid_targets], axis=0)
-
-        self.valid = None
-        self.valid_targets = None
-
         self.folds = 10
+
+    def get_data(self):
+        dm = MNISTDataCrossvalidation()
+        X_train, y_train, X_test, y_test = dm.load()
+        return X_train, y_train, None, None, X_test, y_test
+
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
@@ -293,8 +286,6 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
 
         :return: dict
         """
-        start_time = time.time()
-
         fold = int(float(kwargs["fold"]))
         assert 0 <= fold < self.folds + 1
 
@@ -309,19 +300,19 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
             return self.objective_function_test(x, **kwargs)
 
         # Compute crossvalidation splits
-        kf = StratifiedKFold(y=self.train_targets, n_folds=self.folds,
-                             shuffle=True, random_state=self.rng)
+        kf = StratifiedKFold(n_splits=self.folds, shuffle=True,
+                             random_state=self.rng)
 
         # Get indices for required fold
         train_idx = None
         valid_idx = None
-        for idx, split in enumerate(kf):
-            if idx == fold:
+        for idx, split in enumerate(kf.split(X=self.train,
+                                             y=self.train_targets)):
+            if idx+1 == fold:
                 train_idx = split[0]
                 valid_idx = split[1]
                 break
 
-        # Get training data for this fold
         valid = self.train[valid_idx, :]
         valid_targets = self.train_targets[valid_idx]
 
@@ -335,10 +326,29 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
                                                  valid=valid,
                                                  valid_targets=valid_targets)
         y = lc_curve[-1]
-        c = time.time() - start_time
-
+        c = cost_curve[-1]
         return {'function_value': y, "cost": c, "learning_curve": lc_curve,
                 "cost_curve": cost_curve}
+
+    @AbstractBenchmark._check_configuration
+    @AbstractBenchmark._configuration_as_array
+    def objective_function_test(self, x, **kwargs):
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
+
+        lc_curve, cost_curve = \
+            self._train_model(config=x, train=self.train,
+                              train_targets=self.train_targets,
+                              valid=self.test,
+                              valid_targets=self.test_targets)
+        y = lc_curve[-1]
+        c = cost_curve[-1]
+
+        return {'function_value': y, "cost": c,
+                "learning_curve": lc_curve, "cost_curve": cost_curve}
 
     @staticmethod
     def get_meta_information():
