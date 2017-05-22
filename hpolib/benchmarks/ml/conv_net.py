@@ -8,6 +8,7 @@ import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.data_manager import CIFAR10Data, SVHNData
+import hpolib.util.rng_helper as rng_helper
 
 
 class ConvolutionalNeuralNetwork(AbstractBenchmark):
@@ -38,10 +39,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
         self.num_classes = len(np.unique(self.train_targets))
 
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+        self.rng = rng_helper.create_rng(rng)
 
         lasagne.random.set_rng(self.rng)
         super(ConvolutionalNeuralNetwork, self).__init__()
@@ -53,6 +51,13 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, steps=1, dataset_fraction=1, **kwargs):
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
+
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
@@ -85,6 +90,12 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, steps=1, **kwargs):
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
