@@ -9,7 +9,8 @@ from sklearn.model_selection import StratifiedKFold
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util.data_manager import DataManager
+from hpolib.util.data_manager import DataManager, \
+    MNISTData, MNISTDataCrossvalidation
 from hpolib.util import rng_helper
 
 
@@ -242,7 +243,7 @@ class LogisticRegression(AbstractBenchmark):
 class LogisticRegressionOnMnist(LogisticRegression):
 
     def get_data(self):
-        dm = DataManager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod
