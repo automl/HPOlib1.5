@@ -57,12 +57,10 @@ class LogisticRegression(unittest.TestCase):
         self.assertRaises(AssertionError, b.objective_function,
                           configuration=cfg, fold=-1)
         self.assertRaises(AssertionError, b.objective_function,
-                          configuration=cfg, fold=0)
-        self.assertRaises(AssertionError, b.objective_function,
                           configuration=cfg, fold=11)
 
         self.assertEqual(b.objective_function(configuration=cfg,
-                                              fold=1)["function_value"], False)
+                                              fold=0)["function_value"], False)
         self.assertEqual(b.objective_function(configuration=cfg,
                                               fold=9)["function_value"], False)
         self.assertEqual(b.objective_function(configuration=cfg,
