@@ -53,6 +53,7 @@ class LogisticRegression(AbstractBenchmark):
         if rng is not None:
             lasagne.random.set_rng(self.rng)
 
+        # Shuffle training data
         shuffle = self.rng.permutation(self.train.shape[0])
         size = int(dataset_fraction * self.train.shape[0])
 
@@ -286,7 +287,7 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
         :return: dict
         """
         fold = int(float(kwargs["fold"]))
-        assert 0 <= fold < self.folds + 1
+        assert 0 < fold <= self.folds
 
         arg_rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=arg_rng, self_rng=self.rng)
