@@ -105,7 +105,7 @@ class AbstractBenchmark(object, metaclass=abc.ABCMeta):
         return(self.objective_function(configuration, **kwargs)['function_value'])
 
 
-    def test(self, n_runs=5):
+    def test(self, n_runs=5, *args, **kwargs):
         """ Draws some random configuration and call objective_fucntion(_test).
 
         Parameters
@@ -113,10 +113,17 @@ class AbstractBenchmark(object, metaclass=abc.ABCMeta):
         n_runs : int
             number of random configurations to draw and evaluate
         """
+        train_rvals = []
+        test_rvals = []
+
         for _ in range(n_runs):
             configuration = self.configuration_space.sample_configuration()
-            self.objective_function(configuration)
-            self.objective_function_test(configuration)
+            train_rvals.append(self.objective_function(
+                configuration, *args, **kwargs))
+            test_rvals.append(self.objective_function_test(
+                configuration, *args, **kwargs))
+
+        return train_rvals, test_rvals
 
     @staticmethod
     @abc.abstractmethod

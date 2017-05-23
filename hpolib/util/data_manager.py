@@ -6,14 +6,16 @@ import os
 import tarfile
 
 from urllib.request import urlretrieve
-from scipy.io import loadmat
+
 import numpy as np
 
 import hpolib
 
 
 class DataManager(object, metaclass=abc.ABCMeta):
+
     def __init__(self):
+
         self.logger = logging.getLogger("DataManager")
 
     @abc.abstractmethod
@@ -25,7 +27,9 @@ class DataManager(object, metaclass=abc.ABCMeta):
 
 
 class HoldoutDataManager(DataManager):
+
     def __init__(self):
+
         super().__init__()
 
         self.X_train = None
@@ -37,7 +41,9 @@ class HoldoutDataManager(DataManager):
 
 
 class CrossvalidationDataManager(DataManager):
+
     def __init__(self):
+
         super().__init__()
 
         self.X_train = None
@@ -47,6 +53,7 @@ class CrossvalidationDataManager(DataManager):
 
 
 class MNISTData(HoldoutDataManager):
+
     def __init__(self):
         self.url_source = 'http://yann.lecun.com/exdb/mnist/'
         self.logger = logging.getLogger("DataManager")
@@ -141,6 +148,7 @@ class MNISTData(HoldoutDataManager):
 
 
 class CIFAR10Data(HoldoutDataManager):
+
     def __init__(self):
         self.url_source = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
         self.logger = logging.getLogger("DataManager")

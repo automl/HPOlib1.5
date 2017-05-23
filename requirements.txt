@@ -11,4 +11,4 @@ matplotlib
 theano
 lasagne
 scikit-learn
-ConfigSpace
+ConfigSpace>=0.3.3
