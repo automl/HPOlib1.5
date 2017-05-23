@@ -1,8 +1,6 @@
-# Requirement for openml which is currently not on pypi
-git+https://github.com/renatopp/liac-arff
-# OpenML is currently not on pypi, use an old version to not depend on
-# scikit-learn 0.18
+Cython
+auto-sklearn
 requests
 xmltodict
 git+https://github.com/renatopp/liac-arff
-git+https://github.com/openml/openml-python@0b9009b0436fda77d9f7c701bd116aff4158d5e1
+git+https://github.com/openml/openml-python
