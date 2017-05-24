@@ -18,7 +18,6 @@ def mini_wrapper(configuration, bench, **kwargs):
 
 logReg = logistic_regression.LogisticRegression10CVOnMnist(rng=10)
 
-logger = logging.getLogger("Optimizer")  # Enable to show Debug outputs
 logging.basicConfig(level=logging.DEBUG)
 
 # Get Configuration Space
@@ -33,13 +32,9 @@ scenario = Scenario({"run_obj": "quality",
                      "runcount-limit": 5,
                      "cs": cs,
                      "deterministic": "true",
-                     "instances": list([str(i) for i in range(10)]), # train_inst_fh.name,
-                     "test_instances": ["10", ]
+                     "instances": list([str(i) for i in range(10)]),
+                     "test_instances": ["10"]
                      })
-
-# Evaluate default config as a test
-def_value = taf.run(cs.get_default_configuration(), instance=0)[1]
-print("Default Value: %.2f" % (def_value))
 
 # Use SMAC to optimize function
 smac = SMAC(scenario=scenario, rng=1,
@@ -49,6 +44,6 @@ try:
 finally:
     incumbent = smac.solver.incumbent
 
-# Then evaluate final configuration
-inc_value = taf.run(incumbent)[1]
+# Evaluate final configuration
+inc_value = taf.run(incumbent, instance=10)[1]
 print("Optimized Value: %.2f" % inc_value)
