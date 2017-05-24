@@ -47,7 +47,7 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, **kwargs):
         # Shuffle training data
-        rng = kwargs.get("rng", None)
+        rng = kwargs.get("rng")
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
         # if rng was not not, set rng for lasagne
@@ -77,11 +77,10 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-
-        rng = kwargs.get("rng", None)
+        rng = kwargs.get("rng")
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
-        # if rng was not not, set rng for lasagne
+        # if rng was not None, set rng for lasagne
         if rng is not None:
             lasagne.random.set_rng(self.rng)
 
@@ -120,15 +119,21 @@ class LogisticRegression(AbstractBenchmark):
                 }
 
     def _train_model(self, config, train, train_targets, valid, valid_targets):
-        """ helper method that accepts data and configuration and returns
-        lc_curve, cost_curve
-        :param config: list
-            hyperparameters [learning_rate, l2_reg, batch_size, dropout_rate]
-        :param train: array
-        :param train_targets: list
-        :param valid: array
-        :param valid_targets: list
-        :return: lc_curve, cost_curve
+        """ helper method that accepts data and configuration, transforms
+         hyperparmaters and returns lc_curve, cost_curve on valid data
+
+        Parameters
+        ----------
+        config: list, np.ndarray, Configspace.config
+            [log10(learning_rate), l2_reg, batch_size, dropout_rate]
+        train: np.ndarray [n_samples, n_features]
+        train_targets: np.ndarray [n_samples, n_objectives]
+        valid: np.ndarray [n_samples, n_features]
+        valid_targets: [n_samples, n_objectives]
+
+        Returns
+        -------
+        learning_curve, cost
         """
         learning_rate = float(10 ** config[0])
         l2_reg = float(config[1])
@@ -161,7 +166,25 @@ class LogisticRegression(AbstractBenchmark):
             valid, valid_targets,
             learning_rate=1.0, l2_reg=0.0,
             batch_size=200, dropout_rate=0.1, num_epochs=100):
+        """ accepts data and hyperparameters and returns lc_curve, cost_curve
 
+        Parameters
+        ----------
+        train: np.ndarray [n_samples, n_features]
+        train_targets: np.ndarray [n_samples, n_objectives]
+        valid: np.ndarray [n_samples, n_features]
+        valid_targets: [n_samples, n_objectives]
+
+        learning_rate: float
+        l2_reg: float
+        batch_size: float
+        dropout_rate: float
+        num_epochs: int
+
+        Returns
+        -------
+        learning_curve, cost
+        """
         start_time = time.time()
 
         input_var = T.dmatrix('inputs')

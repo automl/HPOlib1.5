@@ -32,9 +32,6 @@ install:
   # Inverse grep allows comments in requirements file
   - cat requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
   - cat optional-requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
-  # Install auto-sklearn
-  #- curl https://raw.githubusercontent.com/automl/auto-sklearn/development/requirements.txt | xargs -n 1 -L 1 pip install
-  #- pip install git+https://github.com/automl/auto-sklearn@development
   - python setup.py install
 
 # command to run tests, e.g. python setup.py test
