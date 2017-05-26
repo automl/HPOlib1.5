@@ -10,6 +10,7 @@ import unittest.mock
 import numpy as np
 
 import pynisher
+import theano
 
 import hpolib
 import hpolib.benchmarks.ml
@@ -19,8 +20,8 @@ from hpolib.benchmarks.ml.autosklearn_benchmark import AutoSklearnBenchmark
 from hpolib.benchmarks.ml.autosklearn_benchmark import \
     MulticlassClassificationBenchmark
 from hpolib.benchmarks.ml.logistic_regression import LogisticRegression
-
-os.environ["THEANO_FLAGS"] = "mode=FAST_RUN,floatX=float32"
+from hpolib.benchmarks.ml.fully_connected_network import FullyConnectedNetwork
+from hpolib.benchmarks.ml.conv_net import ConvolutionalNeuralNetwork
 
 
 class TestRandomConfig(unittest.TestCase):
@@ -75,8 +76,15 @@ class TestRandomConfig(unittest.TestCase):
                             continue
 
                         if issubclass(obj, LogisticRegression):
-                            # Special case for log reg as is does not run on CPU
-                            continue
+                            # Special case for log reg as it does require
+                            # different theano flags
+                            theano.config.floatX = "float64"
+
+                        if issubclass(obj, FullyConnectedNetwork) or \
+                                issubclass(obj, ConvolutionalNeuralNetwork):
+                            # Special case for networks as they require
+                            # different theano flags to run on CPU
+                            theano.config.floatX = "float32"
 
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
