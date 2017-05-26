@@ -22,6 +22,8 @@ class LogisticRegression(AbstractBenchmark):
         ratio on the inputs. The weights are optimized with stochastic
         gradient descent and we do NOT perform early stopping on
         the validation data set.
+
+        ** Note ** This benchmark needs to be run on GPU
     """
 
     def __init__(self, rng=None):
@@ -133,10 +135,10 @@ class LogisticRegression(AbstractBenchmark):
         -------
         learning_curve, cost
         """
-        learning_rate = float(10 ** config[0])
-        l2_reg = float(config[1])
-        batch_size = int(config[2])
-        dropout_rate = float(config[3])
+        learning_rate = np.float32(10 ** config[0])
+        l2_reg = np.float32(config[1])
+        batch_size = np.int32(config[2])
+        dropout_rate = np.float32(config[3])
 
         return self.run(train=train,
                         train_targets=train_targets,
