@@ -92,7 +92,8 @@ class TestRandomConfig(unittest.TestCase):
                             c = cfg.sample_configuration()
 
                             # Limit Wallclocktime using pynisher
-                            obj = pynisher.enforce_limits(wall_time_in_s=10)(b.objective_function)
+                            obj = pynisher.enforce_limits(wall_time_in_s=10,
+                                                          mem_in_mb=3072)(b.objective_function)
                             res = obj(c)
                             if res is not None:
                                 self.assertTrue(np.isfinite(res['cost']))
