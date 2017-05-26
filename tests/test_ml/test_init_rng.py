@@ -12,7 +12,7 @@ import hpolib
 import hpolib.benchmarks.ml
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-
+from hpolib.benchmarks.ml.autosklearn_benchmark import AutoSklearnBenchmark, MulticlassClassificationBenchmark
 import numpy as np
 
 
@@ -47,11 +47,20 @@ class TestInitRng(unittest.TestCase):
                         print(obj)
 
                         rng = np.random.RandomState(1)
-                        b = getattr(mod_name, name)(rng=rng)
+                        kwargs = {"rng": rng}
+
+                        if issubclass(obj, AutoSklearnBenchmark) and not \
+                                MulticlassClassificationBenchmark in obj.__bases__:
+                            # Special case for auto-sklearn which has
+                            # two baseclasses
+                            continue
+
+                        b = getattr(mod_name, name)(**kwargs)
                         self.assertListEqual(list(b.rng.get_state()[1]),
                                              list(rng.get_state()[1]))
 
-                        b = getattr(mod_name, name)(rng=1)
+                        kwargs["rng"] = 1
+                        b = getattr(mod_name, name)(**kwargs)
                         rng = np.random.RandomState(1)
                         self.assertListEqual(list(b.rng.get_state()[1]),
                                              list(rng.get_state()[1]))
