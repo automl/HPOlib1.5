@@ -377,16 +377,16 @@ class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
     @staticmethod
     def get_meta_information():
         d = LogisticRegression.get_meta_information()
-        d["references"].append("@article{lecun-ieee98,"
-                               "title={Gradient-based learning applied to document recognition},"
-                               "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
-                               "journal={Proceedings of the IEEE},"
-                               "pages={2278--2324},"
-                               "year={1998},"
-                               "publisher={IEEE}"
-                               )
-        if "additional" in d:
-            d["additional"]["cvfolds"] = 10
-        else:
-            d["additional"] = {"cvfolds": 10}
+        d["references"].append("""@article{lecun-ieee98,
+title={Gradient-based learning applied to document recognition},
+author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},
+journal={Proceedings of the IEEE},
+pages={2278--2324},
+year={1998},
+publisher={IEEE}
+""")
+        d["cvfolds"] = 10
+        d["wallclocklimit"] = 24*60*60
+        d['num_function_evals'] = np.inf
+        d['cutoff'] = 1800
         return d
