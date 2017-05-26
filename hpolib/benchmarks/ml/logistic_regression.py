@@ -23,7 +23,7 @@ class LogisticRegression(AbstractBenchmark):
         gradient descent and we do NOT perform early stopping on
         the validation data set.
 
-        ** Note ** This benchmark needs to be run on GPU
+
     """
 
     def __init__(self, rng=None):
