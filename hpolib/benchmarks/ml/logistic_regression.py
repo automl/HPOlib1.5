@@ -25,6 +25,8 @@ class LogisticRegression(AbstractBenchmark):
     """
 
     def __init__(self, rng=None):
+        super(LogisticRegression, self).__init__(rng=rng)
+
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
         self.num_epochs = 100
@@ -33,11 +35,7 @@ class LogisticRegression(AbstractBenchmark):
         self.num_classes = np.unique(self.train_targets).shape[0]
         self.s_min = 2000  # Minimum batch size
 
-        self.rng = rng_helper.create_rng(rng)
-
         lasagne.random.set_rng(self.rng)
-
-        super(LogisticRegression, self).__init__()
 
     def get_data(self):
         raise NotImplementedError("Do not use this benchmark as this is only "
@@ -46,10 +44,10 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, **kwargs):
+
         # Shuffle training data
         rng = kwargs.get("rng")
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
-
         # if rng was not not, set rng for lasagne
         if rng is not None:
             lasagne.random.set_rng(self.rng)
@@ -77,9 +75,9 @@ class LogisticRegression(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
+
         rng = kwargs.get("rng")
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
-
         # if rng was not None, set rng for lasagne
         if rng is not None:
             lasagne.random.set_rng(self.rng)

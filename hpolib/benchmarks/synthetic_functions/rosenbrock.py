@@ -50,7 +50,7 @@ class Rosenbrock5D(AbstractBenchmark):
     @staticmethod
     def get_configuration_space():
         cs = CS.ConfigurationSpace()
-        cs.generate_all_continuous_from_bounds(Rosenbrock.get_meta_information()['bounds'])
+        cs.generate_all_continuous_from_bounds(Rosenbrock5D.get_meta_information()['bounds'])
         return cs
 
     @staticmethod
@@ -80,7 +80,7 @@ class Rosenbrock10D(AbstractBenchmark):
     @staticmethod
     def get_configuration_space():
         cs = CS.ConfigurationSpace()
-        cs.generate_all_continuous_from_bounds(Rosenbrock.get_meta_information()['bounds'])
+        cs.generate_all_continuous_from_bounds(Rosenbrock10D.get_meta_information()['bounds'])
         return cs
 
     @staticmethod
@@ -110,7 +110,7 @@ class Rosenbrock20D(AbstractBenchmark):
     @staticmethod
     def get_configuration_space():
         cs = CS.ConfigurationSpace()
-        cs.generate_all_continuous_from_bounds(Rosenbrock.get_meta_information()['bounds'])
+        cs.generate_all_continuous_from_bounds(Rosenbrock20D.get_meta_information()['bounds'])
         return cs
 
     @staticmethod

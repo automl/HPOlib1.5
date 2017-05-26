@@ -10,6 +10,7 @@ from sklearn import svm
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.data_manager import MNISTData
 from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager
+import hpolib.util.rng_helper as rng_helper
 
 
 class SupportVectorMachine(AbstractBenchmark):
@@ -42,11 +43,7 @@ class SupportVectorMachine(AbstractBenchmark):
         super(SupportVectorMachine, self).__init__()
 
         self.n_calls = 0
-
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+        self.rng = rng_helper.create_rng(rng)
 
     def get_data(self):
         raise NotImplementedError()
@@ -55,6 +52,9 @@ class SupportVectorMachine(AbstractBenchmark):
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, **kwargs):
         start_time = time.time()
+
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
         # Shuffle training data
         shuffle = self.rng.permutation(self.train.shape[0])
@@ -82,6 +82,9 @@ class SupportVectorMachine(AbstractBenchmark):
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
         start_time = time.time()
+
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
         # Concatenate training and validation dataset
         if type(self.train) == sparse.csr.csr_matrix or type(self.valid) == sparse.csr.csr_matrix:

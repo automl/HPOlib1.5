@@ -3,10 +3,12 @@ import abc
 import numpy as np
 import ConfigSpace
 
+from hpolib.util import rng_helper
+
 
 class AbstractBenchmark(object, metaclass=abc.ABCMeta):
 
-    def __init__(self):
+    def __init__(self, rng=None):
         """Interface for benchmarks.
 
         A benchmark contains of two building blocks, the target function and
@@ -15,6 +17,8 @@ class AbstractBenchmark(object, metaclass=abc.ABCMeta):
         value of the global optima. New benchmarks should be derived from
         this base class or one of its child classes.
         """
+
+        self.rng = rng_helper.create_rng(rng)
         self.configuration_space = self.get_configuration_space()
 
     @abc.abstractmethod
