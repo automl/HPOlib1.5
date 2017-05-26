@@ -99,8 +99,9 @@ class TestRandomConfig(unittest.TestCase):
                                 self.assertTrue(np.isfinite(res['cost']))
                                 self.assertTrue(np.isfinite(res['function_value']))
                             else:
-                                self.assertEqual(obj.exit_status,
-                                                 pynisher.TimeoutException)
+                                self.assertTrue(obj.exit_status in
+                                                (pynisher.TimeoutException,
+                                                 pynisher.MemorylimitException))
             else:
                 raise ValueError("{:s} does not contain basic benchmark that is"
                                  " derived from AbstractBenchmark".
