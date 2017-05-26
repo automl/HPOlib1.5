@@ -86,7 +86,8 @@ class AutoSklearnBenchmark(AbstractBenchmark):
 
     @staticmethod
     def get_meta_information():
-        return {'bibtex': """@incollection{NIPS2015_5872,
+        info = {'name': 'auto-sklearn',
+                'references': ["""@incollection{NIPS2015_5872,
 title = {Efficient and Robust Automated Machine Learning},
 author = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina and Springenberg, Jost and Blum, Manuel and Hutter, Frank},
 booktitle = {Advances in Neural Information Processing Systems 28},
@@ -95,7 +96,8 @@ pages = {2962--2970},
 year = {2015},
 publisher = {Curran Associates, Inc.},
 url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
-}"""}
+}"""]}
+        return info
 
     @AbstractBenchmark._check_configuration
     def objective_function(self, configuration, **kwargs):
@@ -109,6 +111,11 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
         # (TODO) For now ignoring seed
         rng = kwargs.get("rng")
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
+        if fold == folds:
+            # run validation
+            self.objective_function_test(configuration, cutoff=cutoff,
+                                         memory_limit=memory_limit, rng=rng)
 
         include, _ = self._get_include_exclude_info()
         evaluator = autosklearn.evaluation.ExecuteTaFuncWithQueue(
@@ -161,6 +168,7 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
 
 
 class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
+
     def get_configuration_space(self):
         include, exclude = self._get_include_exclude_info()
         task = autosklearn.constants.MULTICLASS_CLASSIFICATION
@@ -177,3 +185,22 @@ class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
 class AutoSklearnBenchmarkAdultBAC(MulticlassClassificationBenchmark):
     def __init__(self, rng=None):
         super().__init__(2117, rng=rng)
+
+    @staticmethod
+    def get_meta_information():
+        d = AutoSklearnBenchmark.get_meta_information()
+
+        d["references"].append("""@inproceedings{Kohavi_kdd96,
+title={Scaling Up the Accuracy of Naive-Bayes Classifiers: A Decision-Tree Hybrid.},
+author={Kohavi, Ron},
+booktitle={Proceedings of the Second International Conference on Knowledge Discovery and Data Mining},
+volume={96},
+pages={202--207},
+year={1996}
+}""")
+
+        d["cvfolds"] = 10
+        d["wallclocklimit"] = 24*60*60
+        d['num_function_evals'] = np.inf
+        d['cutoff'] = 1800
+        return d
