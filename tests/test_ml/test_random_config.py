@@ -15,6 +15,10 @@ import hpolib
 import hpolib.benchmarks.ml
 import hpolib.benchmarks.synthetic_functions
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.benchmarks.ml.autosklearn_benchmark import AutoSklearnBenchmark
+from hpolib.benchmarks.ml.autosklearn_benchmark import \
+    MulticlassClassificationBenchmark
+from hpolib.benchmarks.ml.logistic_regression import LogisticRegression
 
 os.environ["THEANO_FLAGS"] = "mode=FAST_RUN,floatX=float32"
 
@@ -62,14 +66,25 @@ class TestRandomConfig(unittest.TestCase):
                             inspect.isclass(obj) and \
                             abstract_class in obj.__bases__:
                         # Make sure to only test correct implementations
-                        #print(mod_name, name, abstract_class)
+                        print(obj)
+
+                        if issubclass(obj, AutoSklearnBenchmark) and not \
+                                MulticlassClassificationBenchmark in obj.__bases__:
+                            # Special case for auto-sklearn which has
+                            # two baseclasses
+                            continue
+
+                        if issubclass(obj, LogisticRegression):
+                            # Special case for log reg as is does not run on CPU
+                            continue
+
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
                         for i in range(5):
                             c = cfg.sample_configuration()
 
                             # Limit Wallclocktime using pynisher
-                            obj = pynisher.enforce_limits(wall_time_in_s=30)(b.objective_function)
+                            obj = pynisher.enforce_limits(wall_time_in_s=10)(b.objective_function)
                             res = obj(c)
                             if res is not None:
                                 self.assertTrue(np.isfinite(res['cost']))
