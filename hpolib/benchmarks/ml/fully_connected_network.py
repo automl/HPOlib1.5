@@ -27,6 +27,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         rng: str
             set up rng
         """
+        super(FullyConnectedNetwork, self).__init__(rng=rng)
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
@@ -36,9 +37,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         # Minimum dataset size is equal to the maximum batch size
         self.s_min = float(512) / self.train.shape[0]
 
-        self.rng = rng_helper.create_rng(rng)
         lasagne.random.set_rng(self.rng)
-        super(FullyConnectedNetwork, self).__init__()
 
     def get_data(self):
         raise NotImplementedError("Do not use this benchmark as this is only "
@@ -47,9 +46,9 @@ class FullyConnectedNetwork(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, steps=1, **kwargs):
+
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
-
         # if rng was not not, set rng for lasagne
         if rng is not None:
             lasagne.random.set_rng(self.rng)
@@ -93,6 +92,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, steps=1, **kwargs):
+
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
         # if rng was not not, set rng for lasagne

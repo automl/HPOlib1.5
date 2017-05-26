@@ -14,6 +14,7 @@ import numpy as np
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.dependencies import verify_packages
 from hpolib.util.openml_data_manager import OpenMLCrossvalidationDataManager
+from hpolib.util import rng_helper
 
 __version__ = 0.1
 
@@ -26,7 +27,7 @@ class AutoSklearnBenchmark(AbstractBenchmark):
     Proceedings of NIPS 2015.
     """
 
-    def __init__(self, task_id):
+    def __init__(self, task_id, rng=None):
 
         self._check_dependencies()
         self._get_data_manager(task_id)
@@ -35,7 +36,7 @@ class AutoSklearnBenchmark(AbstractBenchmark):
 
         # Setup of the datamanager etc has to be done before call to super
         # which itselfs calls get_hyperparameter_configuration_space
-        super().__init__()
+        super().__init__(rng)
 
     def _setup_backend(self):
         tmp_folder = tempfile.mkdtemp()
@@ -105,6 +106,10 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
         subsample = kwargs.get('subsample', None)
         instance = json.dumps({'fold': fold, 'subsample': subsample})
 
+        # (TODO) For now ignoring seed
+        rng = kwargs.get("rng")
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
         include, _ = self._get_include_exclude_info()
         evaluator = autosklearn.evaluation.ExecuteTaFuncWithQueue(
             backend=self.backend,
@@ -170,5 +175,5 @@ class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
 
 
 class AutoSklearnBenchmarkAdultBAC(MulticlassClassificationBenchmark):
-    def __init__(self):
-        super().__init__(2117)
+    def __init__(self, rng=None):
+        super().__init__(2117, rng=rng)
