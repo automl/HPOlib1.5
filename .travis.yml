@@ -8,6 +8,7 @@ os: linux
 cache:
   directories:
     - $HOME/.cache/pip
+    - $HOME/.hpolib/
   pip: true
 
 sudo: false
