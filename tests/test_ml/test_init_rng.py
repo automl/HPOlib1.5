@@ -8,12 +8,10 @@ import unittest
 import unittest.mock
 
 import hpolib
-#import hpolib.util.rng_helper
 import hpolib.benchmarks.ml
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.benchmarks.ml.autosklearn_benchmark import AutoSklearnBenchmark, MulticlassClassificationBenchmark
-import numpy as np
 
 
 class TestInitRng(unittest.TestCase):
@@ -45,5 +43,3 @@ class TestInitRng(unittest.TestCase):
                             abstract_class in obj.__bases__:
                         print(obj)
                         self.assertIn("rng", inspect.signature(getattr(mod_name, name)).parameters)
-
-
