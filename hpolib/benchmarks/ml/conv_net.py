@@ -8,6 +8,7 @@ import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.data_manager import CIFAR10Data, SVHNData
+import hpolib.util.rng_helper as rng_helper
 
 
 class ConvolutionalNeuralNetwork(AbstractBenchmark):
@@ -20,6 +21,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         the number of units in each layer (on a log2 scale).
     """
     def __init__(self, max_num_epochs=40, rng=None):
+        super(ConvolutionalNeuralNetwork, self).__init__(rng=rng)
 
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data()
 
@@ -38,20 +40,21 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
         self.num_classes = len(np.unique(self.train_targets))
 
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
-
         lasagne.random.set_rng(self.rng)
-        super(ConvolutionalNeuralNetwork, self).__init__()
 
-    def get_data(self, path):
-        pass
+    def get_data(self):
+        raise NotImplementedError("Do not use this benchmark as this is only "
+                                  "a skeleton for further implementations.")
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, steps=1, dataset_fraction=1, **kwargs):
+
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
@@ -85,18 +88,25 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, steps=1, **kwargs):
 
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
+
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
         train = np.concatenate((self.train, self.valid))
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
-        lc_curve, cost_curve, train_loss, valid_loss = self.train_net(train, train_targets,
-                                                                      self.test, self.test_targets,
-                                                                      init_learning_rate=np.power(10., x[0]),
-                                                                      batch_size=int(x[1]),
-                                                                      n_units_1=int(np.power(2, x[2])),
-                                                                      n_units_2=int(np.power(2, x[3])),
-                                                                      n_units_3=int(np.power(2, x[4])),
-                                                                      num_epochs=num_epochs)
+        lc_curve, cost_curve, train_loss, valid_loss = \
+            self.train_net(train, train_targets,
+                           self.test, self.test_targets,
+                           init_learning_rate=np.power(10., x[0]),
+                           batch_size=int(x[1]),
+                           n_units_1=int(np.power(2, x[2])),
+                           n_units_2=int(np.power(2, x[3])),
+                           n_units_3=int(np.power(2, x[4])),
+                           num_epochs=num_epochs)
         y = lc_curve[-1]
         c = cost_curve[-1]
         return {'function_value': y,
@@ -109,7 +119,8 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
     @staticmethod
     def get_configuration_space():
         cs = CS.ConfigurationSpace()
-        cs.generate_all_continuous_from_bounds(ConvolutionalNeuralNetwork.get_meta_information()['bounds'])
+        cs.generate_all_continuous_from_bounds(ConvolutionalNeuralNetwork.
+                                               get_meta_information()['bounds'])
         return cs
 
     @staticmethod
@@ -120,12 +131,13 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                            [4, 8],  # n_units_1
                            [4, 8],  # n_units_2
                            [4, 8]],  # n_units_3
-                'references': ["@article{klein-bnn16a,"
-                               "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
-                               "title = {Bayesian Neural Network for Predicting Learning Curves},"
-                               "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
-                               "month = dec,"
-                               "year = {2016}}"]
+                'references':
+                    ["@article{klein-bnn16a,"
+       "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
+       "title = {Bayesian Neural Network for Predicting Learning Curves},"
+       "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
+       "month = dec,"
+       "year = {2016}}"]
                 }
 
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
@@ -155,39 +167,44 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         target_var = T.ivector('targets')
 
         # Build net
-        network = lasagne.layers.InputLayer(shape=(None, train.shape[1],  train.shape[2],  train.shape[3]),
+        network = lasagne.layers.InputLayer(shape=(None, train.shape[1],
+                                                   train.shape[2],
+                                                   train.shape[3]),
                                             input_var=input_var)
 
-        network = lasagne.layers.batch_norm(lasagne.layers.Conv2DLayer(network,
-                                                                       num_filters=n_units_1,
-                                                                       filter_size=(5, 5),
-                                                                       pad="same",
-                                                                       stride=1,
-                                                                       W=lasagne.init.HeNormal(),
-                                                                       b=lasagne.init.Constant(val=0.0),
-                                                                       nonlinearity=lasagne.nonlinearities.rectify))
+        network = lasagne.layers.batch_norm(
+                lasagne.layers.Conv2DLayer(network,
+                                           num_filters=n_units_1,
+                                           filter_size=(5, 5),
+                                           pad="same",
+                                           stride=1,
+                                           W=lasagne.init.HeNormal(),
+                                           b=lasagne.init.Constant(val=0.0),
+                                           nonlinearity=lasagne.nonlinearities.rectify))
 
         network = lasagne.layers.MaxPool2DLayer(network, pool_size=3, stride=2)
 
-        network = lasagne.layers.batch_norm(lasagne.layers.Conv2DLayer(network,
-                                                                       num_filters=n_units_2,
-                                                                       filter_size=(5, 5),
-                                                                       pad="same",
-                                                                       stride=1,
-                                                                       W=lasagne.init.HeNormal(),
-                                                                       b=lasagne.init.Constant(val=0.0),
-                                                                       nonlinearity=lasagne.nonlinearities.rectify))
+        network = lasagne.layers.batch_norm(
+                lasagne.layers.Conv2DLayer(network,
+                                           num_filters=n_units_2,
+                                           filter_size=(5, 5),
+                                           pad="same",
+                                           stride=1,
+                                           W=lasagne.init.HeNormal(),
+                                           b=lasagne.init.Constant(val=0.0),
+                                           nonlinearity=lasagne.nonlinearities.rectify))
 
         network = lasagne.layers.MaxPool2DLayer(network, pool_size=3, stride=2)
 
-        network = lasagne.layers.batch_norm(lasagne.layers.Conv2DLayer(network,
-                                                                       num_filters=n_units_3,
-                                                                       filter_size=(5, 5),
-                                                                       pad="same",
-                                                                       stride=1,
-                                                                       W=lasagne.init.HeNormal(),
-                                                                       b=lasagne.init.Constant(val=0.0),
-                                                                       nonlinearity=lasagne.nonlinearities.rectify))
+        network = lasagne.layers.batch_norm(
+                lasagne.layers.Conv2DLayer(network,
+                                           num_filters=n_units_3,
+                                           filter_size=(5, 5),
+                                           pad="same",
+                                           stride=1,
+                                           W=lasagne.init.HeNormal(),
+                                           b=lasagne.init.Constant(val=0.0),
+                                           nonlinearity=lasagne.nonlinearities.rectify))
 
         network = lasagne.layers.MaxPool2DLayer(network, pool_size=3, stride=2)
 
