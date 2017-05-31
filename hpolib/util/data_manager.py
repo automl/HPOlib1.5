@@ -8,6 +8,7 @@ import tarfile
 from urllib.request import urlretrieve
 
 import numpy as np
+from scipy.io import loadmat
 
 import hpolib
 
