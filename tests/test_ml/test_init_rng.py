@@ -17,9 +17,7 @@ from hpolib.benchmarks.ml.autosklearn_benchmark import \
 
 class TestInitRng(unittest.TestCase):
 
-    @unittest.mock.patch('hpolib.util.rng_helper.get_rng')
-    def test_init_rng(self, rng_mock):
-        rng_mock.side_effect = Exception("Used get_rng")
+    def test_init_rng(self):
         path = os.path.dirname(hpolib.benchmarks.ml.__file__)
 
         for _, pkg, _ in pkgutil.iter_modules([path, ]):
@@ -27,21 +25,29 @@ class TestInitRng(unittest.TestCase):
             importlib.import_module(pkg_name)
             mod_name = sys.modules[pkg_name]
 
-            # Find Abstract Benchmark
+            # Find benchmarks that directly inherit from Abstract benchmark
+            # to identify actual implementations
             abstract_class = None
             for name, obj in inspect.getmembers(mod_name,
                                                 inspect.isclass):
+                # Iterate over all classes in that module
                 if issubclass(obj, AbstractBenchmark) and \
                         inspect.isclass(obj) and \
                         AbstractBenchmark in obj.__bases__:
+                    # If this class directly inherits from AbstractBenchmark we
+                    # found what we were looking for and continue
                     abstract_class = obj
+                    break
 
             # Check whether all classes accept rng
             if abstract_class is not None:
                 for name, obj in inspect.getmembers(mod_name, inspect.isclass):
+                    # Again loop over all classes in that file
                     if issubclass(obj, abstract_class) and \
                             inspect.isclass(obj) and \
                             abstract_class in obj.__bases__:
+                        # If this class directly inherits from the abstract
+                        # class found above, we found a benchmark implementation
                         print(obj)
                         self.assertIn("rng",
                                       inspect.signature(
