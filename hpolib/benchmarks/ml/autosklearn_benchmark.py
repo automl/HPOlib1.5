@@ -111,10 +111,12 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
         # (TODO) For now ignoring seed
         rng = kwargs.get("rng")
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
-
         if fold == folds:
-            # run validation with a higher memory limit
-            self.objective_function_test(configuration, cutoff=cutoff, rng=rng)
+            # run validation with the same memory limit and cutoff
+            return self.objective_function_test(configuration,
+                                                cutoff=cutoff,
+                                                rng=rng,
+                                                memory_limit=memory_limit)
 
         include, _ = self._get_include_exclude_info()
         evaluator = autosklearn.evaluation.ExecuteTaFuncWithQueue(
