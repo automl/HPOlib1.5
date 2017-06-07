@@ -4,45 +4,55 @@ import lasagne
 import theano
 import theano.tensor as T
 
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util.data_manager import DataManager
+from sklearn.model_selection import StratifiedKFold
+
 import ConfigSpace as CS
+
+from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.util.data_manager import DataManager, \
+    MNISTData, MNISTDataCrossvalidation
+from hpolib.util import rng_helper
 
 
 class LogisticRegression(AbstractBenchmark):
     """
-        Logistic regression benchmark which resembles the benchmark used in the MTBO / Freeze Thaw paper.
-        The hyperparameters are the learning rate (on log scale), L2 regularization, batch size and the
-        dropout ratio on the inputs.
-        The weights are optimized with stochastic gradient descent and we do NOT perform early stopping on
+        Logistic regression benchmark which resembles the benchmark used in
+        the MTBO / Freeze Thaw paper. The hyperparameters are the learning
+        rate (on log scale), L2 regularization, batch size and the dropout
+        ratio on the inputs. The weights are optimized with stochastic
+        gradient descent and we do NOT perform early stopping on
         the validation data set.
+
+
     """
 
-    def __init__(self, path=None, rng=None):
-        self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data(path)
+    def __init__(self, rng=None):
+        super(LogisticRegression, self).__init__(rng=rng)
+
+        self.train, self.train_targets, self.valid, self.valid_targets, \
+            self.test, self.test_targets = self.get_data()
         self.num_epochs = 100
 
         # Use 10 time the number of classes as lower bound for the dataset fraction
         self.num_classes = np.unique(self.train_targets).shape[0]
         self.s_min = 2000  # Minimum batch size
 
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
-
         lasagne.random.set_rng(self.rng)
 
-        super(LogisticRegression, self).__init__()
-
-    def get_data(self, path):
-        pass
+    def get_data(self):
+        raise NotImplementedError("Do not use this benchmark as this is only "
+                                  "a skeleton for further implementations.")
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, **kwargs):
 
-        start_time = time.time()
+        # Shuffle training data
+        rng = kwargs.get("rng")
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
 
         # Shuffle training data
         shuffle = self.rng.permutation(self.train.shape[0])
@@ -52,51 +62,40 @@ class LogisticRegression(AbstractBenchmark):
         train = self.train[shuffle[:size]]
         train_targets = self.train_targets[shuffle[:size]]
 
-        learning_rate = np.float32(10 ** x[0])
-        l2_reg = np.float32(x[1])
-        batch_size = np.int32(x[2])
-        dropout_rate = np.float32(x[3])
-
-        lc_curve, cost_curve = self.run(train=train,
-                                        train_targets=train_targets,
-                                        valid=self.valid,
-                                        valid_targets=self.valid_targets,
-                                        learning_rate=learning_rate,
-                                        l2_reg=l2_reg,
-                                        batch_size=batch_size,
-                                        dropout_rate=dropout_rate,
-                                        num_epochs=self.num_epochs)
+        lc_curve, cost_curve = \
+            self._train_model(config=x,
+                              train=train,
+                              train_targets=train_targets,
+                              valid=self.valid,
+                              valid_targets=self.valid_targets)
         y = lc_curve[-1]
-        c = time.time() - start_time
+        c = cost_curve[-1]
 
-        return {'function_value': y, "cost": c, "learning_curve": lc_curve, "cost_curve": cost_curve}
+        return {'function_value': y, "cost": c,
+                "learning_curve": lc_curve, "cost_curve": cost_curve}
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
 
-        start_time = time.time()
-
-        learning_rate = np.float32(10 ** x[0])
-        l2_reg = np.float32(x[1])
-        batch_size = np.int32(x[2])
-        dropout_rate = np.float32(x[3])
+        rng = kwargs.get("rng")
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        # if rng was not None, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
 
         train = np.concatenate((self.train, self.valid))
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
-        lc_curve, cost_curve = self.run(train=train,
-                                        train_targets=train_targets,
-                                        valid=self.test,
-                                        valid_targets=self.test_targets,
-                                        learning_rate=learning_rate,
-                                        l2_reg=l2_reg,
-                                        batch_size=batch_size,
-                                        dropout_rate=dropout_rate,
-                                        num_epochs=self.num_epochs)
+        lc_curve, cost_curve = \
+            self._train_model(config=x, train=train,
+                              train_targets=train_targets,
+                              valid=self.test,
+                              valid_targets=self.test_targets)
         y = lc_curve[-1]
-        c = time.time() - start_time
+        c = cost_curve[-1]
 
-        return {'function_value': y, "cost": c, "learning_curve": lc_curve, "cost_curve": cost_curve}
+        return {'function_value': y, "cost": c,
+                "learning_curve": lc_curve, "cost_curve": cost_curve}
 
     @staticmethod
     def get_configuration_space():
@@ -119,6 +118,38 @@ class LogisticRegression(AbstractBenchmark):
                                "year = {2016}}"]
                 }
 
+    def _train_model(self, config, train, train_targets, valid, valid_targets):
+        """ helper method that accepts data and configuration, transforms
+         hyperparmaters and returns lc_curve, cost_curve on valid data
+
+        Parameters
+        ----------
+        config: list, np.ndarray, Configspace.config
+            [log10(learning_rate), l2_reg, batch_size, dropout_rate]
+        train: np.ndarray [n_samples, n_features]
+        train_targets: np.ndarray [n_samples, n_objectives]
+        valid: np.ndarray [n_samples, n_features]
+        valid_targets: [n_samples, n_objectives]
+
+        Returns
+        -------
+        learning_curve, cost
+        """
+        learning_rate = np.float32(10 ** config[0])
+        l2_reg = np.float32(config[1])
+        batch_size = np.int32(config[2])
+        dropout_rate = np.float32(config[3])
+
+        return self.run(train=train,
+                        train_targets=train_targets,
+                        valid=valid,
+                        valid_targets=valid_targets,
+                        learning_rate=learning_rate,
+                        l2_reg=l2_reg,
+                        batch_size=batch_size,
+                        dropout_rate=dropout_rate,
+                        num_epochs=self.num_epochs)
+
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
         assert len(inputs) == len(targets)
         if shuffle:
@@ -133,9 +164,27 @@ class LogisticRegression(AbstractBenchmark):
 
     def run(self, train, train_targets,
             valid, valid_targets,
-            learning_rate=1, l2_reg=0.0,
+            learning_rate=1.0, l2_reg=0.0,
             batch_size=200, dropout_rate=0.1, num_epochs=100):
+        """ accepts data and hyperparameters and returns lc_curve, cost_curve
 
+        Parameters
+        ----------
+        train: np.ndarray [n_samples, n_features]
+        train_targets: np.ndarray [n_samples, n_objectives]
+        valid: np.ndarray [n_samples, n_features]
+        valid_targets: [n_samples, n_objectives]
+
+        learning_rate: float
+        l2_reg: float
+        batch_size: float
+        dropout_rate: float
+        num_epochs: int
+
+        Returns
+        -------
+        learning_curve, cost
+        """
         start_time = time.time()
 
         input_var = T.dmatrix('inputs')
@@ -159,7 +208,8 @@ class LogisticRegression(AbstractBenchmark):
         loss = lasagne.objectives.categorical_crossentropy(prediction,
                                                            target_var)
         # Add L2 regularization for the weights
-        l2_penalty = l2_reg * lasagne.regularization.regularize_network_params(lr, lasagne.regularization.l2)
+        l2_penalty = l2_reg * lasagne.regularization.\
+            regularize_network_params(lr, lasagne.regularization.l2)
 
         loss += l2_penalty
         loss = loss.mean()
@@ -190,7 +240,8 @@ class LogisticRegression(AbstractBenchmark):
             train_err = 0
             train_batches = 0
 
-            for batch in self.iterate_minibatches(train, train_targets, batch_size, shuffle=True):
+            for batch in self.iterate_minibatches(train, train_targets,
+                                                  batch_size, shuffle=True):
                 inputs, targets = batch
                 train_err += train_fn(inputs, targets)
                 train_batches += 1
@@ -198,7 +249,8 @@ class LogisticRegression(AbstractBenchmark):
             val_err = 0
             val_acc = 0
             val_batches = 0
-            for batch in self.iterate_minibatches(valid, valid_targets, batch_size, shuffle=False):
+            for batch in self.iterate_minibatches(valid, valid_targets,
+                                                  batch_size, shuffle=False):
                 inputs, targets = batch
                 err, acc = val_fn(inputs, targets)
                 val_err += err
@@ -214,7 +266,7 @@ class LogisticRegression(AbstractBenchmark):
 class LogisticRegressionOnMnist(LogisticRegression):
 
     def get_data(self):
-        dm = DataManager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod
@@ -228,4 +280,113 @@ class LogisticRegressionOnMnist(LogisticRegression):
                                "year={1998},"
                                "publisher={IEEE}"
                                )
+        return d
+
+
+class LogisticRegression10CVOnMnist(LogisticRegressionOnMnist):
+
+    def __init__(self, rng=None):
+        super(LogisticRegression10CVOnMnist, self).__init__(rng=rng)
+        self.folds = 10
+
+    def get_data(self):
+        dm = MNISTDataCrossvalidation()
+        X_train, y_train, X_test, y_test = dm.load()
+        return X_train, y_train, None, None, X_test, y_test
+
+    @AbstractBenchmark._check_configuration
+    @AbstractBenchmark._configuration_as_array
+    def objective_function(self, x, **kwargs):
+        """
+        Evaluates dataset_fraction of one fold of a 10 fold CV
+
+        :param x: array/Configurations
+            configuration
+        :param kwargs:
+            fold: int in [0, 9]
+                if fold == 10, return test performance
+            rng: rng, int or None
+                if not None overwrites current RandomState
+
+        :return: dict
+        """
+        fold = int(float(kwargs["fold"]))
+        assert 0 <= fold <= self.folds
+
+        arg_rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=arg_rng, self_rng=self.rng)
+
+        # if arg_rng was not not, set rng for lasagne
+        if arg_rng is not None:
+            lasagne.random.set_rng(self.rng)
+
+        if fold == self.folds:
+            return self.objective_function_test(x, **kwargs)
+
+        # Compute crossvalidation splits
+        kf = StratifiedKFold(n_splits=self.folds, shuffle=True,
+                             random_state=self.rng)
+
+        # Get indices for required fold
+        train_idx = None
+        valid_idx = None
+        for idx, split in enumerate(kf.split(X=self.train,
+                                             y=self.train_targets)):
+            if idx == fold:
+                train_idx = split[0]
+                valid_idx = split[1]
+                break
+
+        valid = self.train[valid_idx, :]
+        valid_targets = self.train_targets[valid_idx]
+
+        train = self.train[train_idx, :]
+        train_targets = self.train_targets[train_idx]
+
+        # Get performance
+        lc_curve, cost_curve = self._train_model(config=x,
+                                                 train=train,
+                                                 train_targets=train_targets,
+                                                 valid=valid,
+                                                 valid_targets=valid_targets)
+        y = lc_curve[-1]
+        c = cost_curve[-1]
+        return {'function_value': y, "cost": c, "learning_curve": lc_curve,
+                "cost_curve": cost_curve}
+
+    @AbstractBenchmark._check_configuration
+    @AbstractBenchmark._configuration_as_array
+    def objective_function_test(self, x, **kwargs):
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
+
+        lc_curve, cost_curve = \
+            self._train_model(config=x, train=self.train,
+                              train_targets=self.train_targets,
+                              valid=self.test,
+                              valid_targets=self.test_targets)
+        y = lc_curve[-1]
+        c = cost_curve[-1]
+
+        return {'function_value': y, "cost": c,
+                "learning_curve": lc_curve, "cost_curve": cost_curve}
+
+    @staticmethod
+    def get_meta_information():
+        d = LogisticRegression.get_meta_information()
+        d["references"].append("""@article{lecun-ieee98,
+title={Gradient-based learning applied to document recognition},
+author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},
+journal={Proceedings of the IEEE},
+pages={2278--2324},
+year={1998},
+publisher={IEEE}
+""")
+        d["cvfolds"] = 10
+        d["wallclocklimit"] = 24*60*60
+        d['num_function_evals'] = np.inf
+        d['cutoff'] = 1800
         return d

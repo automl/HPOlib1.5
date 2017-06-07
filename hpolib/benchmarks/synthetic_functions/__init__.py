@@ -9,4 +9,4 @@ from hpolib.benchmarks.synthetic_functions.sin_two import SinTwo
 from hpolib.benchmarks.synthetic_functions.goldstein_price import GoldsteinPrice
 from hpolib.benchmarks.synthetic_functions.rosenbrock import Rosenbrock
 from hpolib.benchmarks.synthetic_functions.forrester import Forrester
-from hpolib.benchmarks.synthetic_functions.misc import SyntheticNoiseAndCost
+from hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost import SyntheticNoiseAndCost

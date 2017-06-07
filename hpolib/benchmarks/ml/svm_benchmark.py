@@ -1,13 +1,16 @@
 import time
 
 import numpy as np
-from sklearn import svm
-
 import ConfigSpace as CS
 
+from scipy import sparse
+from sklearn import svm
+
+
 from hpolib.abstract_benchmark import AbstractBenchmark
-import hpolib.util.data_manager
-import hpolib
+from hpolib.util.data_manager import MNISTData
+from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager
+import hpolib.util.rng_helper as rng_helper
 
 
 class SupportVectorMachine(AbstractBenchmark):
@@ -40,11 +43,7 @@ class SupportVectorMachine(AbstractBenchmark):
         super(SupportVectorMachine, self).__init__()
 
         self.n_calls = 0
-
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+        self.rng = rng_helper.create_rng(rng)
 
     def get_data(self):
         raise NotImplementedError()
@@ -53,6 +52,9 @@ class SupportVectorMachine(AbstractBenchmark):
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, **kwargs):
         start_time = time.time()
+
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
         # Shuffle training data
         shuffle = self.rng.permutation(self.train.shape[0])
@@ -81,8 +83,15 @@ class SupportVectorMachine(AbstractBenchmark):
     def objective_function_test(self, x, **kwargs):
         start_time = time.time()
 
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
         # Concatenate training and validation dataset
-        train = np.concatenate((self.train, self.valid))
+        if type(self.train) == sparse.csr.csr_matrix or type(self.valid) == sparse.csr.csr_matrix:
+            train = sparse.vstack((self.train, self.valid))
+        else:
+            train = np.concatenate((self.train, self.valid))
+
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
 
         # Transform hyperparameters to linear scale
@@ -123,7 +132,7 @@ class SupportVectorMachine(AbstractBenchmark):
 class SvmOnMnist(SupportVectorMachine):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod
@@ -143,12 +152,12 @@ class SvmOnMnist(SupportVectorMachine):
 class SvmOnVehicle(SupportVectorMachine):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=75191)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75191)
         return dm.load()
 
 
 class SvmOnCovertype(SupportVectorMachine):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.OpenMLData(openml_task_id=75191)
+        dm = OpenMLHoldoutDataManager(openml_task_id=2118)
         return dm.load()

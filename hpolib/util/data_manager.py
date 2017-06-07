@@ -8,6 +8,7 @@ import tarfile
 from urllib.request import urlretrieve
 
 import numpy as np
+from scipy.io import loadmat
 
 import hpolib
 
@@ -15,12 +16,6 @@ import hpolib
 class DataManager(object, metaclass=abc.ABCMeta):
 
     def __init__(self):
-        self.X_train = None
-        self.y_train = None
-        self.X_val = None
-        self.y_val = None
-        self.X_test = None
-        self.y_test = None
 
         self.logger = logging.getLogger("DataManager")
 
@@ -32,7 +27,33 @@ class DataManager(object, metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
 
-class MNISTData(DataManager):
+class HoldoutDataManager(DataManager):
+
+    def __init__(self):
+
+        super().__init__()
+
+        self.X_train = None
+        self.y_train = None
+        self.X_val = None
+        self.y_val = None
+        self.X_test = None
+        self.y_test = None
+
+
+class CrossvalidationDataManager(DataManager):
+
+    def __init__(self):
+
+        super().__init__()
+
+        self.X_train = None
+        self.y_train = None
+        self.X_test = None
+        self.y_test = None
+
+
+class MNISTData(HoldoutDataManager):
 
     def __init__(self):
         self.url_source = 'http://yann.lecun.com/exdb/mnist/'
@@ -67,7 +88,7 @@ class MNISTData(DataManager):
                                   images=True)
         y_test = self.__load_data(filename='t10k-labels-idx1-ubyte.gz')
 
-        # Split data
+        # Split data in training and validation
         X_train, X_val = X_train[:-10000], X_train[-10000:]
         y_train, y_val = y_train[:-10000], y_train[-10000:]
 
@@ -75,7 +96,7 @@ class MNISTData(DataManager):
         assert X_val.shape[0] == 10000, X_val.shape
         assert X_test.shape[0] == 10000, X_test.shape
 
-        # Reshape data
+        # Reshape data to NxD
         X_train = X_train.reshape(X_train.shape[0], 28 * 28)
         X_val = X_val.reshape(X_val.shape[0], 28 * 28)
         X_test = X_test.reshape(X_test.shape[0], 28 * 28)
@@ -92,8 +113,6 @@ class MNISTData(DataManager):
         ----------
         filename: str
             file to download
-        save_to: str
-            directory to store file
         images: bool
             if True converts data to X
 
@@ -129,7 +148,14 @@ class MNISTData(DataManager):
         return data
 
 
+class MNISTDataCrossvalidation(MNISTData, CrossvalidationDataManager):
 
+    def load(self):
+        X_train, y_train, X_val, y_val, X_test, y_test = \
+            super(MNISTDataCrossvalidation, self).load()
+        X_train = np.concatenate([X_train, X_val], axis=0)
+        y_train = np.concatenate([y_train, y_val], axis=0)
+        return X_train, y_train, X_test, y_test
 
 
 class CIFAR10Data(DataManager):
@@ -148,8 +174,7 @@ class CIFAR10Data(DataManager):
     def load(self):
         """
         Loads CIFAR10 from data directory as defined in _config.data_directory.
-        Downloads data if necessary. Code is copied and modified from the
-        Lasagne tutorial.
+        Downloads data if necessary.
 
         Returns
         -------
@@ -164,7 +189,8 @@ class CIFAR10Data(DataManager):
         xs = []
         ys = []
         for j in range(5):
-            fh = open(self.__load_data(filename='data_batch_%d' % (j + 1)), "rb")
+            fh = open(self.__load_data(filename='data_batch_%d' % (j + 1)),
+                      "rb")
             d = pickle.load(fh, encoding='latin1')
             fh.close()
             x = d['data']
@@ -184,11 +210,12 @@ class CIFAR10Data(DataManager):
         x = np.dstack((x[:, :1024], x[:, 1024:2048], x[:, 2048:]))
         x = x.reshape((x.shape[0], 32, 32, 3)).transpose(0, 3, 1, 2)
 
-        # subtract per-pixel mean
+        # Subtract per-pixel mean
         pixel_mean = np.mean(x[0:50000], axis=0)
 
         x -= pixel_mean
 
+        # Split in training, validation and test
         X_train = x[:40000, :, :, :]
         y_train = y[:40000]
 
@@ -208,10 +235,6 @@ class CIFAR10Data(DataManager):
         ----------
         filename: str
             file to download
-        save_to: str
-            directory to store file
-        images: bool
-            if True converts data to X
 
         Returns
         -------
@@ -222,7 +245,8 @@ class CIFAR10Data(DataManager):
         if not os.path.exists(save_fl):
             self.logger.debug("Downloading %s to %s",
                               self.url_source, save_fl)
-            urlretrieve(self.url_source, self.save_to + "cifar-10-python.tar.gz")
+            urlretrieve(self.url_source,
+                        self.save_to + "cifar-10-python.tar.gz")
             tar = tarfile.open(self.save_to + "cifar-10-python.tar.gz")
             tar.extractall(self.save_to)
 
@@ -230,3 +254,107 @@ class CIFAR10Data(DataManager):
             self.logger.debug("Load data %s", save_fl)
 
         return save_fl
+
+
+class SVHNData(DataManager):
+
+    def __init__(self):
+        self.url_source = 'http://ufldl.stanford.edu/housenumbers/'
+        self.logger = logging.getLogger("DataManager")
+        self.save_to = os.path.join(hpolib._config.data_dir, "svhn/")
+
+        self.n_train_all = 73257
+        self.n_valid = 6000
+        self.n_train = self.n_train_all - self.n_valid
+        self.n_test = 26032
+
+        if not os.path.isdir(self.save_to):
+            self.logger.debug("Create directory %s", self.save_to)
+            os.makedirs(self.save_to)
+
+        super(SVHNData, self).__init__()
+
+    def load(self):
+        """
+        Loads SVHN from data directory as defined in _config.data_directory.
+        Downloads data if necessary.
+
+        Returns
+        -------
+        X_train: np.array
+        y_train: np.array
+        X_val: np.array
+        y_val: np.array
+        X_test: np.array
+        y_test: np.array
+        """
+        X, y, X_test, y_test = self.__load_data("train_32x32.mat", "test_32x32.mat")
+
+        # Change the label encoding from [1, ... 10] to [0, ..., 9]
+        y[y == 10] = 0
+        y_test[y_test == 10] = 0
+
+        X_train = X[:self.n_train, :, :, :]
+        y_train = y[:self.n_train]
+        X_valid = X[self.n_train:self.n_train_all, :, :, :]
+        y_valid = y[self.n_train:self.n_train_all]
+
+        X_train = np.array(X_train, dtype=np.float32)
+        X_valid = np.array(X_valid, dtype=np.float32)
+        X_test = np.array(X_test, dtype=np.float32)
+
+        all_X = [X_train, X_valid, X_test]
+
+        # Subtract per pixel mean
+        for X in all_X:
+            data_shape = X.shape
+            X = X.reshape(X.shape[0], np.product(X.shape[1:]))
+            X -= X.mean(axis=1)[:, np.newaxis]
+            X = X.reshape(data_shape)
+
+        return X_train, y_train[:, 0], X_valid, y_valid[:, 0], X_test, y_test[:, 0]
+
+    def __load_data(self, filename_train, filename_test):
+        """
+        Loads data in binary format as available under 'http://ufldl.stanford.edu/housenumbers/'.
+
+        Parameters
+        ----------
+        filename_train: str
+            file to download
+        filename_test: str
+            file to download
+
+        Returns
+        -------
+        filename: string
+        """
+        save_fl = os.path.join(self.save_to, filename_train)
+        if not os.path.exists(save_fl):
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source + filename_train, save_fl)
+            urlretrieve(self.url_source + filename_train, self.save_to + filename_train)
+
+        else:
+            self.logger.debug("Load data %s", save_fl)
+
+        train_data = loadmat(save_fl)
+
+        X_train = train_data['X'].T
+        y_train = train_data['y']
+
+        save_fl = os.path.join(self.save_to, filename_test)
+        if not os.path.exists(save_fl):
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source + filename_test, save_fl)
+            urlretrieve(self.url_source + filename_test, self.save_to + filename_test)
+
+        else:
+            self.logger.debug("Load data %s", save_fl)
+
+        test_data = loadmat(save_fl)
+
+        X_test = test_data['X'].T
+        y_test = test_data['y']
+
+        return X_train, y_train, X_test, y_test

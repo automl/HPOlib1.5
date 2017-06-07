@@ -1,5 +1,3 @@
-import os
-import sys
 import time
 
 import numpy as np
@@ -10,8 +8,8 @@ import theano.tensor as T
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-import hpolib.util.data_manager
-import hpolib
+from hpolib.util.data_manager import MNISTData
+import hpolib.util.rng_helper as rng_helper
 
 
 class FullyConnectedNetwork(AbstractBenchmark):
@@ -29,6 +27,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         rng: str
             set up rng
         """
+        super(FullyConnectedNetwork, self).__init__(rng=rng)
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
@@ -36,21 +35,23 @@ class FullyConnectedNetwork(AbstractBenchmark):
 
         self.num_classes = np.int32(np.unique(self.train_targets).shape[0])
         # Minimum dataset size is equal to the maximum batch size
-        self.s_min = 512
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+        self.s_min = float(512) / self.train.shape[0]
 
         lasagne.random.set_rng(self.rng)
-        super(FullyConnectedNetwork, self).__init__()
 
     def get_data(self):
-        raise NotImplementedError()
+        raise NotImplementedError("Do not use this benchmark as this is only "
+                                  "a skeleton for further implementations.")
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, steps=1, **kwargs):
+
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
 
         x = np.array(x, dtype=np.float32)
 
@@ -83,7 +84,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
         c = cost_curve[-1]
         return {'function_value': y,
                 "cost": c,
-                "learning_curve_valid_error": lc_curve,
+                "learning_curve": lc_curve,
                 "train_loss": train_loss,
                 "valid_loss": valid_loss,
                 "learning_curve_cost": cost_curve}
@@ -91,6 +92,12 @@ class FullyConnectedNetwork(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, steps=1, **kwargs):
+
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        # if rng was not not, set rng for lasagne
+        if rng is not None:
+            lasagne.random.set_rng(self.rng)
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
@@ -276,7 +283,7 @@ class FullyConnectedNetwork(AbstractBenchmark):
 class FCNetOnMnist(FullyConnectedNetwork):
 
     def get_data(self):
-        dm = hpolib.util.data_manager.MNISTData()
+        dm = MNISTData()
         return dm.load()
 
     @staticmethod

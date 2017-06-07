@@ -1,4 +1,7 @@
-# Requirement for openml which is currently not on pypi
+Cython
+auto-sklearn
+requests
+xmltodict
 git+https://github.com/renatopp/liac-arff
-# OpenML is currently not on pypi
 git+https://github.com/openml/openml-python
+pynisher
