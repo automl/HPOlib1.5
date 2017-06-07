@@ -2,17 +2,28 @@ language: python
 python:
   - "3.4"
   - "3.5"
+  - "3.6"
 os: linux
 
 cache:
   directories:
     - $HOME/.cache/pip
+    - $HOME/.hpolib/
   pip: true
 
 sudo: false
 
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
+
+
+addons:
+  apt:
+    packages:
+    - libatlas3gf-base
+    - libatlas-dev
+    - liblapack-dev
+    - gfortran
 
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -22,12 +33,12 @@ before_install:
   - conda update --yes conda
   - conda create -n testenv --yes python=$TRAVIS_PYTHON_VERSION pip wheel nose
   - source activate testenv
-  - conda install --yes gcc
+  - conda install --yes gcc swig
   - echo "Using GCC at "`which gcc`
   - export CC=`which gcc`
 
 install:
-  - pip install coverage pep8 python-coveralls
+  - pip install coverage pep8 codecov
   # Inverse grep allows comments in requirements file
   - cat requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
   - cat optional-requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
@@ -37,4 +48,4 @@ install:
 script:
   - nosetests -sv --with-coverage --cover-package=hpolib
 after_success:
-  - coveralls
+  - codecov

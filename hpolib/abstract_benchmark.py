@@ -3,10 +3,12 @@ import abc
 import numpy as np
 import ConfigSpace
 
+from hpolib.util import rng_helper
+
 
 class AbstractBenchmark(object, metaclass=abc.ABCMeta):
 
-    def __init__(self):
+    def __init__(self, rng=None):
         """Interface for benchmarks.
 
         A benchmark contains of two building blocks, the target function and
@@ -15,6 +17,8 @@ class AbstractBenchmark(object, metaclass=abc.ABCMeta):
         value of the global optima. New benchmarks should be derived from
         this base class or one of its child classes.
         """
+
+        self.rng = rng_helper.create_rng(rng)
         self.configuration_space = self.get_configuration_space()
 
     @abc.abstractmethod
@@ -105,7 +109,7 @@ class AbstractBenchmark(object, metaclass=abc.ABCMeta):
         return(self.objective_function(configuration, **kwargs)['function_value'])
 
 
-    def test(self, n_runs=5):
+    def test(self, n_runs=5, *args, **kwargs):
         """ Draws some random configuration and call objective_fucntion(_test).
 
         Parameters
@@ -113,10 +117,17 @@ class AbstractBenchmark(object, metaclass=abc.ABCMeta):
         n_runs : int
             number of random configurations to draw and evaluate
         """
+        train_rvals = []
+        test_rvals = []
+
         for _ in range(n_runs):
             configuration = self.configuration_space.sample_configuration()
-            self.objective_function(configuration)
-            self.objective_function_test(configuration)
+            train_rvals.append(self.objective_function(
+                configuration, *args, **kwargs))
+            test_rvals.append(self.objective_function_test(
+                configuration, *args, **kwargs))
+
+        return train_rvals, test_rvals
 
     @staticmethod
     @abc.abstractmethod
