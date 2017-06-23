@@ -15,3 +15,8 @@ git+https://github.com/Lasagne/Lasagne.git@master
 
 scikit-learn
 ConfigSpace>=0.3.3
+
+requests
+xmltodict
+liac-arff>=2.1.1
+git+https://github.com/openml/openml-python
