@@ -1,7 +1,3 @@
 Cython
 auto-sklearn
-requests
-xmltodict
-git+https://github.com/renatopp/liac-arff
-git+https://github.com/openml/openml-python
 pynisher
