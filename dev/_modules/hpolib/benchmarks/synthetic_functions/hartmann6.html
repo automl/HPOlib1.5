@@ -7,10 +7,8 @@
     
     <title>hpolib.benchmarks.synthetic_functions.hartmann6 &#8212; HPOlib2 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -120,16 +118,15 @@
 
 
 <div class="viewcode-block" id="Hartmann6"><a class="viewcode-back" href="../../../../synthetic_benchmarks/hartmann6.html#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6">[docs]</a><span class="k">class</span> <span class="nc">Hartmann6</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
-
     <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">1.20</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">,</span> <span class="mf">3.20</span><span class="p">]</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">10.00</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">,</span> <span class="mf">17.00</span><span class="p">,</span> <span class="mf">3.50</span><span class="p">,</span> <span class="mf">1.70</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">],</span>
-                      <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">10.00</span><span class="p">,</span> <span class="mf">17.00</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">,</span> <span class="mf">14.00</span><span class="p">],</span>
-                      <span class="p">[</span><span class="mf">3.00</span><span class="p">,</span> <span class="mf">3.50</span><span class="p">,</span> <span class="mf">1.70</span><span class="p">,</span> <span class="mf">10.00</span><span class="p">,</span> <span class="mf">17.00</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">],</span>
-                      <span class="p">[</span><span class="mf">17.00</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">10.00</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">14.00</span><span class="p">]])</span>
+                  <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">10.00</span><span class="p">,</span> <span class="mf">17.00</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">,</span> <span class="mf">14.00</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mf">3.00</span><span class="p">,</span> <span class="mf">3.50</span><span class="p">,</span> <span class="mf">1.70</span><span class="p">,</span> <span class="mf">10.00</span><span class="p">,</span> <span class="mf">17.00</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">],</span>
+                  <span class="p">[</span><span class="mf">17.00</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">10.00</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">14.00</span><span class="p">]])</span>
     <span class="n">P</span> <span class="o">=</span> <span class="mf">0.0001</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1312</span><span class="p">,</span> <span class="mi">1696</span><span class="p">,</span> <span class="mi">5569</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">8283</span><span class="p">,</span> <span class="mi">5886</span><span class="p">],</span>
-                               <span class="p">[</span><span class="mi">2329</span><span class="p">,</span> <span class="mi">4135</span><span class="p">,</span> <span class="mi">8307</span><span class="p">,</span> <span class="mi">3736</span><span class="p">,</span> <span class="mi">1004</span><span class="p">,</span> <span class="mi">9991</span><span class="p">],</span>
-                               <span class="p">[</span><span class="mi">2348</span><span class="p">,</span> <span class="mi">1451</span><span class="p">,</span> <span class="mi">3522</span><span class="p">,</span> <span class="mi">2883</span><span class="p">,</span> <span class="mi">3047</span><span class="p">,</span> <span class="mi">6650</span><span class="p">],</span>
-                               <span class="p">[</span><span class="mi">4047</span><span class="p">,</span> <span class="mi">8828</span><span class="p">,</span> <span class="mi">8732</span><span class="p">,</span> <span class="mi">5743</span><span class="p">,</span> <span class="mi">1091</span><span class="p">,</span> <span class="mi">381</span><span class="p">]])</span>
+                           <span class="p">[</span><span class="mi">2329</span><span class="p">,</span> <span class="mi">4135</span><span class="p">,</span> <span class="mi">8307</span><span class="p">,</span> <span class="mi">3736</span><span class="p">,</span> <span class="mi">1004</span><span class="p">,</span> <span class="mi">9991</span><span class="p">],</span>
+                           <span class="p">[</span><span class="mi">2348</span><span class="p">,</span> <span class="mi">1451</span><span class="p">,</span> <span class="mi">3522</span><span class="p">,</span> <span class="mi">2883</span><span class="p">,</span> <span class="mi">3047</span><span class="p">,</span> <span class="mi">6650</span><span class="p">],</span>
+                           <span class="p">[</span><span class="mi">4047</span><span class="p">,</span> <span class="mi">8828</span><span class="p">,</span> <span class="mi">8732</span><span class="p">,</span> <span class="mi">5743</span><span class="p">,</span> <span class="mi">1091</span><span class="p">,</span> <span class="mi">381</span><span class="p">]])</span>
 
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_configuration_as_array</span>
@@ -144,8 +141,8 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
             <span class="n">internal_sum</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
-                <span class="n">internal_sum</span> <span class="o">=</span> <span class="n">internal_sum</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="n">external_sum</span> <span class="o">=</span> <span class="n">external_sum</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">internal_sum</span><span class="p">)</span>
+                <span class="n">internal_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">external_sum</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">internal_sum</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;function_value&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">external_sum</span><span class="p">}</span>
 
@@ -157,15 +154,17 @@
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="Hartmann6.get_configuration_space"><a class="viewcode-back" href="../../../../synthetic_benchmarks/hartmann6.html#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.get_configuration_space">[docs]</a>    <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">():</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">CS</span><span class="o">.</span><span class="n">ConfigurationSpace</span><span class="p">()</span>
-        <span class="n">cs</span><span class="o">.</span><span class="n">generate_all_continuous_from_bounds</span><span class="p">(</span><span class="n">Hartmann6</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()[</span><span class="s1">&#39;bounds&#39;</span><span class="p">])</span>
-        <span class="k">return</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span></div>
-    
+        <span class="n">cs</span><span class="o">.</span><span class="n">generate_all_continuous_from_bounds</span><span class="p">(</span>
+                <span class="n">Hartmann6</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()[</span><span class="s1">&#39;bounds&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">cs</span><span class="p">)</span></div>
+
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="Hartmann6.get_meta_information"><a class="viewcode-back" href="../../../../synthetic_benchmarks/hartmann6.html#hpolib.benchmarks.synthetic_functions.hartmann6.Hartmann6.get_meta_information">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_information</span><span class="p">():</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Hartmann 3D&#39;</span><span class="p">,</span>
-				<span class="s1">&#39;num_function_evals&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-                <span class="s1">&#39;optima&#39;</span><span class="p">:</span> <span class="p">([[</span><span class="mf">0.20169</span><span class="p">,</span> <span class="mf">0.150011</span><span class="p">,</span> <span class="mf">0.476874</span><span class="p">,</span> <span class="mf">0.275332</span><span class="p">,</span> <span class="mf">0.311652</span><span class="p">,</span> <span class="mf">0.6573</span><span class="p">]]),</span>
-                <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="mi">6</span><span class="p">,</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Hartmann6&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;num_function_evals&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                <span class="s1">&#39;optima&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="p">[[</span><span class="mf">0.20169</span><span class="p">,</span> <span class="mf">0.150011</span><span class="p">,</span> <span class="mf">0.476874</span><span class="p">,</span> <span class="mf">0.275332</span><span class="p">,</span> <span class="mf">0.311652</span><span class="p">,</span> <span class="mf">0.6573</span><span class="p">]]),</span>
+                <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">6</span><span class="p">,</span>
                 <span class="s1">&#39;f_opt&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.322368011391339</span><span class="p">}</span></div></div>
 </pre></div>
 
@@ -184,7 +183,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
     </p>
   </div>
 </footer>

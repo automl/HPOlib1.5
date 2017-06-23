@@ -7,10 +7,8 @@
     
     <title>Logistic Regression Benchmarks &#8212; HPOlib2 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -112,12 +110,13 @@
 <span id="logistic-regression-benchmarks"></span><h1>Logistic Regression Benchmarks<a class="headerlink" href="#module-hpolib.benchmarks.ml.logistic_regression" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression">
-<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.logistic_regression.</code><code class="descname">LogisticRegression</code><span class="sig-paren">(</span><em>path=None</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.logistic_regression.</code><code class="descname">LogisticRegression</code><span class="sig-paren">(</span><em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hpolib.abstract_benchmark.AbstractBenchmark</span></code></p>
-<p>Logistic regression benchmark which resembles the benchmark used in the MTBO / Freeze Thaw paper.
-The hyperparameters are the learning rate (on log scale), L2 regularization, batch size and the
-dropout ratio on the inputs.
-The weights are optimized with stochastic gradient descent and we do NOT perform early stopping on
+<p>Logistic regression benchmark which resembles the benchmark used in
+the MTBO / Freeze Thaw paper. The hyperparameters are the learning
+rate (on log scale), L2 regularization, batch size and the dropout
+ratio on the inputs. The weights are optimized with stochastic
+gradient descent and we do NOT perform early stopping on
 the validation data set.</p>
 <dl class="staticmethod">
 <dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_configuration_space">
@@ -126,7 +125,7 @@ the validation data set.</p>
 
 <dl class="method">
 <dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_data">
-<code class="descname">get_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">
@@ -151,14 +150,51 @@ the validation data set.</p>
 
 <dl class="method">
 <dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>train</em>, <em>train_targets</em>, <em>valid</em>, <em>valid_targets</em>, <em>learning_rate=1</em>, <em>l2_reg=0.0</em>, <em>batch_size=200</em>, <em>dropout_rate=0.1</em>, <em>num_epochs=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>train</em>, <em>train_targets</em>, <em>valid</em>, <em>valid_targets</em>, <em>learning_rate=1.0</em>, <em>l2_reg=0.0</em>, <em>batch_size=200</em>, <em>dropout_rate=0.1</em>, <em>num_epochs=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>accepts data and hyperparameters and returns lc_curve, cost_curve</p>
+<p>train: np.ndarray [n_samples, n_features]
+train_targets: np.ndarray [n_samples, n_objectives]
+valid: np.ndarray [n_samples, n_features]
+valid_targets: [n_samples, n_objectives]</p>
+<p>learning_rate: float
+l2_reg: float
+batch_size: float
+dropout_rate: float
+num_epochs: int</p>
+<p>learning_curve, cost</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.logistic_regression.</code><code class="descname">LogisticRegression10CVOnMnist</code><span class="sig-paren">(</span><em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression10CVOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist" title="hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist"><code class="xref py py-class docutils literal"><span class="pre">hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist</span></code></a></p>
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression10CVOnMnist.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.get_meta_information">
+<em class="property">static </em><code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegression10CVOnMnist.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.get_meta_information" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.objective_function">
+<code class="descname">objective_function</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.objective_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.objective_function_test">
+<code class="descname">objective_function_test</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.objective_function_test" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist">
-<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.logistic_regression.</code><code class="descname">LogisticRegressionOnMnist</code><span class="sig-paren">(</span><em>path=None</em>, <em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegressionOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.ml.logistic_regression.</code><code class="descname">LogisticRegressionOnMnist</code><span class="sig-paren">(</span><em>rng=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hpolib/benchmarks/ml/logistic_regression.html#LogisticRegressionOnMnist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hpolib.benchmarks.ml.logistic_regression.LogisticRegression" title="hpolib.benchmarks.ml.logistic_regression.LogisticRegression"><code class="xref py py-class docutils literal"><span class="pre">hpolib.benchmarks.ml.logistic_regression.LogisticRegression</span></code></a></p>
 <dl class="method">
 <dt id="hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist.get_data">
@@ -194,7 +230,7 @@ the validation data set.</p>
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
     </p>
   </div>
 </footer>

@@ -8,10 +8,8 @@
     
     <title>Index &#8212; HPOlib2 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -169,7 +167,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10">ConvolutionalNeuralNetworkOnCIFAR10 (class in hpolib.benchmarks.ml.conv_net)</a>
 </li>
-      <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.cost_function">cost_function() (hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost method)</a>
+      <li><a href="ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN">ConvolutionalNeuralNetworkOnSVHN (class in hpolib.benchmarks.ml.conv_net)</a>
+</li>
+      <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.cost_function">cost_function() (hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -216,13 +216,19 @@
 </li>
         <li><a href="synthetic_benchmarks/levy.html#hpolib.benchmarks.synthetic_functions.levy.Levy.get_configuration_space">(hpolib.benchmarks.synthetic_functions.levy.Levy static method)</a>
 </li>
-        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.get_configuration_space">(hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost method)</a>
-</li>
         <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock.get_configuration_space">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock static method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D.get_configuration_space">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D static method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D.get_configuration_space">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D static method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D.get_configuration_space">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D static method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_one.html#hpolib.benchmarks.synthetic_functions.sin_one.SinOne.get_configuration_space">(hpolib.benchmarks.synthetic_functions.sin_one.SinOne static method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_two.html#hpolib.benchmarks.synthetic_functions.sin_two.SinTwo.get_configuration_space">(hpolib.benchmarks.synthetic_functions.sin_two.SinTwo static method)</a>
+</li>
+        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.get_configuration_space">(hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost method)</a>
 </li>
       </ul></li>
       <li><a href="ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork.get_data">get_data() (hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork method)</a>
@@ -230,11 +236,15 @@
       <ul>
         <li><a href="ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10.get_data">(hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10 method)</a>
 </li>
+        <li><a href="ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN.get_data">(hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN method)</a>
+</li>
         <li><a href="ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data">(hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist method)</a>
 </li>
         <li><a href="ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data">(hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork method)</a>
 </li>
         <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_data">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression method)</a>
+</li>
+        <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.get_data">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist method)</a>
 </li>
         <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist.get_data">(hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist method)</a>
 </li>
@@ -254,11 +264,15 @@
       <ul>
         <li><a href="ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10.get_meta_information">(hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnCIFAR10 static method)</a>
 </li>
+        <li><a href="ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN.get_meta_information">(hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN static method)</a>
+</li>
         <li><a href="ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_meta_information">(hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist static method)</a>
 </li>
         <li><a href="ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_meta_information">(hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork static method)</a>
 </li>
         <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.get_meta_information">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression static method)</a>
+</li>
+        <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.get_meta_information">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist static method)</a>
 </li>
         <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist.get_meta_information">(hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist static method)</a>
 </li>
@@ -282,13 +296,19 @@
 </li>
         <li><a href="synthetic_benchmarks/levy.html#hpolib.benchmarks.synthetic_functions.levy.Levy.get_meta_information">(hpolib.benchmarks.synthetic_functions.levy.Levy static method)</a>
 </li>
-        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.get_meta_information">(hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost method)</a>
-</li>
         <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock.get_meta_information">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock static method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D.get_meta_information">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D static method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D.get_meta_information">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D static method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D.get_meta_information">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D static method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_one.html#hpolib.benchmarks.synthetic_functions.sin_one.SinOne.get_meta_information">(hpolib.benchmarks.synthetic_functions.sin_one.SinOne static method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_two.html#hpolib.benchmarks.synthetic_functions.sin_two.SinTwo.get_meta_information">(hpolib.benchmarks.synthetic_functions.sin_two.SinTwo static method)</a>
+</li>
+        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.get_meta_information">(hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost method)</a>
 </li>
       </ul></li>
       <li><a href="synthetic_benchmarks/goldstein_price.html#hpolib.benchmarks.synthetic_functions.goldstein_price.GoldsteinPrice">GoldsteinPrice (class in hpolib.benchmarks.synthetic_functions.goldstein_price)</a>
@@ -329,13 +349,13 @@
 </li>
       <li><a href="synthetic_benchmarks/levy.html#module-hpolib.benchmarks.synthetic_functions.levy">hpolib.benchmarks.synthetic_functions.levy (module)</a>
 </li>
-      <li><a href="utility.html#module-hpolib.benchmarks.synthetic_functions.misc">hpolib.benchmarks.synthetic_functions.misc (module)</a>
-</li>
       <li><a href="synthetic_benchmarks/rosenbrock.html#module-hpolib.benchmarks.synthetic_functions.rosenbrock">hpolib.benchmarks.synthetic_functions.rosenbrock (module)</a>
 </li>
       <li><a href="synthetic_benchmarks/sin_one.html#module-hpolib.benchmarks.synthetic_functions.sin_one">hpolib.benchmarks.synthetic_functions.sin_one (module)</a>
 </li>
       <li><a href="synthetic_benchmarks/sin_two.html#module-hpolib.benchmarks.synthetic_functions.sin_two">hpolib.benchmarks.synthetic_functions.sin_two (module)</a>
+</li>
+      <li><a href="utility.html#module-hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost">hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost (module)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -359,9 +379,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="synthetic_benchmarks/levy.html#hpolib.benchmarks.synthetic_functions.levy.Levy">Levy (class in hpolib.benchmarks.synthetic_functions.levy)</a>
 </li>
+      <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression">LogisticRegression (class in hpolib.benchmarks.ml.logistic_regression)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression">LogisticRegression (class in hpolib.benchmarks.ml.logistic_regression)</a>
+      <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist">LogisticRegression10CVOnMnist (class in hpolib.benchmarks.ml.logistic_regression)</a>
 </li>
       <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegressionOnMnist">LogisticRegressionOnMnist (class in hpolib.benchmarks.ml.logistic_regression)</a>
 </li>
@@ -377,6 +399,8 @@
         <li><a href="ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.objective_function">(hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork method)</a>
 </li>
         <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.objective_function">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression method)</a>
+</li>
+        <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.objective_function">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist method)</a>
 </li>
         <li><a href="ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine.objective_function">(hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine method)</a>
 </li>
@@ -396,13 +420,19 @@
 </li>
         <li><a href="synthetic_benchmarks/levy.html#hpolib.benchmarks.synthetic_functions.levy.Levy.objective_function">(hpolib.benchmarks.synthetic_functions.levy.Levy method)</a>
 </li>
-        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.objective_function">(hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost method)</a>
-</li>
         <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock.objective_function">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D.objective_function">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D.objective_function">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D.objective_function">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_one.html#hpolib.benchmarks.synthetic_functions.sin_one.SinOne.objective_function">(hpolib.benchmarks.synthetic_functions.sin_one.SinOne method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_two.html#hpolib.benchmarks.synthetic_functions.sin_two.SinTwo.objective_function">(hpolib.benchmarks.synthetic_functions.sin_two.SinTwo method)</a>
+</li>
+        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.objective_function">(hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -413,6 +443,8 @@
         <li><a href="ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.objective_function_test">(hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork method)</a>
 </li>
         <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.objective_function_test">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression method)</a>
+</li>
+        <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist.objective_function_test">(hpolib.benchmarks.ml.logistic_regression.LogisticRegression10CVOnMnist method)</a>
 </li>
         <li><a href="ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine.objective_function_test">(hpolib.benchmarks.ml.svm_benchmark.SupportVectorMachine method)</a>
 </li>
@@ -432,13 +464,19 @@
 </li>
         <li><a href="synthetic_benchmarks/levy.html#hpolib.benchmarks.synthetic_functions.levy.Levy.objective_function_test">(hpolib.benchmarks.synthetic_functions.levy.Levy method)</a>
 </li>
-        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.objective_function_test">(hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost method)</a>
-</li>
         <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock.objective_function_test">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D.objective_function_test">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D.objective_function_test">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D method)</a>
+</li>
+        <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D.objective_function_test">(hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_one.html#hpolib.benchmarks.synthetic_functions.sin_one.SinOne.objective_function_test">(hpolib.benchmarks.synthetic_functions.sin_one.SinOne method)</a>
 </li>
         <li><a href="synthetic_benchmarks/sin_two.html#hpolib.benchmarks.synthetic_functions.sin_two.SinTwo.objective_function_test">(hpolib.benchmarks.synthetic_functions.sin_two.SinTwo method)</a>
+</li>
+        <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.objective_function_test">(hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -461,8 +499,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock">Rosenbrock (class in hpolib.benchmarks.synthetic_functions.rosenbrock)</a>
 </li>
+      <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock10D">Rosenbrock10D (class in hpolib.benchmarks.synthetic_functions.rosenbrock)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock20D">Rosenbrock20D (class in hpolib.benchmarks.synthetic_functions.rosenbrock)</a>
+</li>
+      <li><a href="synthetic_benchmarks/rosenbrock.html#hpolib.benchmarks.synthetic_functions.rosenbrock.Rosenbrock5D">Rosenbrock5D (class in hpolib.benchmarks.synthetic_functions.rosenbrock)</a>
+</li>
       <li><a href="ml_benchmarks/logistic_regression.html#hpolib.benchmarks.ml.logistic_regression.LogisticRegression.run">run() (hpolib.benchmarks.ml.logistic_regression.LogisticRegression method)</a>
 </li>
   </ul></td>
@@ -471,7 +515,7 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.sigma_function">sigma_function() (hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost method)</a>
+      <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.sigma_function">sigma_function() (hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost method)</a>
 </li>
       <li><a href="synthetic_benchmarks/sin_one.html#hpolib.benchmarks.synthetic_functions.sin_one.SinOne">SinOne (class in hpolib.benchmarks.synthetic_functions.sin_one)</a>
 </li>
@@ -487,7 +531,7 @@
 </li>
       <li><a href="ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnVehicle">SvmOnVehicle (class in hpolib.benchmarks.ml.svm_benchmark)</a>
 </li>
-      <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost">SyntheticNoiseAndCost (class in hpolib.benchmarks.synthetic_functions.misc)</a>
+      <li><a href="utility.html#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost">SyntheticNoiseAndCost (class in hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -521,7 +565,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
     </p>
   </div>
 </footer>

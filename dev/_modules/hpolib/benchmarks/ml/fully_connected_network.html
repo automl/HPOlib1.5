@@ -7,10 +7,8 @@
     
     <title>hpolib.benchmarks.ml.fully_connected_network &#8212; HPOlib2 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -107,9 +105,7 @@
     <div class="col-md-12 content">
       
   <h1>Source code for hpolib.benchmarks.ml.fully_connected_network</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span></span><span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">lasagne</span>
@@ -119,8 +115,8 @@
 <span class="kn">import</span> <span class="nn">ConfigSpace</span> <span class="k">as</span> <span class="nn">CS</span>
 
 <span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
-<span class="kn">import</span> <span class="nn">hpolib.util.data_manager</span>
-<span class="kn">import</span> <span class="nn">hpolib</span>
+<span class="kn">from</span> <span class="nn">hpolib.util.data_manager</span> <span class="k">import</span> <span class="n">MNISTData</span>
+<span class="kn">import</span> <span class="nn">hpolib.util.rng_helper</span> <span class="k">as</span> <span class="nn">rng_helper</span>
 
 
 <div class="viewcode-block" id="FullyConnectedNetwork"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork">[docs]</a><span class="k">class</span> <span class="nc">FullyConnectedNetwork</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
@@ -138,6 +134,7 @@
 <span class="sd">        rng: str</span>
 <span class="sd">            set up rng</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FullyConnectedNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_targets</span><span class="p">,</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
@@ -147,20 +144,21 @@
         <span class="c1"># Minimum dataset size is equal to the maximum batch size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
-
         <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">FullyConnectedNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="FullyConnectedNetwork.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FullyConnectedNetwork.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Do not use this benchmark as this is only &quot;</span>
+                                  <span class="s2">&quot;a skeleton for further implementations.&quot;</span><span class="p">)</span></div>
 
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_configuration_as_array</span>
     <span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dataset_fraction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rng&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng_helper</span><span class="o">.</span><span class="n">get_rng</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">self_rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="c1"># if rng was not not, set rng for lasagne</span>
+        <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
@@ -201,6 +199,12 @@
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_configuration_as_array</span>
     <span class="k">def</span> <span class="nf">objective_function_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rng&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng_helper</span><span class="o">.</span><span class="n">get_rng</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">self_rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="c1"># if rng was not not, set rng for lasagne</span>
+        <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="n">num_epochs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_epochs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">steps</span><span class="p">)</span>
 
@@ -386,7 +390,7 @@
 <div class="viewcode-block" id="FCNetOnMnist"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist">[docs]</a><span class="k">class</span> <span class="nc">FCNetOnMnist</span><span class="p">(</span><span class="n">FullyConnectedNetwork</span><span class="p">):</span>
 
 <div class="viewcode-block" id="FCNetOnMnist.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/fc_net.html#hpolib.benchmarks.ml.fully_connected_network.FCNetOnMnist.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">dm</span> <span class="o">=</span> <span class="n">hpolib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">data_manager</span><span class="o">.</span><span class="n">MNISTData</span><span class="p">()</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">MNISTData</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">dm</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
 
     <span class="nd">@staticmethod</span>
@@ -418,7 +422,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
     </p>
   </div>
 </footer>

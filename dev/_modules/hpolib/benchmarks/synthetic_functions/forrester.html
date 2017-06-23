@@ -7,10 +7,8 @@
     
     <title>hpolib.benchmarks.synthetic_functions.forrester &#8212; HPOlib2 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -118,6 +116,7 @@
 <span class="kn">import</span> <span class="nn">ConfigSpace</span> <span class="k">as</span> <span class="nn">CS</span>
 <span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
 
+
 <div class="viewcode-block" id="Forrester"><a class="viewcode-back" href="../../../../synthetic_benchmarks/forrester.html#hpolib.benchmarks.synthetic_functions.forrester.Forrester">[docs]</a><span class="k">class</span> <span class="nc">Forrester</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; one dimensioal function with one global minimum, another local minimum and a zero gradient, inflection point.</span>
 <span class="sd">    </span>
@@ -140,12 +139,13 @@
     
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_configuration_as_array</span>
-    <span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">fidelity</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">fidelity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">6</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">12</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">6</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">12</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
         
         <span class="c1"># best least-squared fit with cubic polynomial</span>
-        <span class="n">y2</span> <span class="o">=</span> <span class="mf">131.09227753</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span><span class="mf">164.50286816</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">50.7228373</span> <span class="o">*</span> <span class="n">x</span>  <span class="o">-</span><span class="mf">2.84345244</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="mf">131.09227753</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span><span class="mf">164.50286816</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> \
+             <span class="mf">50.7228373</span> <span class="o">*</span> <span class="n">x</span> <span class="o">-</span> <span class="mf">2.84345244</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;function_value&#39;</span><span class="p">:</span> <span class="n">fidelity</span><span class="o">*</span><span class="n">y1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">fidelity</span><span class="p">)</span><span class="o">*</span><span class="n">y2</span><span class="p">,</span>
                 <span class="s1">&#39;cost&#39;</span><span class="p">:</span> <span class="n">fidelity</span><span class="o">**</span><span class="mi">2</span><span class="p">}</span>
 
@@ -156,14 +156,14 @@
 <div class="viewcode-block" id="Forrester.get_configuration_space"><a class="viewcode-back" href="../../../../synthetic_benchmarks/forrester.html#hpolib.benchmarks.synthetic_functions.forrester.Forrester.get_configuration_space">[docs]</a>    <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">():</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">CS</span><span class="o">.</span><span class="n">ConfigurationSpace</span><span class="p">()</span>
         <span class="n">cs</span><span class="o">.</span><span class="n">generate_all_continuous_from_bounds</span><span class="p">(</span><span class="n">Forrester</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()[</span><span class="s1">&#39;bounds&#39;</span><span class="p">])</span>
-        <span class="k">return</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">cs</span></div>
 
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="Forrester.get_meta_information"><a class="viewcode-back" href="../../../../synthetic_benchmarks/forrester.html#hpolib.benchmarks.synthetic_functions.forrester.Forrester.get_meta_information">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_information</span><span class="p">():</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Branin&#39;</span><span class="p">,</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Forrester&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;num_function_evals&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
                 <span class="s1">&#39;optima&#39;</span><span class="p">:</span> <span class="p">([[</span><span class="mf">0.75724875</span><span class="p">]]),</span>
-                <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span>
+                <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
                 <span class="s1">&#39;f_opt&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.02074</span><span class="p">}</span></div></div>
 </pre></div>
 
@@ -182,7 +182,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
     </p>
   </div>
 </footer>

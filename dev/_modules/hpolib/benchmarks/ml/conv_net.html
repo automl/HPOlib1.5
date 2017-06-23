@@ -7,10 +7,8 @@
     
     <title>hpolib.benchmarks.ml.conv_net &#8212; HPOlib2 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -116,7 +114,8 @@
 <span class="kn">import</span> <span class="nn">ConfigSpace</span> <span class="k">as</span> <span class="nn">CS</span>
 
 <span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
-<span class="kn">from</span> <span class="nn">hpolib.util.data_manager</span> <span class="k">import</span> <span class="n">CIFAR10Data</span>
+<span class="kn">from</span> <span class="nn">hpolib.util.data_manager</span> <span class="k">import</span> <span class="n">CIFAR10Data</span><span class="p">,</span> <span class="n">SVHNData</span>
+<span class="kn">import</span> <span class="nn">hpolib.util.rng_helper</span> <span class="k">as</span> <span class="nn">rng_helper</span>
 
 
 <div class="viewcode-block" id="ConvolutionalNeuralNetwork"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork">[docs]</a><span class="k">class</span> <span class="nc">ConvolutionalNeuralNetwork</span><span class="p">(</span><span class="n">AbstractBenchmark</span><span class="p">):</span>
@@ -129,6 +128,7 @@
 <span class="sd">        the number of units in each layer (on a log2 scale).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_num_epochs</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_targets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
 
@@ -147,20 +147,21 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
-
         <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ConvolutionalNeuralNetwork.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+<div class="viewcode-block" id="ConvolutionalNeuralNetwork.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Do not use this benchmark as this is only &quot;</span>
+                                  <span class="s2">&quot;a skeleton for further implementations.&quot;</span><span class="p">)</span></div>
 
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_check_configuration</span>
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_configuration_as_array</span>
     <span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dataset_fraction</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rng&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng_helper</span><span class="o">.</span><span class="n">get_rng</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">self_rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="c1"># if rng was not not, set rng for lasagne</span>
+        <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="n">num_epochs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_epochs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">steps</span><span class="p">)</span>
 
@@ -194,18 +195,25 @@
     <span class="nd">@AbstractBenchmark</span><span class="o">.</span><span class="n">_configuration_as_array</span>
     <span class="k">def</span> <span class="nf">objective_function_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rng&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng_helper</span><span class="o">.</span><span class="n">get_rng</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">self_rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="c1"># if rng was not not, set rng for lasagne</span>
+        <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lasagne</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+
         <span class="n">num_epochs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_epochs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">steps</span><span class="p">)</span>
 
         <span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="p">))</span>
         <span class="n">train_targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_targets</span><span class="p">))</span>
-        <span class="n">lc_curve</span><span class="p">,</span> <span class="n">cost_curve</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">valid_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_net</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train_targets</span><span class="p">,</span>
-                                                                      <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span><span class="p">,</span>
-                                                                      <span class="n">init_learning_rate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-                                                                      <span class="n">batch_size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                                                                      <span class="n">n_units_1</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
-                                                                      <span class="n">n_units_2</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
-                                                                      <span class="n">n_units_3</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">])),</span>
-                                                                      <span class="n">num_epochs</span><span class="o">=</span><span class="n">num_epochs</span><span class="p">)</span>
+        <span class="n">lc_curve</span><span class="p">,</span> <span class="n">cost_curve</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">valid_loss</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_net</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train_targets</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_targets</span><span class="p">,</span>
+                           <span class="n">init_learning_rate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                           <span class="n">batch_size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                           <span class="n">n_units_1</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+                           <span class="n">n_units_2</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+                           <span class="n">n_units_3</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">])),</span>
+                           <span class="n">num_epochs</span><span class="o">=</span><span class="n">num_epochs</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">lc_curve</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">cost_curve</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;function_value&#39;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
@@ -218,7 +226,8 @@
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="ConvolutionalNeuralNetwork.get_configuration_space"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork.get_configuration_space">[docs]</a>    <span class="k">def</span> <span class="nf">get_configuration_space</span><span class="p">():</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">CS</span><span class="o">.</span><span class="n">ConfigurationSpace</span><span class="p">()</span>
-        <span class="n">cs</span><span class="o">.</span><span class="n">generate_all_continuous_from_bounds</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()[</span><span class="s1">&#39;bounds&#39;</span><span class="p">])</span>
+        <span class="n">cs</span><span class="o">.</span><span class="n">generate_all_continuous_from_bounds</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="o">.</span>
+                                               <span class="n">get_meta_information</span><span class="p">()[</span><span class="s1">&#39;bounds&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">cs</span></div>
 
     <span class="nd">@staticmethod</span>
@@ -229,12 +238,13 @@
                            <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>  <span class="c1"># n_units_1</span>
                            <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>  <span class="c1"># n_units_2</span>
                            <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">]],</span>  <span class="c1"># n_units_3</span>
-                <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;@article{klein-bnn16a,&quot;</span>
-                               <span class="s2">&quot;author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},&quot;</span>
-                               <span class="s2">&quot;title = {Bayesian Neural Network for Predicting Learning Curves},&quot;</span>
-                               <span class="s2">&quot;booktitle = {NIPS 2016 Bayesian Neural Network Workshop},&quot;</span>
-                               <span class="s2">&quot;month = dec,&quot;</span>
-                               <span class="s2">&quot;year = </span><span class="si">{2016}</span><span class="s2">}&quot;</span><span class="p">]</span>
+                <span class="s1">&#39;references&#39;</span><span class="p">:</span>
+                    <span class="p">[</span><span class="s2">&quot;@article{klein-bnn16a,&quot;</span>
+       <span class="s2">&quot;author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},&quot;</span>
+       <span class="s2">&quot;title = {Bayesian Neural Network for Predicting Learning Curves},&quot;</span>
+       <span class="s2">&quot;booktitle = {NIPS 2016 Bayesian Neural Network Workshop},&quot;</span>
+       <span class="s2">&quot;month = dec,&quot;</span>
+       <span class="s2">&quot;year = </span><span class="si">{2016}</span><span class="s2">}&quot;</span><span class="p">]</span>
                 <span class="p">}</span></div>
 
 <div class="viewcode-block" id="ConvolutionalNeuralNetwork.iterate_minibatches"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetwork.iterate_minibatches">[docs]</a>    <span class="k">def</span> <span class="nf">iterate_minibatches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -264,39 +274,44 @@
         <span class="n">target_var</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">ivector</span><span class="p">(</span><span class="s1">&#39;targets&#39;</span><span class="p">)</span>
 
         <span class="c1"># Build net</span>
-        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">InputLayer</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>  <span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">InputLayer</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                   <span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                   <span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
                                             <span class="n">input_var</span><span class="o">=</span><span class="n">input_var</span><span class="p">)</span>
 
-        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">(</span><span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span>
-                                                                       <span class="n">num_filters</span><span class="o">=</span><span class="n">n_units_1</span><span class="p">,</span>
-                                                                       <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-                                                                       <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
-                                                                       <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                                                       <span class="n">W</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">HeNormal</span><span class="p">(),</span>
-                                                                       <span class="n">b</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
-                                                                       <span class="n">nonlinearity</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">rectify</span><span class="p">))</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">(</span>
+                <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span>
+                                           <span class="n">num_filters</span><span class="o">=</span><span class="n">n_units_1</span><span class="p">,</span>
+                                           <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                                           <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+                                           <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                           <span class="n">W</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">HeNormal</span><span class="p">(),</span>
+                                           <span class="n">b</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                                           <span class="n">nonlinearity</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">rectify</span><span class="p">))</span>
 
         <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">MaxPool2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">(</span><span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span>
-                                                                       <span class="n">num_filters</span><span class="o">=</span><span class="n">n_units_2</span><span class="p">,</span>
-                                                                       <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-                                                                       <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
-                                                                       <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                                                       <span class="n">W</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">HeNormal</span><span class="p">(),</span>
-                                                                       <span class="n">b</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
-                                                                       <span class="n">nonlinearity</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">rectify</span><span class="p">))</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">(</span>
+                <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span>
+                                           <span class="n">num_filters</span><span class="o">=</span><span class="n">n_units_2</span><span class="p">,</span>
+                                           <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                                           <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+                                           <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                           <span class="n">W</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">HeNormal</span><span class="p">(),</span>
+                                           <span class="n">b</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                                           <span class="n">nonlinearity</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">rectify</span><span class="p">))</span>
 
         <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">MaxPool2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">(</span><span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span>
-                                                                       <span class="n">num_filters</span><span class="o">=</span><span class="n">n_units_3</span><span class="p">,</span>
-                                                                       <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-                                                                       <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
-                                                                       <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                                                       <span class="n">W</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">HeNormal</span><span class="p">(),</span>
-                                                                       <span class="n">b</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
-                                                                       <span class="n">nonlinearity</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">rectify</span><span class="p">))</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">(</span>
+                <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span>
+                                           <span class="n">num_filters</span><span class="o">=</span><span class="n">n_units_3</span><span class="p">,</span>
+                                           <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                                           <span class="n">pad</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+                                           <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                           <span class="n">W</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">HeNormal</span><span class="p">(),</span>
+                                           <span class="n">b</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                                           <span class="n">nonlinearity</span><span class="o">=</span><span class="n">lasagne</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">rectify</span><span class="p">))</span>
 
         <span class="n">network</span> <span class="o">=</span> <span class="n">lasagne</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">MaxPool2DLayer</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
@@ -384,6 +399,24 @@
                                <span class="s2">&quot;keywords = </span><span class="si">{ML}</span><span class="s2">}&quot;</span>
                                <span class="p">)</span>
         <span class="k">return</span> <span class="n">d</span></div></div>
+
+
+<div class="viewcode-block" id="ConvolutionalNeuralNetworkOnSVHN"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN">[docs]</a><span class="k">class</span> <span class="nc">ConvolutionalNeuralNetworkOnSVHN</span><span class="p">(</span><span class="n">ConvolutionalNeuralNetwork</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ConvolutionalNeuralNetworkOnSVHN.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">SVHNData</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dm</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ConvolutionalNeuralNetworkOnSVHN.get_meta_information"><a class="viewcode-back" href="../../../../ml_benchmarks/conv_net.html#hpolib.benchmarks.ml.conv_net.ConvolutionalNeuralNetworkOnSVHN.get_meta_information">[docs]</a>    <span class="k">def</span> <span class="nf">get_meta_information</span><span class="p">():</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">ConvolutionalNeuralNetwork</span><span class="o">.</span><span class="n">get_meta_information</span><span class="p">()</span>
+        <span class="n">d</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;@inproceedings{SVHN,&quot;</span>
+                               <span class="s2">&quot;title = {Reading Digits in Natural Images with Unsupervised Feature Learning},&quot;</span>
+                               <span class="s2">&quot;author  = {Y. Netzer and T. Wang and A. Coates and A. Bissacco and B. Wu and A. Y. Ng},&quot;</span>
+                               <span class="s2">&quot;year  = 2011,&quot;</span>
+                               <span class="s2">&quot;booktitle = {NIPS Workshop on Deep Learning and Unsupervised Feature Learning 2011}&quot;</span>
+                               <span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span></div></div>
 </pre></div>
 
     </div>
@@ -401,7 +434,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
     </p>
   </div>
 </footer>

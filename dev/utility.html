@@ -7,10 +7,8 @@
     
     <title>Miscelanious utility functions &#8212; HPOlib2 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -110,40 +108,40 @@
   <div class="section" id="miscelanious-utility-functions">
 <h1>Miscelanious utility functions<a class="headerlink" href="#miscelanious-utility-functions" title="Permalink to this headline">¶</a></h1>
 <p>This submodule contains a few useful functions to add artificial noise and costs to synthetic benchmarks.</p>
-<span class="target" id="module-hpolib.benchmarks.synthetic_functions.misc"></span><p>Created on 2016/09/08</p>
+<span class="target" id="module-hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost"></span><p>Created on 2016/09/08</p>
 <p>&#64;author: Stefan Falkner, based on code from Aaron Klein</p>
 <dl class="class">
-<dt id="hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost">
-<em class="property">class </em><code class="descclassname">hpolib.benchmarks.synthetic_functions.misc.</code><code class="descname">SyntheticNoiseAndCost</code><span class="sig-paren">(</span><em>original_benchmark</em>, <em>sigma_min</em>, <em>sigma_max</em>, <em>k_noise</em>, <em>c_min</em>, <em>c_max</em>, <em>k_cost</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/misc.html#SyntheticNoiseAndCost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost" title="Permalink to this definition">¶</a></dt>
+<dt id="hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost">
+<em class="property">class </em><code class="descclassname">hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.</code><code class="descname">SyntheticNoiseAndCost</code><span class="sig-paren">(</span><em>original_benchmark</em>, <em>sigma_min</em>, <em>sigma_max</em>, <em>k_noise</em>, <em>c_min</em>, <em>c_max</em>, <em>k_cost</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/wrapper/synthetic_noise_and_cost.html#SyntheticNoiseAndCost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hpolib.abstract_benchmark.AbstractBenchmark</span></code></p>
 <dl class="method">
-<dt id="hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.cost_function">
-<code class="descname">cost_function</code><span class="sig-paren">(</span><em>dataset_fraction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/misc.html#SyntheticNoiseAndCost.cost_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.cost_function" title="Permalink to this definition">¶</a></dt>
+<dt id="hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.cost_function">
+<code class="descname">cost_function</code><span class="sig-paren">(</span><em>dataset_fraction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/wrapper/synthetic_noise_and_cost.html#SyntheticNoiseAndCost.cost_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.cost_function" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.get_configuration_space">
-<code class="descname">get_configuration_space</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/misc.html#SyntheticNoiseAndCost.get_configuration_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.get_configuration_space" title="Permalink to this definition">¶</a></dt>
+<dt id="hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.get_configuration_space">
+<code class="descname">get_configuration_space</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/wrapper/synthetic_noise_and_cost.html#SyntheticNoiseAndCost.get_configuration_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.get_configuration_space" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.get_meta_information">
-<code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/misc.html#SyntheticNoiseAndCost.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.get_meta_information" title="Permalink to this definition">¶</a></dt>
+<dt id="hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.get_meta_information">
+<code class="descname">get_meta_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/wrapper/synthetic_noise_and_cost.html#SyntheticNoiseAndCost.get_meta_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.get_meta_information" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.objective_function">
-<code class="descname">objective_function</code><span class="sig-paren">(</span><em>configuration</em>, <em>dataset_fraction=1</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/misc.html#SyntheticNoiseAndCost.objective_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.objective_function" title="Permalink to this definition">¶</a></dt>
+<dt id="hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.objective_function">
+<code class="descname">objective_function</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.objective_function" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.objective_function_test">
-<code class="descname">objective_function_test</code><span class="sig-paren">(</span><em>configuration</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/misc.html#SyntheticNoiseAndCost.objective_function_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.objective_function_test" title="Permalink to this definition">¶</a></dt>
+<dt id="hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.objective_function_test">
+<code class="descname">objective_function_test</code><span class="sig-paren">(</span><em>x</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/wrapper/synthetic_noise_and_cost.html#SyntheticNoiseAndCost.objective_function_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.objective_function_test" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.sigma_function">
-<code class="descname">sigma_function</code><span class="sig-paren">(</span><em>dataset_fraction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/misc.html#SyntheticNoiseAndCost.sigma_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.misc.SyntheticNoiseAndCost.sigma_function" title="Permalink to this definition">¶</a></dt>
+<dt id="hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.sigma_function">
+<code class="descname">sigma_function</code><span class="sig-paren">(</span><em>dataset_fraction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hpolib/benchmarks/synthetic_functions/wrapper/synthetic_noise_and_cost.html#SyntheticNoiseAndCost.sigma_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost.SyntheticNoiseAndCost.sigma_function" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -170,7 +168,7 @@
     </p>
     <p>
         &copy; Copyright 2016, Katharina Eggensperger, Matthias Feurer, Aaron Klein, Stefan Falkner.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
     </p>
   </div>
 </footer>
