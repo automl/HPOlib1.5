@@ -5,6 +5,7 @@ import ConfigSpace as CS
 
 from scipy import sparse
 from sklearn import svm
+from sklearn.model_selection import StratifiedShuffleSplit
 
 
 from hpolib.abstract_benchmark import AbstractBenchmark
@@ -56,13 +57,16 @@ class SupportVectorMachine(AbstractBenchmark):
     def objective_function(self, x, dataset_fraction=1, **kwargs):
         start_time = time.time()
 
-        # Shuffle training data
-        shuffle = self.rng.permutation(self.train.shape[0])
-        size = int(dataset_fraction * self.train.shape[0])
+        # Stratified shuffle training data
+        if np.round(dataset_fraction, 3) < 1.0:
+            sss = StratifiedShuffleSplit(n_splits=1, train_size=np.round(dataset_fraction, 3), test_size=None)
+            idx = list(sss.split(self.train, self.train_targets))[0][0]
 
-        # Split of dataset subset
-        train = self.train[shuffle[:size]]
-        train_targets = self.train_targets[shuffle[:size]]
+            train = self.train[idx]
+            train_targets = self.train_targets[idx]
+        else:
+            train = self.train
+            train_targets = self.train_targets
 
         # Transform hyperparameters to linear scale
         C = np.exp(float(x[0]))
@@ -158,3 +162,38 @@ class SvmOnCovertype(SupportVectorMachine):
     def get_data(self):
         dm = OpenMLHoldoutDataManager(openml_task_id=2118)
         return dm.load()
+
+
+class SvmOnLetter(SupportVectorMachine):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=236)
+        return dm.load()
+
+
+class SvmOnAdult(SupportVectorMachine):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=2117)
+        X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
+        from sklearn.preprocessing import Imputer
+        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+        imp.fit(X_train)
+        X_train = imp.transform(X_train)
+        X_val = imp.transform(X_val)
+        X_test = imp.transform(X_test)
+        return X_train, y_train, X_val, y_val, X_test, y_test
+
+
+class SvmOnHiggs(SupportVectorMachine):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=75101)
+        X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
+        from sklearn.preprocessing import Imputer
+        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+        imp.fit(X_train)
+        X_train = imp.transform(X_train)
+        X_val = imp.transform(X_val)
+        X_test = imp.transform(X_test)
+        return X_train, y_train, X_val, y_val, X_test, y_test
