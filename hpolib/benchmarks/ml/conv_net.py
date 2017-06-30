@@ -120,12 +120,12 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                            [4, 8],  # n_units_1
                            [4, 8],  # n_units_2
                            [4, 8]],  # n_units_3
-                'references': ["@article{klein-bnn16a,"
-                               "author = {A. Klein and S. Falkner and T. Springenberg and F. Hutter},"
-                               "title = {Bayesian Neural Network for Predicting Learning Curves},"
-                               "booktitle = {NIPS 2016 Bayesian Neural Network Workshop},"
-                               "month = dec,"
-                               "year = {2016}}"]
+                'references': ["@InProceedings{klein-aistats17,"
+                               "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
+                               "title = {Fast {Bayesian} Optimization of Machine"
+                               "Learning Hyperparameters on Large Datasets},"
+                               "booktitle = {Proceedings of the AISTATS conference},"
+                               "year = {2017}}"]
                 }
 
     def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
