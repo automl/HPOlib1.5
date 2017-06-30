@@ -112,6 +112,7 @@
 
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">sparse</span>
 <span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">svm</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">StratifiedShuffleSplit</span>
 
 
 <span class="kn">from</span> <span class="nn">hpolib.abstract_benchmark</span> <span class="k">import</span> <span class="n">AbstractBenchmark</span>
@@ -163,13 +164,16 @@
         <span class="n">rng</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rng&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng_helper</span><span class="o">.</span><span class="n">get_rng</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">self_rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 
-        <span class="c1"># Shuffle training data</span>
-        <span class="n">shuffle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dataset_fraction</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># Stratified shuffle training data</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dataset_fraction</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">sss</span> <span class="o">=</span> <span class="n">StratifiedShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dataset_fraction</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">test_size</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sss</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="c1"># Split of dataset subset</span>
-        <span class="n">train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">[</span><span class="n">shuffle</span><span class="p">[:</span><span class="n">size</span><span class="p">]]</span>
-        <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">[</span><span class="n">shuffle</span><span class="p">[:</span><span class="n">size</span><span class="p">]]</span>
+            <span class="n">train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span>
+            <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_targets</span>
 
         <span class="c1"># Transform hyperparameters to linear scale</span>
         <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -226,13 +230,12 @@
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Support Vector Machine&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>  <span class="c1"># C</span>
                            <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]],</span>  <span class="c1"># gamma</span>
-                <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;@article{klein-corr16,&quot;</span>
+                <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;@InProceedings{klein-aistats17,&quot;</span>
                                <span class="s2">&quot;author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},&quot;</span>
-                               <span class="s2">&quot;title = {Fast Bayesian Optimization of Machine Learning&quot;</span>
-                               <span class="s2">&quot;Hyperparameters on Large Datasets},&quot;</span>
-                               <span class="s2">&quot;journal = corr,&quot;</span>
-                               <span class="s2">&quot;llvolume = {abs/1605.07079},&quot;</span>
-                               <span class="s2">&quot;lurl = {http://arxiv.org/abs/1605.07079}, year = </span><span class="si">{2016}</span><span class="s2"> }&quot;</span><span class="p">]</span>
+                               <span class="s2">&quot;title = {Fast </span><span class="si">{Bayesian}</span><span class="s2"> Optimization of Machine&quot;</span>
+                               <span class="s2">&quot;Learning Hyperparameters on Large Datasets},&quot;</span>
+                               <span class="s2">&quot;booktitle = {Proceedings of the AISTATS conference},&quot;</span>
+                               <span class="s2">&quot;year = </span><span class="si">{2017}</span><span class="s2">}&quot;</span><span class="p">]</span>
                 <span class="p">}</span></div></div>
 
 
@@ -268,6 +271,41 @@
 <div class="viewcode-block" id="SvmOnCovertype.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnCovertype.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dm</span> <span class="o">=</span> <span class="n">OpenMLHoldoutDataManager</span><span class="p">(</span><span class="n">openml_task_id</span><span class="o">=</span><span class="mi">2118</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dm</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="SvmOnLetter"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnLetter">[docs]</a><span class="k">class</span> <span class="nc">SvmOnLetter</span><span class="p">(</span><span class="n">SupportVectorMachine</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SvmOnLetter.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnLetter.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">OpenMLHoldoutDataManager</span><span class="p">(</span><span class="n">openml_task_id</span><span class="o">=</span><span class="mi">236</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dm</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="SvmOnAdult"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnAdult">[docs]</a><span class="k">class</span> <span class="nc">SvmOnAdult</span><span class="p">(</span><span class="n">SupportVectorMachine</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SvmOnAdult.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnAdult.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">OpenMLHoldoutDataManager</span><span class="p">(</span><span class="n">openml_task_id</span><span class="o">=</span><span class="mi">2117</span><span class="p">)</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">Imputer</span>
+        <span class="n">imp</span> <span class="o">=</span> <span class="n">Imputer</span><span class="p">(</span><span class="n">missing_values</span><span class="o">=</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">imp</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+        <span class="n">X_train</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+        <span class="n">X_val</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_val</span><span class="p">)</span>
+        <span class="n">X_test</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span></div></div>
+
+
+<div class="viewcode-block" id="SvmOnHiggs"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnHiggs">[docs]</a><span class="k">class</span> <span class="nc">SvmOnHiggs</span><span class="p">(</span><span class="n">SupportVectorMachine</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SvmOnHiggs.get_data"><a class="viewcode-back" href="../../../../ml_benchmarks/svm.html#hpolib.benchmarks.ml.svm_benchmark.SvmOnHiggs.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dm</span> <span class="o">=</span> <span class="n">OpenMLHoldoutDataManager</span><span class="p">(</span><span class="n">openml_task_id</span><span class="o">=</span><span class="mi">75101</span><span class="p">)</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">Imputer</span>
+        <span class="n">imp</span> <span class="o">=</span> <span class="n">Imputer</span><span class="p">(</span><span class="n">missing_values</span><span class="o">=</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">imp</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+        <span class="n">X_train</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+        <span class="n">X_val</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_val</span><span class="p">)</span>
+        <span class="n">X_test</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span></div></div>
 </pre></div>
 
     </div>
