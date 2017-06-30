@@ -3,9 +3,7 @@ import os
 
 import numpy as np
 import openml
-
-from scipy.sparse.csr import csr_matrix
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 import hpolib
 from hpolib.util.data_manager import HoldoutDataManager, \
@@ -44,6 +42,8 @@ def _load_data(task_id):
     X_test = X[test_indices]
     y_test = y[test_indices]
 
+    # TODO replace by more efficient function which only reads in the data
+    # saved in the arff file describing the attributes/features
     dataset = task.get_dataset()
     _, _, categorical_indicator = dataset.get_data(
         target=task.target_name,
@@ -71,7 +71,7 @@ class OpenMLHoldoutDataManager(HoldoutDataManager):
             os.makedirs(self.save_to)
 
         openml.config.apikey = '610344db6388d9ba34f6db45a3cf71de'
-        openml.config.set_cache_directory(self.save_to, self.save_to)
+        openml.config.set_cache_directory(self.save_to)
 
         super(OpenMLHoldoutDataManager, self).__init__()
 
@@ -113,8 +113,7 @@ class OpenMLHoldoutDataManager(HoldoutDataManager):
 class OpenMLCrossvalidationDataManager(CrossvalidationDataManager):
     def __init__(self, openml_task_id, rng=None):
 
-        super().__init__()
-
+        self.logger = logging.getLogger("DataManager")
         self.save_to = os.path.join(hpolib._config.data_dir, "OpenML")
         self.task_id = openml_task_id
 
@@ -128,7 +127,7 @@ class OpenMLCrossvalidationDataManager(CrossvalidationDataManager):
             os.makedirs(self.save_to)
 
         openml.config.apikey = '610344db6388d9ba34f6db45a3cf71de'
-        openml.config.set_cache_directory(self.save_to, self.save_to)
+        openml.config.set_cache_directory(self.save_to)
 
         super(OpenMLCrossvalidationDataManager, self).__init__()
 
