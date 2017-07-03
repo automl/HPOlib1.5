@@ -1,3 +1,5 @@
+import os
+import shutil
 import unittest
 import unittest.mock
 
@@ -34,6 +36,15 @@ class TestAutoSklearnBenchmark(unittest.TestCase):
     @unittest.mock.patch('hpolib.benchmarks.ml.autosklearn_benchmark.AutoSklearnBenchmark.__init__',
                          unittest.mock.Mock(return_value=None))
     def test_get_data_manager(self):
+        real_cache_dir = hpolib._config.data_dir
+        cache_dir = os.path.join(os.path.abspath('.'), '.cache')
+        hpolib._config.data_dir = cache_dir
+        autosklearn_cache_dir = os.path.join(cache_dir, 'auto-sklearn')
+        try:
+            os.makedirs(autosklearn_cache_dir)
+        except:
+            pass
+
         # Test an allowed task - a task which is a 33% holdout task
         auto = hpolib.benchmarks.ml.autosklearn_benchmark.AutoSklearnBenchmark()
         auto._get_data_manager(289)
@@ -45,6 +56,9 @@ class TestAutoSklearnBenchmark(unittest.TestCase):
         self.assertEqual(auto.data_manager.info['task'], MULTICLASS_CLASSIFICATION)
         self.assertEqual(auto.data_manager.feat_type, ['numerical', 'numerical',
                                                        'numerical', 'numerical'])
+
+        hpolib._config.data_dir = real_cache_dir
+        shutil.rmtree(cache_dir)
 
         # Test that tasks with more than one repeat fail
         auto = hpolib.benchmarks.ml.autosklearn_benchmark.AutoSklearnBenchmark()
