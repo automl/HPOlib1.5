@@ -14,25 +14,23 @@ from sklearn.model_selection import StratifiedShuffleSplit
 
 class ParamNetBenchmark(AbstractBenchmark):
 
-    def __init__(self, train, train_targets, valid, valid_targets, test, test_targets,
-                 do_early_stopping, n_epochs, rng=None):
+    def __init__(self, n_epochs=100, do_early_stopping=False, rng=None):
 
-        self.train = train
-        self.train_targets = train_targets
-        self.valid = valid
-        self.valid_targets = valid_targets
-        self.test = test
-        self.test_targets = test_targets
+        self.train, self.train_targets, self.valid, self.valid_targets, \
+            self.test, self.test_targets = self.get_data()
         self.n_epochs = n_epochs
         self.do_early_stopping = do_early_stopping
 
         # Use 10 time the number of classes as lower bound for the dataset
         # fraction
-        n_classes = np.unique(self.train_targets).shape[0]
-        self.s_min = float(10 * n_classes) / self.train.shape[0]
+        self.n_classes = np.unique(self.train_targets).shape[0]
+        self.s_min = float(10 * self.n_classes) / self.train.shape[0]
         self.rng = rng_helper.create_rng(rng)
 
         super(ParamNetBenchmark, self).__init__()
+
+    def get_data(self):
+        raise NotImplementedError()
 
     @AbstractBenchmark._check_configuration
     def objective_function(self, x, dataset_fraction=1, **kwargs):
@@ -51,7 +49,7 @@ class ParamNetBenchmark(AbstractBenchmark):
             train = self.train
             train_targets = self.train_targets
 
-        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1], n_classes=np.unique(train_targets).shape[0])
+        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1], n_classes=self.n_classes)
         history = pc.train(train, train_targets, self.valid, self.valid_targets,
                            n_epochs=self.n_epochs, do_early_stopping=self.do_early_stopping)
         y = 1 - history.history["val_acc"][-1]
@@ -73,7 +71,7 @@ class ParamNetBenchmark(AbstractBenchmark):
         train = np.concatenate((self.train, self.valid))
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
 
-        pc = ParamFCNetClassification(config=x, n_feat=X_train.shape[1], n_classes=np.unique(y_train).shape[0])
+        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1], n_classes=self.n_classes)
         history = pc.train(train, train_targets, self.test, self.test_targets,
                            n_epochs=self.n_epochs, do_early_stopping=self.do_early_stopping)
         y = 1 - history.history["val_acc"][-1]
