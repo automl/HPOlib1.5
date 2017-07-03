@@ -118,6 +118,11 @@ year = {2015},
 publisher = {Curran Associates, Inc.},
 url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
 }"""]}
+        info["cvfolds"] = 10
+        info["wallclocklimit"] = 24 * 60 * 60
+        info['num_function_evals'] = np.inf
+        info['cutoff'] = 1800
+        info['memorylimit'] = 1024 * 3
         return info
 
     @AbstractBenchmark._check_configuration
@@ -187,17 +192,6 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
                                   'random_forest', 'sgd']}
         exclude = {}
         return include, exclude
-
-    @staticmethod
-    def get_meta_information():
-        d = AutoSklearnBenchmark.get_meta_information()
-
-        d["cvfolds"] = 10
-        d["wallclocklimit"] = 24 * 60 * 60
-        d['num_function_evals'] = np.inf
-        d['cutoff'] = 1800
-        d['memorylimit'] = 1024 * 3
-        return d
 
 
 class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
