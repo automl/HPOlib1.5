@@ -231,7 +231,7 @@ class Adult(MulticlassClassificationBenchmark):
 
     @staticmethod
     def get_meta_information():
-        d = super().get_meta_information()
+        d = AutoSklearnBenchmark.get_meta_information()
 
         d["references"].append("""@inproceedings{Kohavi_kdd96,
 title={Scaling Up the Accuracy of Naive-Bayes Classifiers: A Decision-Tree Hybrid.},
