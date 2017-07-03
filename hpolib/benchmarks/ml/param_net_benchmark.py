@@ -39,8 +39,18 @@ class ParamNetBenchmark(AbstractBenchmark):
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
+        fold = int(float(kwargs.get("fold", 0)))
+        folds = kwargs.get('folds', 1)
+
+        if fold == folds:
+            # Test fold, run function_test
+            return self.objective_function_test(x, rng=rng)
+
         if dataset_fraction < 1.0:
-            sss = StratifiedShuffleSplit(n_splits=1, train_size=np.round(dataset_fraction, 3), test_size=None)
+            sss = StratifiedShuffleSplit(n_splits=1,
+                                         train_size=np.round(dataset_fraction, 3),
+                                         test_size=None,
+                                         random_state=self.rng)
             idx = list(sss.split(self.train, self.train_targets))[0][0]
 
             train = self.train[idx]
@@ -49,9 +59,11 @@ class ParamNetBenchmark(AbstractBenchmark):
             train = self.train
             train_targets = self.train_targets
 
-        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1], n_classes=self.n_classes)
+        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1],
+                                      n_classes=self.n_classes)
         history = pc.train(train, train_targets, self.valid, self.valid_targets,
-                           n_epochs=self.n_epochs, do_early_stopping=self.do_early_stopping)
+                           n_epochs=self.n_epochs,
+                           do_early_stopping=self.do_early_stopping)
         y = 1 - history.history["val_acc"][-1]
 
         if not np.isfinite(y):
@@ -66,14 +78,19 @@ class ParamNetBenchmark(AbstractBenchmark):
         start_time = time.time()
 
         rng = kwargs.get("rng", None)
-        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        self.rng = rng_helper.get_rng(rng=rng,
+                                      self_rng=self.rng)
 
         train = np.concatenate((self.train, self.valid))
-        train_targets = np.concatenate((self.train_targets, self.valid_targets))
+        train_targets = np.concatenate((self.train_targets,
+                                        self.valid_targets))
 
-        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1], n_classes=self.n_classes)
-        history = pc.train(train, train_targets, self.test, self.test_targets,
-                           n_epochs=self.n_epochs, do_early_stopping=self.do_early_stopping)
+        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1],
+                                      n_classes=self.n_classes)
+        history = pc.train(train, train_targets, self.test,
+                           self.test_targets,
+                           n_epochs=self.n_epochs,
+                           do_early_stopping=self.do_early_stopping)
         y = 1 - history.history["val_acc"][-1]
 
         if not np.isfinite(y):
@@ -91,8 +108,9 @@ class ParamNetBenchmark(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         info = dict()
+        info['references'] = ["N.A.", ]
         info["cvfolds"] = 1
-        info["wallclocklimit"] = np.inf
+        info["wallclocklimit"] = 24*60*60
         info['num_function_evals'] = 100
         info['cutoff'] = 1800
         info['memorylimit'] = 1024 * 3
