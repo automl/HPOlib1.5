@@ -11,6 +11,9 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
+import keras.backend as K
+import tensorflow as T
+
 
 class ParamNetBenchmark(AbstractBenchmark):
 
@@ -58,6 +61,11 @@ class ParamNetBenchmark(AbstractBenchmark):
         else:
             train = self.train
             train_targets = self.train_targets
+
+        cfg = T.ConfigProto(intra_op_parallelism_threads=1,
+                            inter_op_parallelism_threads=1)
+        session = T.Session(config=cfg)
+        K.set_session(session)
 
         pc = ParamFCNetClassification(config=x, n_feat=train.shape[1],
                                       n_classes=self.n_classes)
