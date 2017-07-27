@@ -9,6 +9,8 @@ from hpolib.util.data_manager import MNISTData
 from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager
 from hpolib.abstract_benchmark import AbstractBenchmark
 
+import openml
+
 from sklearn.model_selection import StratifiedShuffleSplit
 
 import keras.backend as K
@@ -192,3 +194,46 @@ class ParamNetOnLetter(ParamNetBenchmark):
         X_test, _, _ = zero_mean_unit_var_normalization(X_test, mean, std)
 
         return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+
+class ParamNetOnOpenML100(ParamNetBenchmark):
+
+    """Abstract Class to run ParamNet on OpenML100 datasets
+
+    Attributes:
+    -----------
+    task_id : int
+        Task id used to retrieve dataset from openml.org
+    """
+
+    def __init__(self, task_id, n_epochs=100, do_early_stopping=False,
+                 rng=None):
+        self.task_id = task_id
+        super(ParamNetOnOpenML100, self).__init__()
+
+    def get_data(self):
+        """Gets data from OpenMl (downloads if necessary)
+
+        Returns
+        -------
+        X_train, y_train, X_valid, y_valid, X_test, y_test
+        """
+        dm = OpenMLHoldoutDataManager(openml_task_id=self.task_id)
+
+        X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
+
+        # Zero mean / unit std normalization
+        X_train, mean, std = zero_mean_unit_var_normalization(X_train)
+        X_valid, _, _ = zero_mean_unit_var_normalization(X_valid, mean, std)
+        X_test, _, _ = zero_mean_unit_var_normalization(X_test, mean, std)
+
+        return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+all_tasks = openml.tasks.list_tasks(task_type_id=1, tag='study_14')
+for task_id in all_tasks:
+    benchmark_string = """class ParamNet_OpenML100_%d(ParamNetOnOpenML100):
+
+     def __init__(self, n_epochs=100, do_early_stopping=False, rng=None):
+         super().__init__(%d, rng=rng) """ % (task_id, task_id)
+
+    exec(benchmark_string)
