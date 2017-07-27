@@ -5,6 +5,7 @@ import pickle
 import tempfile
 
 import lockfile
+import openml
 
 import autosklearn
 import autosklearn.evaluation
@@ -209,7 +210,6 @@ class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
         return cs
 
 
-
 class Sick(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 38."""
     def __init__(self, rng=None):
@@ -312,3 +312,13 @@ class FBIS_WC(MulticlassClassificationBenchmark):
 
     def __init__(self, rng=None):
         super().__init__(75197, rng=rng)
+
+
+all_tasks = openml.tasks.list_tasks(task_type_id=1, tag='study_14')
+for task_id in all_tasks:
+    benchmark_string = """class OpenML100_%d(MulticlassClassificationBenchmark):
+
+     def __init__(self, rng=None):
+         super().__init__(%d, rng=rng) """ % (task_id, task_id)
+
+    exec(benchmark_string)
