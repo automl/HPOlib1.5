@@ -5,7 +5,7 @@ import pickle
 import tempfile
 
 import lockfile
-import openml
+#import openml
 
 import autosklearn
 import autosklearn.evaluation
