@@ -20,6 +20,7 @@ import tensorflow as T
 class ParamNetBenchmark(AbstractBenchmark):
 
     def __init__(self, n_epochs=100, do_early_stopping=False, rng=None):
+        super(ParamNetBenchmark, self).__init__(rng=rng)
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
@@ -30,9 +31,6 @@ class ParamNetBenchmark(AbstractBenchmark):
         # fraction
         self.n_classes = np.unique(self.train_targets).shape[0]
         self.s_min = float(10 * self.n_classes) / self.train.shape[0]
-        self.rng = rng_helper.create_rng(rng)
-
-        super(ParamNetBenchmark, self).__init__()
 
     def get_data(self):
         raise NotImplementedError()
