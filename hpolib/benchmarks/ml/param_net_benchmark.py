@@ -9,7 +9,7 @@ from hpolib.util.data_manager import MNISTData
 from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager
 from hpolib.abstract_benchmark import AbstractBenchmark
 
-import openml
+#import openml
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
@@ -124,6 +124,7 @@ class ParamNetBenchmark(AbstractBenchmark):
         info['num_function_evals'] = 100
         info['cutoff'] = 1800
         info['memorylimit'] = 1024 * 3
+        info['compatible_with_commit'] = "2400236"
         return info
 
 
@@ -150,7 +151,7 @@ class ParamNetOnMnist(ParamNetBenchmark):
 class ParamNetOnVehicle(ParamNetBenchmark):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75191)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75191, rng=self.rng)
         X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
 
         # Make sparse matrices dense
@@ -169,7 +170,7 @@ class ParamNetOnVehicle(ParamNetBenchmark):
 class ParamNetOnCovertype(ParamNetBenchmark):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=2118)
+        dm = OpenMLHoldoutDataManager(openml_task_id=2118, rng=self.rng)
 
         X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
 
@@ -184,7 +185,7 @@ class ParamNetOnCovertype(ParamNetBenchmark):
 class ParamNetOnLetter(ParamNetBenchmark):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=236)
+        dm = OpenMLHoldoutDataManager(openml_task_id=236, rng=self.rng)
 
         X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
 
@@ -209,7 +210,9 @@ class ParamNetOnOpenML100(ParamNetBenchmark):
     def __init__(self, task_id, n_epochs=100, do_early_stopping=False,
                  rng=None):
         self.task_id = task_id
-        super(ParamNetOnOpenML100, self).__init__()
+        super(ParamNetOnOpenML100, self).\
+            __init__(n_epochs=n_epochs, do_early_stopping=do_early_stopping,
+                     rng=rng)
 
     def get_data(self):
         """Gets data from OpenMl (downloads if necessary)
@@ -218,7 +221,7 @@ class ParamNetOnOpenML100(ParamNetBenchmark):
         -------
         X_train, y_train, X_valid, y_valid, X_test, y_test
         """
-        dm = OpenMLHoldoutDataManager(openml_task_id=self.task_id)
+        dm = OpenMLHoldoutDataManager(openml_task_id=self.task_id, rng=self.rng)
 
         X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
 
@@ -229,7 +232,18 @@ class ParamNetOnOpenML100(ParamNetBenchmark):
 
         return X_train, y_train, X_valid, y_valid, X_test, y_test
 
-all_tasks = openml.tasks.list_tasks(task_type_id=1, tag='study_14')
+all_tasks = [258, 259, 261, 262, 266, 267, 271, 273, 275, 279, 283, 288, 2120,
+             2121, 2125, 336, 75093, 75092, 75095, 75097, 75099, 75103, 75107,
+             75106, 75109, 75108, 75112, 75129, 75128, 75135, 146574, 146575,
+             146572, 146573, 146578, 146579, 146576, 146577, 75154, 146582,
+             146583, 75156, 146580, 75159, 146581, 146586, 146587, 146584,
+             146585, 146590, 146591, 146588, 146589, 75169, 146594, 146595,
+             146592, 146593, 146598, 146599, 146596, 146597, 146602, 146603,
+             146600, 146601, 75181, 146604, 146605, 75215, 75217, 75219, 75221,
+             75225, 75227, 75231, 75230, 75232, 75235, 3043, 75236, 75239, 3047,
+             232, 233, 236, 3053, 3054, 3055, 241, 242, 244, 245, 246, 248, 250,
+             251, 252, 253, 254]
+# all_tasks = openml.tasks.list_tasks(task_type_id=1, tag='study_14')
 for task_id in all_tasks:
     benchmark_string = """class ParamNet_OpenML100_%d(ParamNetOnOpenML100):
 
