@@ -239,7 +239,9 @@ class ParamNetOnOpenML100_Holdout(ParamNetBenchmark):
         X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
 
         # Zero mean / unit std normalization
-        X_train, mean, std = zero_mean_unit_var_normalization(X_train)
+        _, mean, std = zero_mean_unit_var_normalization(X_train)
+        std += 1e-8
+        X_train, _, _ = zero_mean_unit_var_normalization(X_train, mean, std)
         X_valid, _, _ = zero_mean_unit_var_normalization(X_valid, mean, std)
         X_test, _, _ = zero_mean_unit_var_normalization(X_test, mean, std)
 
@@ -284,11 +286,12 @@ class ParamNetOnOpenML100_Crossvalidation(ParamNetBenchmark):
         X_train, y_train, None, None, X_test, y_test
         """
         dm = OpenMLCrossvalidationDataManager(openml_task_id=self.task_id, rng=self.rng)
-
         X_train, y_train, X_test, y_test = dm.load()
 
         # Zero mean / unit std normalization
-        X_train, mean, std = zero_mean_unit_var_normalization(X_train)
+        _, mean, std = zero_mean_unit_var_normalization(X_train)
+        std += 1e-8
+        X_train, _, _ = zero_mean_unit_var_normalization(X_train, mean, std)
         X_test, _, _ = zero_mean_unit_var_normalization(X_test, mean, std)
 
         return X_train, y_train, None, None, X_test, y_test
