@@ -6,12 +6,13 @@ from param_net.util import zero_mean_unit_var_normalization
 
 from hpolib.util import rng_helper
 from hpolib.util.data_manager import MNISTData
-from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager
+from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager, \
+    OpenMLCrossvalidationDataManager
 from hpolib.abstract_benchmark import AbstractBenchmark
 
 #import openml
 
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
 
 import keras.backend as K
 import tensorflow as T
@@ -19,13 +20,13 @@ import tensorflow as T
 
 class ParamNetBenchmark(AbstractBenchmark):
 
-    def __init__(self, n_epochs=100, do_early_stopping=False, rng=None):
+    def __init__(self, n_epochs=100, early_stopping=False, rng=None):
         super(ParamNetBenchmark, self).__init__(rng=rng)
 
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
         self.n_epochs = n_epochs
-        self.do_early_stopping = do_early_stopping
+        self.early_stopping = early_stopping
 
         # Use 10 time the number of classes as lower bound for the dataset
         # fraction
@@ -39,6 +40,7 @@ class ParamNetBenchmark(AbstractBenchmark):
     def objective_function(self, x, dataset_fraction=1, **kwargs):
         start_time = time.time()
 
+        time_limit_s = kwargs.get("cutoff", None)
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
@@ -62,20 +64,9 @@ class ParamNetBenchmark(AbstractBenchmark):
             train = self.train
             train_targets = self.train_targets
 
-        cfg = T.ConfigProto(intra_op_parallelism_threads=1,
-                            inter_op_parallelism_threads=1)
-        session = T.Session(config=cfg)
-        K.set_session(session)
-
-        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1],
-                                      n_classes=self.n_classes)
-        history = pc.train(train, train_targets, self.valid, self.valid_targets,
-                           n_epochs=self.n_epochs,
-                           do_early_stopping=self.do_early_stopping)
-        y = 1 - history.history["val_acc"][-1]
-
-        if not np.isfinite(y):
-            y = 1
+        y = self._train(x, train_X=train, train_y=train_targets,
+                        valid_X=self.valid, valid_y=self.valid_targets,
+                        time_limit_s=time_limit_s)
 
         c = time.time() - start_time
 
@@ -85,6 +76,7 @@ class ParamNetBenchmark(AbstractBenchmark):
     def objective_function_test(self, x, **kwargs):
         start_time = time.time()
 
+        time_limit_s = kwargs.get("cutoff", None)
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng,
                                       self_rng=self.rng)
@@ -93,20 +85,38 @@ class ParamNetBenchmark(AbstractBenchmark):
         train_targets = np.concatenate((self.train_targets,
                                         self.valid_targets))
 
-        pc = ParamFCNetClassification(config=x, n_feat=train.shape[1],
-                                      n_classes=self.n_classes)
-        history = pc.train(train, train_targets, self.test,
-                           self.test_targets,
-                           n_epochs=self.n_epochs,
-                           do_early_stopping=self.do_early_stopping)
-        y = 1 - history.history["val_acc"][-1]
-
-        if not np.isfinite(y):
-            y = 1
+        y = self._train(x, train_X=train, train_y=train_targets,
+                        valid_X=self.test, valid_y=self.test_targets,
+                        time_limit_s=time_limit_s)
 
         c = time.time() - start_time
 
         return {'function_value': y, "cost": c}
+
+    def _train(self, x, train_X, train_y, valid_X, valid_y, time_limit_s=None):
+        cfg = T.ConfigProto(intra_op_parallelism_threads=1,
+                            inter_op_parallelism_threads=1)
+        session = T.Session(config=cfg)
+        print(train_y.shape, train_X.shape)
+        print(valid_y.shape, valid_X.shape)
+
+        K.set_session(session)
+        print("Use a timelimit of %s" % str(time_limit_s))
+        pc = ParamFCNetClassification(config=x, n_feat=train_X.shape[1],
+                                      n_classes=self.n_classes,
+                                      max_num_epochs=self.n_epochs,
+                                      metrics=['accuracy'], verbose=1,
+                                      early_stopping=self.early_stopping)
+
+        history = pc.train(train_X, train_y, valid_X, valid_y,
+                           shuffle=True, n_epochs=self.n_epochs,
+                           time_limit_s=time_limit_s)
+        print(history)
+        y = 1 - history["val_acc"][-1]
+
+        if not np.isfinite(y):
+            y = 1
+        return y
 
     @staticmethod
     def get_configuration_space(max_num_layers=10):
@@ -122,7 +132,7 @@ class ParamNetBenchmark(AbstractBenchmark):
         info['num_function_evals'] = 100
         info['cutoff'] = 1800
         info['memorylimit'] = 1024 * 3
-        info['compatible_with_commit'] = "2400236"
+        info['compatible_with_commit'] = "f52903a"
         return info
 
 
@@ -195,7 +205,7 @@ class ParamNetOnLetter(ParamNetBenchmark):
         return X_train, y_train, X_valid, y_valid, X_test, y_test
 
 
-class ParamNetOnOpenML100(ParamNetBenchmark):
+class ParamNetOnOpenML100_Holdout(ParamNetBenchmark):
 
     """Abstract Class to run ParamNet on OpenML100 datasets
 
@@ -203,23 +213,28 @@ class ParamNetOnOpenML100(ParamNetBenchmark):
     -----------
     task_id : int
         Task id used to retrieve dataset from openml.org
+    n_epochs : int
+        Number of epochs to train this network
+    early_stopping : bool
+        Whether to do early stopping or not
+    rng : int/np.random.RandomState
+        Will be used to generate train/valid split
     """
 
-    def __init__(self, task_id, n_epochs=100, do_early_stopping=False,
-                 rng=None):
+    def __init__(self, task_id, n_epochs=100, early_stopping=False, rng=None):
         self.task_id = task_id
-        super(ParamNetOnOpenML100, self).\
-            __init__(n_epochs=n_epochs, do_early_stopping=do_early_stopping,
-                     rng=rng)
+        super().__init__(n_epochs=n_epochs, early_stopping=early_stopping,
+                         rng=rng)
 
     def get_data(self):
-        """Gets data from OpenMl (downloads if necessary)
+        """Abstract Class to run ParamNet on OpenML100 datasets using holdout
 
         Returns
         -------
         X_train, y_train, X_valid, y_valid, X_test, y_test
         """
-        dm = OpenMLHoldoutDataManager(openml_task_id=self.task_id, rng=self.rng)
+        dm = OpenMLHoldoutDataManager(openml_task_id=self.task_id,
+                                      rng=self.rng)
 
         X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
 
@@ -229,6 +244,97 @@ class ParamNetOnOpenML100(ParamNetBenchmark):
         X_test, _, _ = zero_mean_unit_var_normalization(X_test, mean, std)
 
         return X_train, y_train, X_valid, y_valid, X_test, y_test
+
+
+class ParamNetOnOpenML100_Crossvalidation(ParamNetBenchmark):
+
+    """Abstract Class to run ParamNet on OpenML100 datasets using crossvalidation
+
+    Attributes:
+    -----------
+    task_id : int
+        Task id used to retrieve dataset from openml.org
+    n_epochs : int
+        Number of epochs to train this network
+    early_stopping : bool
+        Whether to do early stopping or not
+    rng : int/np.random.RandomState
+        Will be used to generate train/valid split
+    """
+
+    def __init__(self, task_id, n_epochs=100, early_stopping=False, rng=None):
+        self.task_id = task_id
+        self.folds = ParamNetOnOpenML100_Crossvalidation.\
+                                              get_meta_information()["cvfolds"]
+        super().__init__(n_epochs=n_epochs, early_stopping=early_stopping,
+                         rng=rng)
+
+    @staticmethod
+    def get_meta_information():
+        d = ParamNetBenchmark.get_meta_information()
+        d["cvfolds"] = 10
+        return d
+
+    def get_data(self):
+        """Gets data from OpenMl (downloads if necessary)
+        *NOTE* also applies zero-mean unit-variance normalization
+
+        Returns
+        -------
+        X_train, y_train, None, None, X_test, y_test
+        """
+        dm = OpenMLCrossvalidationDataManager(openml_task_id=self.task_id, rng=self.rng)
+
+        X_train, y_train, X_test, y_test = dm.load()
+
+        # Zero mean / unit std normalization
+        X_train, mean, std = zero_mean_unit_var_normalization(X_train)
+        X_test, _, _ = zero_mean_unit_var_normalization(X_test, mean, std)
+
+        return X_train, y_train, None, None, X_test, y_test
+
+    @AbstractBenchmark._check_configuration
+    def objective_function(self, x, **kwargs):
+        start_time = time.time()
+
+        time_limit_s = kwargs.get("cutoff", None)
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+
+        fold = int(float(kwargs.get("fold", 0)))
+        folds = kwargs.get('folds', self.folds)
+
+        if fold == folds:
+            # Test fold, run function_test
+            return self.objective_function_test(x, rng=rng)
+
+        # Compute crossvalidation splits
+        kf = StratifiedKFold(n_splits=folds, shuffle=True,
+                             random_state=self.rng)
+
+        # Get indices for required fold
+        train_idx = None
+        valid_idx = None
+        for idx, split in enumerate(kf.split(X=self.train,
+                                             y=self.train_targets)):
+            if idx == fold:
+                train_idx = split[0]
+                valid_idx = split[1]
+                break
+
+        valid = self.train[valid_idx, :]
+        valid_targets = self.train_targets[valid_idx]
+
+        train = self.train[train_idx, :]
+        train_targets = self.train_targets[train_idx]
+
+        y = self._train(x=x, train_X=train, train_y=train_targets,
+                        valid_X=valid, valid_y=valid_targets,
+                        time_limit_s=time_limit_s)
+        c = time.time() - start_time
+
+        return {'function_value': y, "cost": c}
+
 
 all_tasks = [258, 259, 261, 262, 266, 267, 271, 273, 275, 279, 283, 288, 2120,
              2121, 2125, 336, 75093, 75092, 75095, 75097, 75099, 75103, 75107,
@@ -243,9 +349,20 @@ all_tasks = [258, 259, 261, 262, 266, 267, 271, 273, 275, 279, 283, 288, 2120,
              251, 252, 253, 254]
 # all_tasks = openml.tasks.list_tasks(task_type_id=1, tag='study_14')
 for task_id in all_tasks:
-    benchmark_string = """class ParamNet_OpenML100_%d(ParamNetOnOpenML100):
+    benchmark_string = """class ParamNet_OpenML100_HO_%d(ParamNetOnOpenML100_Holdout):
 
-     def __init__(self, n_epochs=100, do_early_stopping=False, rng=None):
-         super().__init__(%d, rng=rng) """ % (task_id, task_id)
+     def __init__(self, n_epochs=100, early_stopping=False, rng=None):
+         super().__init__(%d, n_epochs=n_epochs, early_stopping=early_stopping,
+         rng=rng) """ % (task_id, task_id)
+
+    exec(benchmark_string)
+
+# all_tasks = openml.tasks.list_tasks(task_type_id=1, tag='study_14')
+for task_id in all_tasks:
+    benchmark_string = """class ParamNet_OpenML100_CV_%d(ParamNetOnOpenML100_Crossvalidation):
+
+     def __init__(self, n_epochs=100, early_stopping=False, rng=None):
+         super().__init__(%d, n_epochs=n_epochs, early_stopping=early_stopping,
+         rng=rng) """ % (task_id, task_id)
 
     exec(benchmark_string)
