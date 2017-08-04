@@ -97,8 +97,8 @@ class ParamNetBenchmark(AbstractBenchmark):
         cfg = T.ConfigProto(intra_op_parallelism_threads=1,
                             inter_op_parallelism_threads=1)
         session = T.Session(config=cfg)
-        print(train_y.shape, train_X.shape)
-        print(valid_y.shape, valid_X.shape)
+        print("Training on: ", train_y.shape, train_X.shape)
+        print("Validate on: ", valid_y.shape, valid_X.shape)
 
         K.set_session(session)
         print("Use a timelimit of %s" % str(time_limit_s))
