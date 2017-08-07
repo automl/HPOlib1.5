@@ -338,6 +338,23 @@ class ParamNetOnOpenML100_Crossvalidation(ParamNetBenchmark):
 
         return {'function_value': y, "cost": c}
 
+    @AbstractBenchmark._check_configuration
+    def objective_function_test(self, x, **kwargs):
+        # Need to redefine this as we do not have validation data
+        start_time = time.time()
+
+        time_limit_s = kwargs.get("cutoff", None)
+        rng = kwargs.get("rng", None)
+        self.rng = rng_helper.get_rng(rng=rng,
+                                      self_rng=self.rng)
+
+        y = self._train(x, train_X=self.train, train_y=self.train_targets,
+                        valid_X=self.test, valid_y=self.test_targets,
+                        time_limit_s=time_limit_s)
+
+        c = time.time() - start_time
+
+        return {'function_value': y, "cost": c}
 
 all_tasks = [258, 259, 261, 262, 266, 267, 271, 273, 275, 279, 283, 288, 2120,
              2121, 2125, 336, 75093, 75092, 75095, 75097, 75099, 75103, 75107,
