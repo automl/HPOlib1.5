@@ -3,6 +3,7 @@ import numpy as np
 
 from param_net import ParamFCNetClassification
 from param_net.util import zero_mean_unit_var_normalization
+from sklearn.preprocessing import Imputer
 
 from hpolib.util import rng_helper
 from hpolib.util.data_manager import MNISTData
@@ -50,6 +51,8 @@ class ParamNetBenchmark(AbstractBenchmark):
         if fold == folds:
             # Test fold, run function_test
             return self.objective_function_test(x, rng=rng)
+        if fold < 0 or fold > folds:
+            raise ValueError("%s is not a valid fold" % fold)
 
         if dataset_fraction < 1.0:
             sss = StratifiedShuffleSplit(n_splits=1,
@@ -94,6 +97,7 @@ class ParamNetBenchmark(AbstractBenchmark):
         return {'function_value': y, "cost": c}
 
     def _train(self, x, train_X, train_y, valid_X, valid_y, time_limit_s=None):
+        np.random.seed(self.rng.randint(1))
         cfg = T.ConfigProto(intra_op_parallelism_threads=1,
                             inter_op_parallelism_threads=1)
         session = T.Session(config=cfg)
@@ -120,7 +124,8 @@ class ParamNetBenchmark(AbstractBenchmark):
 
     @staticmethod
     def get_configuration_space(max_num_layers=10):
-        cs = ParamFCNetClassification.get_config_space(max_num_layers=max_num_layers)
+        cs = ParamFCNetClassification.get_config_space(max_num_layers=max_num_layers,
+                                                       batch_normalization=["True", "False"])
         return cs
 
     @staticmethod
@@ -237,6 +242,11 @@ class ParamNetOnOpenML100_Holdout(ParamNetBenchmark):
                                       rng=self.rng)
 
         X_train, y_train, X_valid, y_valid, X_test, y_test = dm.load()
+        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+        imp.fit(X_train)
+        X_train = imp.transform(X_train)
+        y_valid = imp.transform(y_valid)
+        X_test = imp.transform(X_test)
 
         # Zero mean / unit std normalization
         _, mean, std = zero_mean_unit_var_normalization(X_train)
@@ -288,6 +298,11 @@ class ParamNetOnOpenML100_Crossvalidation(ParamNetBenchmark):
         dm = OpenMLCrossvalidationDataManager(openml_task_id=self.task_id, rng=self.rng)
         X_train, y_train, X_test, y_test = dm.load()
 
+        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+        imp.fit(X_train)
+        X_train = imp.transform(X_train)
+        X_test = imp.transform(X_test)
+
         # Zero mean / unit std normalization
         _, mean, std = zero_mean_unit_var_normalization(X_train)
         std += 1e-8
@@ -310,6 +325,9 @@ class ParamNetOnOpenML100_Crossvalidation(ParamNetBenchmark):
         if fold == folds:
             # Test fold, run function_test
             return self.objective_function_test(x, rng=rng)
+
+        if fold < 0 or fold > folds:
+            raise ValueError("%s is not a valid fold" % fold)
 
         # Compute crossvalidation splits
         kf = StratifiedKFold(n_splits=folds, shuffle=True,
