@@ -133,11 +133,11 @@ class ParamNetBenchmark(AbstractBenchmark):
         info = dict()
         info['references'] = ["N.A.", ]
         info["cvfolds"] = 1
-        info["wallclocklimit"] = 24*60*60
-        info['num_function_evals'] = 100
+        info["wallclocklimit"] = 24*60*60*2
+        info['num_function_evals'] = 1000
         info['cutoff'] = 1800
         info['memorylimit'] = 1024 * 3
-        info['compatible_with_commit'] = "f52903a"
+        info['compatible_with_commit'] = "6a887d36e80227b1d22821bd467fd2ef58d67933"
         return info
 
 
