@@ -245,7 +245,7 @@ class ParamNetOnOpenML100_Holdout(ParamNetBenchmark):
         imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
         imp.fit(X_train)
         X_train = imp.transform(X_train)
-        y_valid = imp.transform(y_valid)
+        X_valid = imp.transform(X_valid)
         X_test = imp.transform(X_test)
 
         # Zero mean / unit std normalization
