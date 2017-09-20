@@ -12,24 +12,12 @@ from hpolib.util.data_manager import HoldoutDataManager, \
 
 def _load_data(task_id):
     task = openml.tasks.get_task(task_id)
-
-    try:
-        task.get_train_test_split_indices(fold=0, repeat=1)
-        raise_exception = True
-    except:
-        raise_exception = False
-
-    if raise_exception:
+	
+	if task.estimation_procedure['parameters']['number_repeats'] > 1:
         raise ValueError('Task %d has more than one repeat. This benchmark '
                          'can only work with a single repeat.' % task_id)
 
-    try:
-        task.get_train_test_split_indices(fold=1, repeat=0)
-        raise_exception = True
-    except:
-        raise_exception = False
-
-    if raise_exception:
+    if task.estimation_procedure['parameters']['number_folds'] > 1:
         raise ValueError('Task %d has more than one fold. This benchmark '
                          'can only work with a single fold.' % task_id)
 
