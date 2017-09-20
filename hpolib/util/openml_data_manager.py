@@ -12,8 +12,8 @@ from hpolib.util.data_manager import HoldoutDataManager, \
 
 def _load_data(task_id):
     task = openml.tasks.get_task(task_id)
-	
-	if task.estimation_procedure['parameters']['number_repeats'] > 1:
+    
+    if task.estimation_procedure['parameters']['number_repeats'] > 1:
         raise ValueError('Task %d has more than one repeat. This benchmark '
                          'can only work with a single repeat.' % task_id)
 
