@@ -32,19 +32,19 @@ class SurrogateSVM(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, dataset_fraction=1, **kwargs):
-        test_point = np.append(x, dataset_fraction)
+        test_point = np.append(x, dataset_fraction)[None, :]
 
-        y = self.surrogate_objective.predict(test_point)
-        c = self.surrogate_cost.predict(test_point)
+        y = self.surrogate_objective.predict(test_point)[0]
+        c = self.surrogate_cost.predict(test_point)[0]
         return {'function_value': y, "cost": c}
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-        test_point = np.append(x, 1)
+        test_point = np.append(x, 1)[None, :]
 
-        y = self.surrogate_objective.predict(test_point)
-        c = self.surrogate_cost.predict(test_point)
+        y = self.surrogate_objective.predict(test_point)[0]
+        c = self.surrogate_cost.predict(test_point)[0]
         return {'function_value': y, "cost": c}
 
     @staticmethod
