@@ -148,11 +148,11 @@ class PredictiveTerminationCriterion(SurrogateParamNet):
     def objective_function(self, x, step=None, **kwargs):
         start_time = time.time()
         lc = []
-        cum_cost = 0
+
         for i in range(self.n_epochs):
             res = super(PredictiveTerminationCriterion, self).objective_function(x, step=i)
             lc.append(1 - res["function_value"])
-            cum_cost += res["cost"]
+
             if i > 0 and i % self.interval == 0:
 
                 # Fit learning curve model
@@ -165,13 +165,13 @@ class PredictiveTerminationCriterion(SurrogateParamNet):
                     continue
                 else:
                     m = np.mean(self.model.predictive_distribution(self.n_epochs + 1))
-                    c = time.time() - start_time + cum_cost
+                    c = time.time() - start_time + res["cost"]
 
                     print(m, c)
 
                     return {'function_value': 1 - m, "cost": c, 'observed_epochs': i}
 
-        c = time.time() - start_time + cum_cost
+        c = time.time() - start_time + res["cost"]
         print(lc[-1], self.current_best_acc)
         if lc[-1] > self.current_best_acc:
             self.current_best_acc = lc[-1]
