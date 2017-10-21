@@ -39,12 +39,12 @@ class SurrogateParamNet(AbstractBenchmark):
         lc = self.surrogate_objective.predict(x_[None, :])[0]
         c = self.surrogate_cost.predict(x_[None, :])[0]
 
-        cost = c / self.n_epochs * step
-
         if step is None:
             y = lc[-1]
+            cost = c
         else:
             y = lc[step]
+            cost = c / self.n_epochs * step
 
         return {'function_value': y, "cost": cost}
 
