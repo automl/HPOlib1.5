@@ -1,6 +1,10 @@
 import json
 import logging
+import os
+import pickle
 import tempfile
+
+import lockfile
 
 import autosklearn
 import autosklearn.evaluation
@@ -15,6 +19,7 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.dependencies import verify_packages
 from hpolib.util.openml_data_manager import OpenMLCrossvalidationDataManager
 from hpolib.util import rng_helper
+import hpolib
 
 __version__ = 0.1
 
@@ -50,30 +55,46 @@ class AutoSklearnBenchmark(AbstractBenchmark):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def _get_data_manager(self, task_id):
+        cache_dir = hpolib._config.data_dir
+        autosklearn_cache_dir = os.path.join(cache_dir, 'auto-sklearn')
+        try:
+            os.makedirs(autosklearn_cache_dir)
+        except:
+            pass
 
-        dm = OpenMLCrossvalidationDataManager(task_id)
-        X_train, y_train, X_test, y_test = dm.load()
-
-        num_classes = len(np.unique(y_train))
-        if num_classes == 2:
-            task_type = autosklearn.constants.BINARY_CLASSIFICATION
-        elif num_classes > 2:
-            task_type = autosklearn.constants.MULTICLASS_CLASSIFICATION
+        data_manager_cache_file = os.path.join(autosklearn_cache_dir,
+                                               '%d.pkl' % task_id)
+        if os.path.exists(data_manager_cache_file):
+            with open(data_manager_cache_file, 'rb') as fh:
+                self.data_manager = pickle.load(fh)
         else:
-            raise ValueError('This benchmark needs at least two classes.')
+            dm = OpenMLCrossvalidationDataManager(task_id)
+            X_train, y_train, X_test, y_test = dm.load()
 
-        variable_types = dm.variable_types
-        name = dm.name
+            num_classes = len(np.unique(y_train))
+            if num_classes == 2:
+                task_type = autosklearn.constants.BINARY_CLASSIFICATION
+            elif num_classes > 2:
+                task_type = autosklearn.constants.MULTICLASS_CLASSIFICATION
+            else:
+                raise ValueError('This benchmark needs at least two classes.')
 
-        # TODO in the future, the XYDataManager should have this as it's own
-        # attribute
-        data_manager = autosklearn.data.xy_data_manager.XYDataManager(
-            data_x=X_train, y=y_train, task=task_type, feat_type=variable_types,
-            dataset_name=name)
-        data_manager.data['X_test'] = X_test
-        data_manager.data['Y_test'] = y_test
+            variable_types = dm.variable_types
+            name = dm.name
 
-        self.data_manager = data_manager
+            # TODO in the future, the XYDataManager should have this as it's own
+            # attribute
+            data_manager = autosklearn.data.xy_data_manager.XYDataManager(
+                data_x=X_train, y=y_train, task=task_type, feat_type=variable_types,
+                dataset_name=name)
+            data_manager.data['X_test'] = X_test
+            data_manager.data['Y_test'] = y_test
+
+            with lockfile.LockFile(data_manager_cache_file):
+                with open(data_manager_cache_file, 'wb') as fh:
+                    pickle.dump(data_manager, fh)
+
+            self.data_manager = data_manager
 
     def _check_dependencies(self):
         dependencies = ['numpy>=1.9.0',
@@ -97,6 +118,11 @@ year = {2015},
 publisher = {Curran Associates, Inc.},
 url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
 }"""]}
+        info["cvfolds"] = 10
+        info["wallclocklimit"] = 24 * 60 * 60
+        info['num_function_evals'] = np.inf
+        info['cutoff'] = 1800
+        info['memorylimit'] = 1024 * 3
         return info
 
     @AbstractBenchmark._check_configuration
@@ -183,7 +209,23 @@ class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
         return cs
 
 
-class AutoSklearnBenchmarkAdultBAC(MulticlassClassificationBenchmark):
+
+class Sick(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 38."""
+    def __init__(self, rng=None):
+        super().__init__(3043, rng=rng)
+
+
+class Splice(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 46."""
+
+    def __init__(self, rng=None):
+        super().__init__(275, rng=rng)
+
+
+class Adult(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 179."""
+
     def __init__(self, rng=None):
         super().__init__(2117, rng=rng)
 
@@ -199,10 +241,74 @@ volume={96},
 pages={202--207},
 year={1996}
 }""")
-
-        d["cvfolds"] = 10
-        d["wallclocklimit"] = 24*60*60
-        d['num_function_evals'] = np.inf
-        d['cutoff'] = 1800
-        d['memorylimit'] = 1024*7
         return d
+
+
+class KROPT(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 184."""
+
+    def __init__(self, rng=None):
+        super().__init__(2122, rng=rng)
+
+
+class MNIST(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 554."""
+
+    def __init__(self, rng=None):
+        super().__init__(75098, rng=rng)
+
+
+class Quake(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 772."""
+
+    def __init__(self, rng=None):
+        super().__init__(75157, rng=rng)
+
+
+class fri_c1_1000_25(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 917."""
+
+    def __init__(self, rng=None):
+        super().__init__(75209, rng=rng)
+
+
+class PC4(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 1049."""
+
+    def __init__(self, rng=None):
+        super().__init__(75092, rng=rng)
+
+
+class KDDCup09_appetency(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 1111."""
+
+    def __init__(self, rng=None):
+        super().__init__(75105, rng=rng)
+
+
+class MagicTelescope(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 1120."""
+
+    def __init__(self, rng=None):
+        super().__init__(75112, rng=rng)
+
+
+class OVABreast(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 1128."""
+
+    def __init__(self, rng=None):
+        super().__init__(75114, rng=rng)
+
+
+class Covertype(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 293."""
+
+    def __init__(self, rng=None):
+        super().__init__(75164, rng=rng)
+
+
+class FBIS_WC(MulticlassClassificationBenchmark):
+    """A.K.A. OpenML ID 389."""
+
+    def __init__(self, rng=None):
+        super().__init__(75197, rng=rng)
