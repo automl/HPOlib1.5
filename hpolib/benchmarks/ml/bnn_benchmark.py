@@ -4,6 +4,7 @@ import ConfigSpace as CS
 import lasagne
 
 from scipy import stats
+from sklearn.datasets import load_boston
 
 from robo.models.bnn import BayesianNeuralNetwork
 from sgmcmc.bnn.lasagne_layers import AppendLayer
@@ -59,22 +60,28 @@ class BNN(AbstractBenchmark):
         super(BNN, self).__init__()
 
         self.n_calls = 0
+        self.max_iters = 10000
         self.rng = rng_helper.create_rng(rng)
 
     def get_data(self):
         raise NotImplementedError()
 
     @AbstractBenchmark._check_configuration
-    def objective_function(self, config, step=None, **kwargs):
+    def objective_function(self, config, budget=None, **kwargs):
         st = time.time()
 
+        # If no budget is specified we train this config for the max number of iterations
+        if budget is None:
+            budget = self.max_iters
+
+        burn_in_steps = int(config['burn_in'] * budget)
         net = partial(get_net, n_units_1=config['n_units_1'], n_units_2=config['n_units_2'])
         model = BayesianNeuralNetwork(sampling_method="sghmc",
                                       get_net=net,
                                       l_rate=config['l_rate'],
                                       mdecay=config['mdecay'],
-                                      burn_in=config['burn_in'],
-                                      n_iters=config['n_iters'] + config['burn_in'],
+                                      burn_in=burn_in_steps,
+                                      n_iters=budget,
                                       precondition=True,
                                       normalize_input=True,
                                       normalize_output=True)
@@ -83,11 +90,10 @@ class BNN(AbstractBenchmark):
         mean_pred, var_pred = model.predict(self.valid)
 
         # Negative log-likelihood
-        y = - np.sum([stats.norm.pdf(self.valid_targets[i],
-                                     loc=mean_pred[i],
-                                     scale=np.sqrt(var_pred[i]))
-                      for i in range(self.valid_targets.shape[0])])
-
+        y = - np.mean([stats.norm.logpdf(self.valid_targets[i],
+                                         loc=mean_pred[i],
+                                         scale=np.sqrt(var_pred[i]))
+                       for i in range(self.valid_targets.shape[0])])
         cost = time.time() - st
         return {'function_value': y, "cost": cost}
 
@@ -96,12 +102,13 @@ class BNN(AbstractBenchmark):
         st = time.time()
 
         net = partial(get_net, n_units_1=config['n_units_1'], n_units_2=config['n_units_2'])
+        burn_in_steps = int(config['burn_in'] * self.max_iters)
         model = BayesianNeuralNetwork(sampling_method="sghmc",
                                       get_net=net,
                                       l_rate=config['l_rate'],
                                       mdecay=config['mdecay'],
-                                      burn_in=config['burn_in'],
-                                      n_iters=config['n_iters'],
+                                      burn_in=burn_in_steps,
+                                      n_iters=self.max_iters,
                                       precondition=True,
                                       normalize_input=True,
                                       normalize_output=True)
@@ -112,10 +119,10 @@ class BNN(AbstractBenchmark):
         mean_pred, var_pred = model.predict(self.test)
 
         # Negative log-likelihood
-        y = - np.sum([stats.norm.pdf(self.test_targets[i],
-                                     loc=mean_pred[i],
-                                     scale=np.sqrt(var_pred[i]))
-                      for i in range(self.test_targets.shape[0])])
+        y = - np.mean([stats.norm.logpdf(self.test_targets[i],
+                                         loc=mean_pred[i],
+                                         scale=np.sqrt(var_pred[i]))
+                       for i in range(self.test_targets.shape[0])])
 
         cost = time.time() - st
         return {'function_value': y, "cost": cost}
@@ -130,10 +137,10 @@ class BNN(AbstractBenchmark):
                                                             default_value=1e-2,
                                                             log=True))
 
-        cs.add_hyperparameter(CS.UniformIntegerHyperparameter('burn_in',
-                                                              lower=500,
-                                                              upper=10000,
-                                                              default_value=3000))
+        cs.add_hyperparameter(CS.UniformFloatHyperparameter('burn_in',
+                                                            lower=0,
+                                                            upper=.8,
+                                                            default_value=.3))
 
         cs.add_hyperparameter(CS.UniformIntegerHyperparameter('n_iters',
                                                               lower=500,
@@ -167,6 +174,7 @@ class BNN(AbstractBenchmark):
 
 
 class BNNOnToyFunction(BNN):
+
     def get_data(self):
         rng = np.random.RandomState(42)
 
@@ -188,6 +196,16 @@ class BNNOnToyFunction(BNN):
 
 
 class BNNOnBostonHousing(BNN):
+
     def get_data(self):
-        raise NotImplementedError
-        # return train, train_targets, valid, valid_targets, test, test_targets
+        X, y = load_boston(return_X_y=True)
+        n_train = int(X.shape[0] * 0.6)
+        n_valid = int(X.shape[0] * 0.2)
+        train = X[:n_train]
+        train_targets = y[:n_train]
+        valid = X[n_train:(n_train + n_valid)]
+        valid_targets = y[n_train:(n_train + n_valid)]
+        test = X[(n_train + n_valid):]
+        test_targets = y[(n_train + n_valid):]
+
+        return train, train_targets, valid, valid_targets, test, test_targets
