@@ -85,7 +85,9 @@ class BNN(AbstractBenchmark):
                                       precondition=True,
                                       normalize_input=True,
                                       normalize_output=True)
-        model.train(self.train, self.train_targets)
+        model.train(self.train, self.train_targets,
+                    valid=self.valid, valid_targets=self.valid_targets,
+                    valid_after_n_steps=100)
 
         mean_pred, var_pred = model.predict(self.valid)
 
@@ -95,7 +97,8 @@ class BNN(AbstractBenchmark):
                                          scale=np.sqrt(var_pred[i]))
                        for i in range(self.valid_targets.shape[0])])
         cost = time.time() - st
-        return {'function_value': y, "cost": cost}
+
+        return {'function_value': y, "cost": cost, "learning_curve": model.learning_curve_nll}
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, config, **kwargs):
@@ -141,11 +144,6 @@ class BNN(AbstractBenchmark):
                                                             lower=0,
                                                             upper=.8,
                                                             default_value=.3))
-
-        cs.add_hyperparameter(CS.UniformIntegerHyperparameter('n_iters',
-                                                              lower=500,
-                                                              upper=10000,
-                                                              default_value=5000))
 
         cs.add_hyperparameter(CS.UniformIntegerHyperparameter('n_units_1',
                                                               lower=16,
