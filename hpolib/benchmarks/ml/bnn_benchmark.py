@@ -1,3 +1,4 @@
+import os
 import time
 import numpy as np
 import ConfigSpace as CS
@@ -196,7 +197,34 @@ class BNNOnToyFunction(BNN):
 class BNNOnBostonHousing(BNN):
 
     def get_data(self):
+
+        # 60 / 20 / 20 split
+
         X, y = load_boston(return_X_y=True)
+        n_train = int(X.shape[0] * 0.6)
+        n_valid = int(X.shape[0] * 0.2)
+        train = X[:n_train]
+        train_targets = y[:n_train]
+        valid = X[n_train:(n_train + n_valid)]
+        valid_targets = y[n_train:(n_train + n_valid)]
+        test = X[(n_train + n_valid):]
+        test_targets = y[(n_train + n_valid):]
+
+        return train, train_targets, valid, valid_targets, test, test_targets
+
+
+class BNNOnProteinStructure(BNN):
+    
+    def __init__(self, path, rng=None):
+        self.path = path
+        super(BNNOnProteinStructure, self).__init__(rng)
+
+    def get_data(self):
+        X = np.load(os.path.join(self.path, "protein_structure_data.npy"))
+        y = np.load(os.path.join(self.path, "protein_structure_targets.npy"))
+
+        # 60 / 20 / 20 split
+
         n_train = int(X.shape[0] * 0.6)
         n_valid = int(X.shape[0] * 0.2)
         train = X[:n_train]
