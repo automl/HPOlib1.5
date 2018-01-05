@@ -235,3 +235,26 @@ class BNNOnProteinStructure(BNN):
         test_targets = y[(n_train + n_valid):]
 
         return train, train_targets, valid, valid_targets, test, test_targets
+
+
+class BNNOnYearPrediction(BNN):
+    def __init__(self, path, rng=None):
+        self.path = path
+        super(BNNOnYearPrediction, self).__init__(rng)
+
+    def get_data(self):
+        X = np.load(os.path.join(self.path, "year_prediction_train_data.npy"))
+        y = np.load(os.path.join(self.path, "year_prediction_train_targets.npy"))
+
+        test = np.load(os.path.join(self.path, "year_prediction_test_data.npy"))
+        test_targets = np.load(os.path.join(self.path, "year_prediction_test_targets.npy"))
+
+        # Split in training / validation (70 / 30 split)
+
+        n_train = int(X.shape[0] * 0.7)
+        train = X[:n_train]
+        train_targets = y[:n_train]
+        valid = X[n_train:]
+        valid_targets = y[n_train:]
+
+        return train, train_targets, valid, valid_targets, test, test_targets
