@@ -94,16 +94,20 @@ class TestRandomConfig(unittest.TestCase):
                             # Limit Wallclocktime using pynisher
                             obj = pynisher.enforce_limits(
                                 wall_time_in_s=10,
-                                mem_in_mb=1500
+                                mem_in_mb=2000
                             )(b.objective_function)
                             res = obj(c)
                             if res is not None:
                                 self.assertTrue(np.isfinite(res['cost']))
                                 self.assertTrue(np.isfinite(res['function_value']))
                             else:
-                                self.assertTrue(obj.exit_status in
-                                                (pynisher.TimeoutException,
-                                                 pynisher.MemorylimitException))
+                                self.assertTrue(
+                                    obj.exit_status in (
+                                        pynisher.TimeoutException,
+                                        pynisher.MemorylimitException,
+                                    ),
+                                    msg=str(obj.exit_status)
+                                )
             else:
                 raise ValueError("{:s} does not contain basic benchmark that is"
                                  " derived from AbstractBenchmark".
