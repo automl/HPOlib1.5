@@ -99,9 +99,9 @@ class AutoSklearnBenchmark(AbstractBenchmark):
     def _check_dependencies(self):
         dependencies = ['numpy>=1.9.0',
                         'scipy>=0.14.1',
-                        'scikit-learn==0.18.2',
+                        'scikit-learn>=0.19.0',
                         'pynisher==0.4.2',
-                        'auto-sklearn==0.2.1']
+                        'auto-sklearn==0.3.0']
         dependencies = '\n'.join(dependencies)
         verify_packages(dependencies)
 
@@ -192,6 +192,17 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
                                   'random_forest', 'sgd']}
         exclude = {}
         return include, exclude
+
+    @staticmethod
+    def get_meta_information():
+        d = AutoSklearnBenchmark.get_meta_information()
+
+        d["cvfolds"] = 10
+        d["wallclocklimit"] = 24 * 60 * 60
+        d['num_function_evals'] = np.inf
+        d['cutoff'] = 1800
+        d['memorylimit'] = 1024 * 3
+        return d
 
 
 class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
