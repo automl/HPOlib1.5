@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.4"
   - "3.5"
   - "3.6"
 os: linux
@@ -17,25 +16,14 @@ before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
 
 
-addons:
-  apt:
-    packages:
-    - libatlas3gf-base
-    - libatlas-dev
-    - liblapack-dev
-    - gfortran
-
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
   - conda update --yes conda
-  - conda create -n testenv --yes python=$TRAVIS_PYTHON_VERSION pip wheel nose
+  - conda create -n testenv --yes python=$TRAVIS_PYTHON_VERSION pip wheel nose gxx_linux-64 gcc_linux-64 swig
   - source activate testenv
-  - conda install --yes gcc swig
-  - echo "Using GCC at "`which gcc`
-  - export CC=`which gcc`
 
 install:
   - pip install coverage pep8 codecov
