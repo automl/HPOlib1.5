@@ -99,9 +99,9 @@ class AutoSklearnBenchmark(AbstractBenchmark):
     def _check_dependencies(self):
         dependencies = ['numpy>=1.9.0',
                         'scipy>=0.14.1',
-                        'scikit-learn==0.18.1',
+                        'scikit-learn==0.18.2',
                         'pynisher==0.4.2',
-                        'auto-sklearn==0.2.0']
+                        'auto-sklearn==0.2.1']
         dependencies = '\n'.join(dependencies)
         verify_packages(dependencies)
 
