@@ -5,14 +5,23 @@ import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 
+from hpolib.util.download_surrogate import DownloadSurrogate
+
 
 class SurrogateCNN(AbstractBenchmark):
 
     def __init__(self, path=None, rng=None):
         super(SurrogateCNN, self).__init__()
 
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_cnn.pkl"), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_cnn.pkl"), "rb"))
+        if path is None:
+            url = "http://www.ml4aad.org/wp-content/uploads/2017/12/lcnet_datasets.zip"
+            surrogate = DownloadSurrogate(url, folder = "lcnet_datasets/convnet_cifar10/")
+            self.surrogate_objective = surrogate.get_learning_curve_rf()
+            self.surrogate_cost = surrogate.get_time_cost_rf()
+        else:
+            self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_cnn.pkl"), "rb"))
+            self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_cnn.pkl"), "rb"))
+
         self.n_epochs = 40
         if rng is None:
             self.rng = np.random.RandomState()
