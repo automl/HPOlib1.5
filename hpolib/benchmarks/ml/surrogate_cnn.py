@@ -23,22 +23,21 @@ class SurrogateCNN(AbstractBenchmark):
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, step=None, **kwargs):
         if step is None:
-            test_point = np.concatenate((x[None, :], np.array([[self.n_epochs]])), axis=1)
-        else:
-            test_point = np.concatenate((x[None, :], np.array([[step]])), axis=1)
+            step = self.n_epochs
+
+        test_point = np.concatenate((x[None, :], np.array([[step]])), axis=1)
 
         y = self.surrogate_objective.predict(test_point)[0]
-        c = self.surrogate_cost.predict(test_point)[0]
+
+        c = np.cumsum([self.surrogate_cost.predict(np.concatenate((x[None, :], np.array([[i]])), axis=1))[0] for i in
+                       range(1, step + 1)])[0]
+
         return {'function_value': y, "cost": c}
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-        test_point = np.concatenate((x[None, :], np.array([[self.n_epochs]])), axis=1)
-
-        y = self.surrogate_objective.predict(test_point)[0]
-        c = self.surrogate_cost.predict(test_point)[0]
-        return {'function_value': y, "cost": c}
+        return self.objective_function(x, step=self.n_epochs)
 
     @staticmethod
     def get_configuration_space():
