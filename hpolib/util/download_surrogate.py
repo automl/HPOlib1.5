@@ -107,4 +107,3 @@ class DownloadSurrogate:
         time_step_rf = RandomForestRegressor(n_estimators=10)
         time_step_rf.fit(self.X, self.c)
         return time_step_rf
-
