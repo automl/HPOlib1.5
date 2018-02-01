@@ -8,10 +8,10 @@ from copy import deepcopy
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 
-import sys
-sys.path.append("/ihome/kleinaa/devel/git/lc_extrapolation")
-sys.path.append("/home/kleinaa/devel/git/lc_extrapolation")
-from learning_curves_2 import MCMCCurveModelCombination
+# import sys
+# sys.path.append("/ihome/kleinaa/devel/git/lc_extrapolation")
+# sys.path.append("/home/kleinaa/devel/git/lc_extrapolation")
+# from learning_curves_2 import MCMCCurveModelCombination
 
 
 class SurrogateParamNet(AbstractBenchmark):
@@ -138,7 +138,7 @@ class SurrogateReducedParamNetTime(AbstractBenchmark):
         idx = np.where(learning_curves_cost < budget)[0][-1]
         y = lc[idx]
 
-        return {'function_value': y, "cost": budget}
+        return {'function_value': y, "cost": budget, "lc": lc[:idx].tolist()}
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
@@ -222,109 +222,109 @@ class SurrogateParamNetTime(SurrogateParamNet):
             return {'function_value': y, "cost": budget, "learning_curve": lc, 'observed_epochs': len(lc)}
 
 
-class PredictiveTerminationCriterion(SurrogateParamNet):
-
-    def __init__(self, interval, dataset, threshold=0.05, path=None, rng=None):
-        super(PredictiveTerminationCriterion, self).__init__(dataset, path=path, rng=rng)
-        self.current_best_acc = -np.inf
-        self.interval = interval
-        self.threshold = threshold
-
-        # self.model = setup_model_combination(self.n_epochs + 1,
-        #                                 models=['weibull', 'pow4', 'mmf', 'pow3',
-        #                                         'loglog_linear', 'janoschek',
-        #                                         'dr_hill_zero_background', 'log_power', 'exp4'],
-        #                                 monotonicity_constraint=False,
-        #                                 soft_monotonicity_constraint=False)
-        self.model = MCMCCurveModelCombination(100,
-                                               nwalkers=100,
-                                               nsamples=1000,
-                                               burn_in=500,
-                                               recency_weighting=False,
-                                               soft_monotonicity_constraint=False,
-                                               monotonicity_constraint=True,
-                                               initial_model_weight_ml_estimate=True)
-
-    @AbstractBenchmark._check_configuration
-    @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x, step=None, **kwargs):
-        start_time = time.time()
-        lc = []
-
-        for i in range(self.n_epochs):
-            res = super(PredictiveTerminationCriterion, self).objective_function(x, step=i)
-            lc.append(1 - res["function_value"])
-
-            if i > 0 and i % self.interval == 0:
-
-                # Fit learning curve model
-                t_idx = np.arange(1, len(lc) + 1)
-                self.model.fit(t_idx, lc)
-
-                p_greater = self.model.posterior_prob_x_greater_than(self.n_epochs + 1, self.current_best_acc)
-
-                if p_greater >= self.threshold:
-                    continue
-                else:
-                    m = np.mean(self.model.predictive_distribution(self.n_epochs + 1))
-                    c = time.time() - start_time + res["cost"]
-
-                    return {'function_value': 1 - m, "cost": c, 'observed_epochs': i}
-
-        c = time.time() - start_time + res["cost"]
-
-        if lc[-1] > self.current_best_acc:
-            self.current_best_acc = lc[-1]
-
-        return {'function_value': 1 - lc[-1], "cost": c, 'observed_epochs': self.n_epochs}
-
-
-class PredictiveTerminationCriterionParamNetTime(SurrogateParamNetTime):
-
-    def __init__(self, n_steps, dataset, threshold=0.05, path=None, rng=None):
-        super(PredictiveTerminationCriterionParamNetTime, self).__init__(dataset, path=path, rng=rng)
-        self.current_best_acc = -np.inf
-        self.n_steps = n_steps
-        self.threshold = threshold
-
-        self.model = MCMCCurveModelCombination(100,
-                                               nwalkers=100,
-                                               nsamples=1000,
-                                               burn_in=500,
-                                               recency_weighting=False,
-                                               soft_monotonicity_constraint=False,
-                                               monotonicity_constraint=True,
-                                               initial_model_weight_ml_estimate=True)
-
-    @AbstractBenchmark._configuration_as_array
-    def objective_function(self, x, budget=None, **kwargs):
-
-        time_steps = budget / self.n_steps
-
-        for i in range(1, self.n_steps):
-
-            res = super(PredictiveTerminationCriterionParamNetTime, self).objective_function(x, budget=(time_steps * i))
-
-            lc = [1 - l for l in res["learning_curve"]]
-
-            # Fit learning curve model
-            t_idx = np.arange(1, len(lc) + 1)
-            self.model.fit(t_idx, lc)
-
-            print(lc[-1], self.current_best_acc)
-
-            p_greater = self.model.posterior_prob_x_greater_than(self.n_epochs + 1, self.current_best_acc)
-            print(p_greater, i)
-            if p_greater >= self.threshold:
-                continue
-            else:
-                m = np.mean(self.model.predictive_distribution(self.n_epochs + 1))
-                print("Killed", m, self.current_best_acc)
-                return {'function_value': 1 - m, "cost": time_steps * i, 'observed_epochs': len(lc)}
-
-        res = super(PredictiveTerminationCriterionParamNetTime, self).objective_function(x, budget=budget)
-
-        if (1 - res["function_value"]) > self.current_best_acc:
-            self.current_best_acc = (1 - res["function_value"])
-
-        return res
+# class PredictiveTerminationCriterion(SurrogateParamNet):
+#
+#     def __init__(self, interval, dataset, threshold=0.05, path=None, rng=None):
+#         super(PredictiveTerminationCriterion, self).__init__(dataset, path=path, rng=rng)
+#         self.current_best_acc = -np.inf
+#         self.interval = interval
+#         self.threshold = threshold
+#
+#         # self.model = setup_model_combination(self.n_epochs + 1,
+#         #                                 models=['weibull', 'pow4', 'mmf', 'pow3',
+#         #                                         'loglog_linear', 'janoschek',
+#         #                                         'dr_hill_zero_background', 'log_power', 'exp4'],
+#         #                                 monotonicity_constraint=False,
+#         #                                 soft_monotonicity_constraint=False)
+#         self.model = MCMCCurveModelCombination(100,
+#                                                nwalkers=100,
+#                                                nsamples=1000,
+#                                                burn_in=500,
+#                                                recency_weighting=False,
+#                                                soft_monotonicity_constraint=False,
+#                                                monotonicity_constraint=True,
+#                                                initial_model_weight_ml_estimate=True)
+#
+#     @AbstractBenchmark._check_configuration
+#     @AbstractBenchmark._configuration_as_array
+#     def objective_function(self, x, step=None, **kwargs):
+#         start_time = time.time()
+#         lc = []
+#
+#         for i in range(self.n_epochs):
+#             res = super(PredictiveTerminationCriterion, self).objective_function(x, step=i)
+#             lc.append(1 - res["function_value"])
+#
+#             if i > 0 and i % self.interval == 0:
+#
+#                 # Fit learning curve model
+#                 t_idx = np.arange(1, len(lc) + 1)
+#                 self.model.fit(t_idx, lc)
+#
+#                 p_greater = self.model.posterior_prob_x_greater_than(self.n_epochs + 1, self.current_best_acc)
+#
+#                 if p_greater >= self.threshold:
+#                     continue
+#                 else:
+#                     m = np.mean(self.model.predictive_distribution(self.n_epochs + 1))
+#                     c = time.time() - start_time + res["cost"]
+#
+#                     return {'function_value': 1 - m, "cost": c, 'observed_epochs': i}
+#
+#         c = time.time() - start_time + res["cost"]
+#
+#         if lc[-1] > self.current_best_acc:
+#             self.current_best_acc = lc[-1]
+#
+#         return {'function_value': 1 - lc[-1], "cost": c, 'observed_epochs': self.n_epochs}
+#
+#
+# class PredictiveTerminationCriterionParamNetTime(SurrogateParamNetTime):
+#
+#     def __init__(self, n_steps, dataset, threshold=0.05, path=None, rng=None):
+#         super(PredictiveTerminationCriterionParamNetTime, self).__init__(dataset, path=path, rng=rng)
+#         self.current_best_acc = -np.inf
+#         self.n_steps = n_steps
+#         self.threshold = threshold
+#
+#         self.model = MCMCCurveModelCombination(100,
+#                                                nwalkers=100,
+#                                                nsamples=1000,
+#                                                burn_in=500,
+#                                                recency_weighting=False,
+#                                                soft_monotonicity_constraint=False,
+#                                                monotonicity_constraint=True,
+#                                                initial_model_weight_ml_estimate=True)
+#
+#     @AbstractBenchmark._configuration_as_array
+#     def objective_function(self, x, budget=None, **kwargs):
+#
+#         time_steps = budget / self.n_steps
+#
+#         for i in range(1, self.n_steps):
+#
+#             res = super(PredictiveTerminationCriterionParamNetTime, self).objective_function(x, budget=(time_steps * i))
+#
+#             lc = [1 - l for l in res["learning_curve"]]
+#
+#             # Fit learning curve model
+#             t_idx = np.arange(1, len(lc) + 1)
+#             self.model.fit(t_idx, lc)
+#
+#             print(lc[-1], self.current_best_acc)
+#
+#             p_greater = self.model.posterior_prob_x_greater_than(self.n_epochs + 1, self.current_best_acc)
+#             print(p_greater, i)
+#             if p_greater >= self.threshold:
+#                 continue
+#             else:
+#                 m = np.mean(self.model.predictive_distribution(self.n_epochs + 1))
+#                 print("Killed", m, self.current_best_acc)
+#                 return {'function_value': 1 - m, "cost": time_steps * i, 'observed_epochs': len(lc)}
+#
+#         res = super(PredictiveTerminationCriterionParamNetTime, self).objective_function(x, budget=budget)
+#
+#         if (1 - res["function_value"]) > self.current_best_acc:
+#             self.current_best_acc = (1 - res["function_value"])
+#
+#         return res
