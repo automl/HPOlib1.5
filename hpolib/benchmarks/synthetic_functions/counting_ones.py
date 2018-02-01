@@ -9,14 +9,12 @@ class CountingOnes(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     def objective_function(self, config, budget=100, **kwargs):
 
-        cs = self.get_configuration_space()
-
         y = 0
-        for h in cs.get_hyperparameters():
-            if type(h) == CS.UniformFloatHyperparameter:
-                y += np.mean(np.random.binomial(1, config[h.name], budget))
+        for h in config:
+            if type(h) == float:
+                y += np.mean(np.random.binomial(1, config[h], budget))
             else:
-                y += config[h.name]
+                y += config[h]
 
         return {'function_value': -y}
 
