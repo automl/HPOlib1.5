@@ -44,11 +44,6 @@ class Cartpole(AbstractBenchmark):
             dict(type='dense', size=config["n_units_2"], activation=config['activation_2'])
         ]
 
-        network_spec_baseline = [
-            dict(type='dense', size=config["baseline_n_units_1"], activation=config['baseline_activation_1']),
-            dict(type='dense', size=config["baseline_n_units_2"], activation=config['baseline_activation_2'])
-        ]
-
         converged_episodes = []
 
         for i in range(budget):
@@ -65,7 +60,7 @@ class Cartpole(AbstractBenchmark):
                 keep_last_timestep=True,
                 # PPOAgent
                 step_optimizer=dict(
-                    type='adam',
+                    type=config["optimizer_type"],
                     learning_rate=config["learning_rate"]
                 ),
                 optimization_steps=config["optimization_steps"],
@@ -77,11 +72,18 @@ class Cartpole(AbstractBenchmark):
                 entropy_regularization=config["entropy_regularization"],
                 # PGModel
                 baseline_mode=config["baseline_mode"],
-                baseline=network_spec_baseline,
-                baseline_optimizer=dict(
-                    type='adam',
-                    learning_rate=config["baseline_learning_rate"]
-                ),
+                baseline={
+                    "type": "mlp",
+                    "sizes": [config["baseline_n_units_1"], config["baseline_n_units_2"]]
+                },
+                baseline_optimizer={
+                    "type": "multi_step",
+                    "optimizer": {
+                        "type": config["baseline_optimizer_type"],
+                        "learning_rate": config["baseline_learning_rate"]
+                    },
+                    "num_steps": config["baseline_optimization_steps"]
+                },
                 gae_lambda=None,
                 # PGLRModel
                 likelihood_ratio_clipping=config["likelihood_ratio_clipping"],
@@ -153,6 +155,8 @@ class Cartpole(AbstractBenchmark):
 
         cs.add_hyperparameter(CS.CategoricalHyperparameter("activation_2", ["tanh", "relu"]))
 
+        cs.add_hyperparameter(CS.CategoricalHyperparameter("optimizer_type", ["adam", "momentum", "rmsprop"]))
+
         cs.add_hyperparameter(CS.UniformIntegerHyperparameter("optimization_steps",
                                                               lower=1,
                                                               default_value=10,
@@ -172,16 +176,18 @@ class Cartpole(AbstractBenchmark):
                                                               upper=128,
                                                               log=True))
 
-        cs.add_hyperparameter(CS.CategoricalHyperparameter("baseline_activation_1", ["tanh", "relu"]))
-
-        cs.add_hyperparameter(CS.CategoricalHyperparameter("baseline_activation_2", ["tanh", "relu"]))
-
         cs.add_hyperparameter(CS.UniformFloatHyperparameter("baseline_learning_rate",
                                                             lower=1e-7,
                                                             default_value=1e-3,
                                                             upper=1e-1,
                                                             log=True))
 
+        cs.add_hyperparameter(CS.UniformIntegerHyperparameter("baseline_optimization_steps",
+                                                              lower=1,
+                                                              default_value=10,
+                                                              upper=100))
+
+        cs.add_hyperparameter(CS.CategoricalHyperparameter("baseline_optimizer_type", ["adam", "momentum", "rmsprop"]))
         return cs
 
     @staticmethod
