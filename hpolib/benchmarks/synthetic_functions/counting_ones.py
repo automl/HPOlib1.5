@@ -11,8 +11,9 @@ class CountingOnes(AbstractBenchmark):
 
         y = 0
         for h in config:
-            if type(h) == float:
-                y += np.mean(np.random.binomial(1, config[h], budget))
+            if 'float' in h:
+                samples = np.random.binomial(1, config[h], budget)
+                y += np.mean(samples)
             else:
                 y += config[h]
 
@@ -33,3 +34,11 @@ class CountingOnes(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'Counting Ones'}
+
+
+
+if __name__ == "__main__":
+    cs = CountingOnes.get_configuration_space()
+    config = cs.sample_configuration()
+    B = CountingOnes()
+    B.objective_function(config, budget=5)
