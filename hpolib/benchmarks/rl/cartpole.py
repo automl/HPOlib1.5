@@ -40,8 +40,13 @@ class Cartpole(AbstractBenchmark):
             budget = self.max_budget
 
         network_spec = [
-            dict(type='dense', size=config["n_units_1"], activation='tanh'),
-            dict(type='dense', size=config["n_units_2"], activation='tanh')
+            dict(type='dense', size=config["n_units_1"], activation=config['activation_1']),
+            dict(type='dense', size=config["n_units_2"], activation=config['activation_2'])
+        ]
+
+        network_spec_baseline = [
+            dict(type='dense', size=config["baseline_n_units_1"], activation=config['baseline_activation_1']),
+            dict(type='dense', size=config["baseline_n_units_2"], activation=config['baseline_activation_2'])
         ]
 
         converged_episodes = []
@@ -63,7 +68,7 @@ class Cartpole(AbstractBenchmark):
                     type='adam',
                     learning_rate=config["learning_rate"]
                 ),
-                optimization_steps=10,
+                optimization_steps=config["optimization_steps"],
                 # Model
                 scope='ppo',
                 discount=config["discount"],
@@ -71,9 +76,12 @@ class Cartpole(AbstractBenchmark):
                 distributions_spec=None,
                 entropy_regularization=config["entropy_regularization"],
                 # PGModel
-                baseline_mode=None,
-                baseline=None,
-                baseline_optimizer=None,
+                baseline_mode=config["baseline_mode"],
+                baseline=network_spec_baseline,
+                baseline_optimizer=dict(
+                    type='adam',
+                    learning_rate=config["baseline_learning_rate"]
+                ),
                 gae_lambda=None,
                 # PGLRModel
                 likelihood_ratio_clipping=config["likelihood_ratio_clipping"],
@@ -119,12 +127,6 @@ class Cartpole(AbstractBenchmark):
                                                               upper=128,
                                                               log=True))
 
-        cs.add_hyperparameter(CS.UniformIntegerHyperparameter("n_units_3",
-                                                              lower=8,
-                                                              default_value=64,
-                                                              upper=128,
-                                                              log=True))
-
         cs.add_hyperparameter(CS.UniformIntegerHyperparameter("batch_size",
                                                               lower=8,
                                                               default_value=64,
@@ -146,6 +148,39 @@ class Cartpole(AbstractBenchmark):
                                                             lower=0,
                                                             default_value=.2,
                                                             upper=1))
+
+        cs.add_hyperparameter(CS.CategoricalHyperparameter("activation_1", ["tanh", "relu"]))
+
+        cs.add_hyperparameter(CS.CategoricalHyperparameter("activation_2", ["tanh", "relu"]))
+
+        cs.add_hyperparameter(CS.UniformIntegerHyperparameter("optimization_steps",
+                                                              lower=1,
+                                                              default_value=10,
+                                                              upper=100))
+
+        cs.add_hyperparameter(CS.CategoricalHyperparameter("baseline_mode", ["states", "network"]))
+
+        cs.add_hyperparameter(CS.UniformIntegerHyperparameter("baseline_n_units_1",
+                                                              lower=8,
+                                                              default_value=64,
+                                                              upper=128,
+                                                              log=True))
+
+        cs.add_hyperparameter(CS.UniformIntegerHyperparameter("baseline_n_units_2",
+                                                              lower=8,
+                                                              default_value=64,
+                                                              upper=128,
+                                                              log=True))
+
+        cs.add_hyperparameter(CS.CategoricalHyperparameter("baseline_activation_1", ["tanh", "relu"]))
+
+        cs.add_hyperparameter(CS.CategoricalHyperparameter("baseline_activation_2", ["tanh", "relu"]))
+
+        cs.add_hyperparameter(CS.UniformFloatHyperparameter("baseline_learning_rate",
+                                                            lower=1e-7,
+                                                            default_value=1e-3,
+                                                            upper=1e-1,
+                                                            log=True))
 
         return cs
 
