@@ -287,12 +287,6 @@ class ContinuousCartpole(Cartpole):
                                                               upper=128,
                                                               log=True))
 
-        cs.add_hyperparameter(CS.UniformIntegerHyperparameter("n_units_3",
-                                                              lower=8,
-                                                              default_value=64,
-                                                              upper=128,
-                                                              log=True))
-
         cs.add_hyperparameter(CS.UniformIntegerHyperparameter("batch_size",
                                                               lower=8,
                                                               default_value=64,
