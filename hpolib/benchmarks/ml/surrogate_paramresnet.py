@@ -7,6 +7,7 @@ import ConfigSpace as CS
 from copy import deepcopy
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.util.data_manager import SurrogateData
 
 import sys
 sys.path.append("/ihome/kleinaa/devel/git/lc_extrapolation")
@@ -19,8 +20,10 @@ class SurrogateParamResNet(AbstractBenchmark):
 
         super(SurrogateParamResNet, self).__init__()
 
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_paramresnet_%s.pkl" % dataset), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_paramresnet_%s.pkl" % dataset), "rb"))
+        url = ""
+        surrogate = SurrogateData(surrogate_file=".pkl", url=url, folder="/")
+        self.surrogate_objective = surrogate.load_objective()
+        self.surrogate_cost = surrogate.load_cost()
         self.n_epochs = 200
         self.dataset = dataset
         if rng is None:

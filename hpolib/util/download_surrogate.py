@@ -1,11 +1,11 @@
 import os
 import logging
-import pickle
 import urllib.request as ur
 import zipfile
 import ast
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
+import hpolib
 
 
 class DownloadSurrogate:
@@ -24,13 +24,24 @@ class DownloadSurrogate:
 
 
 
-    def download_data(self, file_name="data.zip"):
-        ur.urlretrieve(self.url, file_name)
-        zf = zipfile.ZipFile(file_name)
+    def download_data(self):
+        """
+        Downloads the data as a temporary zip file.
+
+        :return:
+        """
+        temp = os.path.join(hpolib._config.data_dir, "data.zip")
+        ur.urlretrieve(self.url, temp)
+        zf = zipfile.ZipFile(temp)
         return zf
 
 
     def load_configs(self):
+        """
+        load configs
+
+        :return:
+        """
         configs = []
         learning_curves = []
         i = 0
@@ -53,6 +64,11 @@ class DownloadSurrogate:
 
 
     def load_timesteps(self):
+        """
+        load time steps
+
+        :return:
+        """
         learning_curve_time_step = []
         i = 0
         while len(learning_curve_time_step) < self.N:
@@ -71,6 +87,11 @@ class DownloadSurrogate:
 
 
     def load_data(self):
+        """
+        loads data
+
+        :return:
+        """
         configs, learning_curves = self.load_configs()
         time_steps = self.load_timesteps()
         t_idx = np.arange(1, self.n_epochs + 1)
@@ -98,12 +119,22 @@ class DownloadSurrogate:
 
 
     def get_learning_curve_rf(self):
+        """
+        Returns learning curve
+
+        :return:
+        """
         rf = RandomForestRegressor(n_estimators=10)
         rf.fit(self.X, self.y)
         return rf
 
 
     def get_time_cost_rf(self):
+        """
+        Returns time cost
+
+        :return:
+        """
         time_step_rf = RandomForestRegressor(n_estimators=10)
         time_step_rf.fit(self.X, self.c)
         return time_step_rf

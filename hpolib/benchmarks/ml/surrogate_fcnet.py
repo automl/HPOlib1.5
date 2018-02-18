@@ -4,6 +4,7 @@ import numpy as np
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.util.data_manager import SurrogateData
 
 
 class SurrogateFCNet(AbstractBenchmark):
@@ -12,8 +13,10 @@ class SurrogateFCNet(AbstractBenchmark):
 
         super(SurrogateFCNet, self).__init__()
 
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_fcnet.pkl"), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_fcnet.pkl"), "rb"))
+        url = ""
+        surrogate = SurrogateData(surrogate_file=".pkl", url=url, folder="/")
+        self.surrogate_objective = surrogate.load_objective()
+        self.surrogate_cost = surrogate.load_cost()
         self.n_epochs = 100
         if rng is None:
             self.rng = np.random.RandomState()
