@@ -8,10 +8,6 @@ from copy import deepcopy
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 
-import sys
-sys.path.append("/ihome/kleinaa/devel/git/lc_extrapolation")
-from learning_curves_2 import MCMCCurveModelCombination
-
 
 class SurrogateParamResNet(AbstractBenchmark):
 

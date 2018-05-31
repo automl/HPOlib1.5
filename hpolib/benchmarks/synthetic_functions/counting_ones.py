@@ -22,6 +22,11 @@ class CountingOnes(AbstractBenchmark):
     def objective_function_test(self, x, **kwargs):
         return self.objective_function(x)
 
+
+    @AbstractBenchmark._check_configuration
+    def objective_function_test(self, config, **kwargs):
+        return {'function_value': -np.sum(config.get_array())}
+
     @staticmethod
     def get_configuration_space(n_categorical=1, n_continuous=1):
         cs = CS.ConfigurationSpace()
@@ -38,7 +43,10 @@ class CountingOnes(AbstractBenchmark):
 
 
 if __name__ == "__main__":
-    cs = CountingOnes.get_configuration_space()
+    cs = CountingOnes.get_configuration_space(8,8)
     config = cs.sample_configuration()
     B = CountingOnes()
-    B.objective_function(config, budget=5)
+    print(config)
+    for i in range(10):
+        print(B.objective_function(config, budget=5))
+    print(B.objective_function_test(config))
