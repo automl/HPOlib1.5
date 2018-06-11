@@ -11,6 +11,7 @@ import numpy as np
 from scipy.io import loadmat
 
 import hpolib
+from hpolib.util.download_surrogate import DownloadSurrogate
 
 
 class DataManager(object, metaclass=abc.ABCMeta):
@@ -358,3 +359,47 @@ class SVHNData(DataManager):
         y_test = test_data['y']
 
         return X_train, y_train, X_test, y_test
+
+
+
+class SurrogateData:
+    def __init__(self, surrogate_file, url, folder="/"):
+        """
+        Checks if the surrogate files are available. If not, download the data from the provided
+        url and generate the required pickle files.
+
+        Parameters
+        ----------
+        surrogate_file: str
+            file name for the surrogate.
+        url: str
+            URL to the file to download the data from in case the surrogate is not available.
+        folder: str
+            Sub-folder to be used from the downloaded data.
+        """
+
+        self.surrogate_file = surrogate_file
+        self.surrogates_dir = os.path.join(hpolib._config.data_dir, "surrogates")
+        if not os.path.exists(self.surrogates_dir): # surrogates directory does not exist
+            os.mkdir(self.surrogates_dir)
+
+        # if rf_surrogate pickle does not exist
+        if not os.path.exists(os.path.join(self.surrogates_dir, "rf_"+surrogate_file)):
+            surrogate = DownloadSurrogate(url, folder=folder)
+            pickle.dump(surrogate.get_learning_curve_rf(),
+                        open( os.path.join(self.surrogates_dir, "rf_"+surrogate_file), "wb"))
+            os.remove(os.path.join(hpolib._config.data_dir, "data.zip"))
+
+        # if rf_cost_surrogate pickle does not exist
+        if not os.path.exists(os.path.join(self.surrogates_dir, "rf_cost_"+surrogate_file)):
+            surrogate = DownloadSurrogate(url, folder=folder)
+            pickle.dump(surrogate.get_time_cost_rf(),
+                        open(os.path.join(self.surrogates_dir, "rf_cost_" + surrogate_file), "wb"))
+            os.remove(os.path.join(hpolib._config.data_dir, "data.zip"))
+
+
+    def load_objective(self):
+        return pickle.load(open( os.path.join(self.surrogates_dir, "rf_"+ self.surrogate_file), "rb"))
+
+    def load_cost(self):
+        return pickle.load(open( os.path.join(self.surrogates_dir, "rf_cost_"+ self.surrogate_file) , "rb"))

@@ -4,6 +4,7 @@ import numpy as np
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.util.data_manager import SurrogateData
 
 
 class SurrogateSVM(AbstractBenchmark):
@@ -19,9 +20,10 @@ class SurrogateSVM(AbstractBenchmark):
 
         super(SurrogateSVM, self).__init__()
 
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_svm.pkl"), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_svm.pkl"), "rb"))
-
+        url = ""
+        surrogate = SurrogateData(surrogate_file=".pkl", url=url, folder="/")
+        self.surrogate_objective = surrogate.load_objective()
+        self.surrogate_cost = surrogate.load_cost()
         self.s_min = 100 / 50000.
 
         if rng is None:

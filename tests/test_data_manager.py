@@ -6,6 +6,7 @@ import hpolib.config
 import hpolib.util.data_manager
 
 import numpy as np
+import os
 
 
 class TestDataManager(unittest.TestCase):
@@ -70,3 +71,19 @@ class TestDataManager(unittest.TestCase):
         self.assertEqual(y_train.shape[0], 40000)
         self.assertEqual(y_val.shape[0], 10000)
         self.assertEqual(y_test.shape[0], 10000)
+
+    def test_surrogate_data(self):
+        # Download a test files. Check if it is downloaded in the correct folder
+        # and with the correct name.
+        # Delete it afterwards.
+        url = "http://www.ml4aad.org/wp-content/uploads/2017/12/lcnet_datasets.zip"
+        surrogate = hpolib.util.data_manager.SurrogateData(surrogate_file="test.pkl",
+                                  url=url, folder="lcnet_datasets/convnet_cifar10/")
+        surrogates_dir = os.path.join(hpolib._config.data_dir, "surrogates")
+        self.assertTrue(os.path.exists(surrogates_dir))
+        self.assertTrue(os.path.exists(os.path.join(surrogates_dir, "rf_test.pkl")))
+        self.assertTrue(os.path.exists(os.path.join(surrogates_dir, "rf_cost_test.pkl")))
+
+        # Delete test files
+        os.remove(os.path.join(surrogates_dir, "rf_test.pkl"))
+        os.remove(os.path.join(surrogates_dir, "rf_cost_test.pkl"))
