@@ -12,7 +12,7 @@ class CountingOnes(AbstractBenchmark):
         y = 0
         for h in config:
             if 'float' in h:
-                samples = np.random.binomial(1, config[h], budget)
+                samples = np.random.binomial(1, config[h], int(budget))
                 y += np.mean(samples)
             else:
                 y += config[h]
