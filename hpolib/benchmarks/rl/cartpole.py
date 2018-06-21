@@ -12,7 +12,7 @@ from hpolib.util import rng_helper
 
 
 class CartpoleBase(AbstractBenchmark):
-	def __init__(self, rng=None, defaults=None):
+	def __init__(self, rng=None, defaults=None, max_budget=9):
 		"""
 		Parameters
 		----------
@@ -29,7 +29,7 @@ class CartpoleBase(AbstractBenchmark):
 		self.env = OpenAIGym('CartPole-v0', visualize=False)
 		self.max_episodes = 3000
 		self.avg_n_episodes = 20
-		self.max_budget = 9
+		self.max_budget = max_budget
 		
 		
 		self.defaults = {
@@ -119,7 +119,6 @@ class CartpoleBase(AbstractBenchmark):
 
 			def episode_finished(r):
 				# Check if we have converged
-				print(r.episode_rewards[-1])
 				if np.mean(r.episode_rewards[-self.avg_n_episodes:]) == 200:
 					return False
 				else:
