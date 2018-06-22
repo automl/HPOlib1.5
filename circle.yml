@@ -35,11 +35,8 @@ dependencies:
     - echo `which conda`
     - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
     - conda update --yes conda
-    - conda create -n testenv --yes python=3.5 pip wheel nose
+    - conda create -n testenv --yes python=3.5 pip wheel nose gxx_linux-64 gcc_linux-64 swig
     - source activate testenv
-    - conda install --yes gcc
-    - echo "Using GCC at "`which gcc`
-    - export CC=`which gcc`
     # upgrade pip and wheel to allow for fast installation
     - pip install wheel pip --upgrade
     # install numpy first as it is a compile time dependency for other packages
