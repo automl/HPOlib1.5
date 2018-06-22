@@ -20,5 +20,5 @@ requests
 theano==0.8.2
 git+https://github.com/Lasagne/Lasagne.git@master
 git+https://github.com/stokasto/sgmcmc.git
-robo
+git+https://github.com/automl/robo.git
 
