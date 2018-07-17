@@ -4,8 +4,3 @@ scipy>=0.14.1
 matplotlib
 ConfigSpace>=0.4.0
 configparser
-
-six	# are we still supporting Python 2? If not, we should drop this
-
-# not sure what this is used for!
-requests

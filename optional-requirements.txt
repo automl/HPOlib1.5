@@ -1,7 +1,6 @@
 # for running the unittests (should not be installed if you only want to use HPOlib
 unittest2
 nose
-setuptools	# do we really need that one
 
 # benchmarks using sklearn
 scikit-learn>=0.19.0,<0.20.0
@@ -13,12 +12,10 @@ openml
 auto-sklearn==0.3.0
 pynisher
 
-requests
-
 
 # ml/bnn_benchmark
-theano==0.8.2
+theano
 git+https://github.com/Lasagne/Lasagne.git@master
-git+https://github.com/stokasto/sgmcmc.git
-git+https://github.com/automl/robo.git
+git+https://github.com/automl/sgmcmc.git
+
 
