@@ -1,18 +1,21 @@
 import os
 import time
+from functools import partial
+
+
 import numpy as np
-import ConfigSpace as CS
+from scipy import stats
+
 import lasagne
 
-from scipy import stats
-from sklearn.datasets import load_boston
+import ConfigSpace as CS
 
-from robo.models.bnn import BayesianNeuralNetwork
+from sgmcmc.bnn.model import BayesianNeuralNetwork
 from sgmcmc.bnn.lasagne_layers import AppendLayer
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util import rng_helper
-from functools import partial
+from hpolib.util.data_manager import BostonHousingData, ProteinStructureData,YearPredictionMSDData
+
 
 
 def get_net(n_inputs, n_units_1, n_units_2):
@@ -55,14 +58,14 @@ class BNN(AbstractBenchmark):
             set up rng
         """
 
-        self.train, self.train_targets, self.valid, self.valid_targets, \
-        self.test, self.test_targets = self.get_data()
-
-        super(BNN, self).__init__()
+        super(BNN, self).__init__(rng=rng)
 
         self.n_calls = 0
         self.max_iters = 10000
-        self.rng = rng_helper.create_rng(rng)
+
+        self.train, self.train_targets, self.valid, self.valid_targets, \
+        self.test, self.test_targets = self.get_data()
+
 
     def get_data(self):
         raise NotImplementedError()
@@ -99,7 +102,7 @@ class BNN(AbstractBenchmark):
                        for i in range(self.valid_targets.shape[0])])
         cost = time.time() - st
 
-        return {'function_value': y, "cost": cost, "learning_curve": model.learning_curve_nll}
+        return {'function_value': y, "cost": cost}
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, config, **kwargs):
@@ -135,33 +138,20 @@ class BNN(AbstractBenchmark):
     def get_configuration_space():
         cs = CS.ConfigurationSpace()
 
-        cs.add_hyperparameter(CS.UniformFloatHyperparameter('l_rate',
-                                                            lower=1e-6,
-                                                            upper=1e-1,
-                                                            default_value=1e-2,
-                                                            log=True))
+        cs.add_hyperparameter(CS.UniformFloatHyperparameter(
+            'l_rate', lower=1e-6, upper=1e-1, default_value=1e-2, log=True))
 
-        cs.add_hyperparameter(CS.UniformFloatHyperparameter('burn_in',
-                                                            lower=0,
-                                                            upper=.8,
-                                                            default_value=.3))
+        cs.add_hyperparameter(CS.UniformFloatHyperparameter(
+            'burn_in', lower=0, upper=.8, default_value=.3))
 
-        cs.add_hyperparameter(CS.UniformIntegerHyperparameter('n_units_1',
-                                                              lower=16,
-                                                              upper=512,
-                                                              default_value=64,
-                                                              log=True))
+        cs.add_hyperparameter(CS.UniformIntegerHyperparameter(
+            'n_units_1', lower=16, upper=512, default_value=64, log=True))
 
-        cs.add_hyperparameter(CS.UniformIntegerHyperparameter('n_units_2',
-                                                              lower=16,
-                                                              upper=512,
-                                                              default_value=64,
-                                                              log=True))
+        cs.add_hyperparameter(CS.UniformIntegerHyperparameter(
+            'n_units_2', lower=16, upper=512, default_value=64, log=True))
 
-        cs.add_hyperparameter(CS.UniformFloatHyperparameter('mdecay',
-                                                            lower=0,
-                                                            upper=1,
-                                                            default_value=0.05))
+        cs.add_hyperparameter(CS.UniformFloatHyperparameter(
+            'mdecay', lower=0, upper=1, default_value=0.05))
 
         return cs
 
@@ -195,53 +185,24 @@ class BNNOnToyFunction(BNN):
 
 
 class BNNOnBostonHousing(BNN):
-
     def get_data(self):
-
-        # 60 / 20 / 20 split
-
-        X, y = load_boston(return_X_y=True)
-        n_train = int(X.shape[0] * 0.6)
-        n_valid = int(X.shape[0] * 0.2)
-        train = X[:n_train]
-        train_targets = y[:n_train]
-        valid = X[n_train:(n_train + n_valid)]
-        valid_targets = y[n_train:(n_train + n_valid)]
-        test = X[(n_train + n_valid):]
-        test_targets = y[(n_train + n_valid):]
-
-        return train, train_targets, valid, valid_targets, test, test_targets
+        dm = BostonHousingData()
+        return dm.load()
 
 
 class BNNOnProteinStructure(BNN):
-    
-    def __init__(self, path, rng=None):
-        self.path = path
-        super(BNNOnProteinStructure, self).__init__(rng)
-
     def get_data(self):
-        X = np.load(os.path.join(self.path, "protein_structure_data.npy"))
-        y = np.load(os.path.join(self.path, "protein_structure_targets.npy"))
-
-        # 60 / 20 / 20 split
-
-        n_train = int(X.shape[0] * 0.6)
-        n_valid = int(X.shape[0] * 0.2)
-        train = X[:n_train]
-        train_targets = y[:n_train]
-        valid = X[n_train:(n_train + n_valid)]
-        valid_targets = y[n_train:(n_train + n_valid)]
-        test = X[(n_train + n_valid):]
-        test_targets = y[(n_train + n_valid):]
-
-        return train, train_targets, valid, valid_targets, test, test_targets
+        dm = ProteinStructureData()
+        return dm.load()
 
 
 class BNNOnYearPrediction(BNN):
-    def __init__(self, path, rng=None):
-        self.path = path
-        super(BNNOnYearPrediction, self).__init__(rng)
+    def get_data(self):
+        dm = YearPredictionMSDData()
+        return dm.load()
 
+"""
+	LEGACY CODE: Have to ask Aaron, if he still needs that particular split!
     def get_data(self):
         X = np.load(os.path.join(self.path, "year_prediction_train_data.npy"))
         y = np.load(os.path.join(self.path, "year_prediction_train_targets.npy"))
@@ -258,3 +219,5 @@ class BNNOnYearPrediction(BNN):
         valid_targets = y[n_train:]
 
         return train, train_targets, valid, valid_targets, test, test_targets
+
+"""
