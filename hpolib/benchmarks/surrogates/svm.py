@@ -4,11 +4,11 @@ import numpy as np
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.benchmarks.surrogates.surrogate_benchmark import SurrogateBenchmark
 
+class SurrogateSVM(SurrogateBenchmark):
 
-class SurrogateSVM(AbstractBenchmark):
-
-    def __init__(self, path=None, rng=None):
+    def __init__(self, **kwargs):
         """
 
         Parameters
@@ -17,17 +17,12 @@ class SurrogateSVM(AbstractBenchmark):
             directory to find or download dataset to
         """
 
-        super(SurrogateSVM, self).__init__()
+        objective_fn = "rf_surrogate_svm.pkl"
+        cost_fn = "rf_cost_surrogate_svm.pkl"
 
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_svm.pkl"), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_svm.pkl"), "rb"))
+        super(SurrogateSVM, self).__init__(objective_surrogate_fn = objective_fn, cost_surrogate_fn=cost_fn, **kwargs)
 
         self.s_min = 100 / 50000.
-
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
@@ -41,11 +36,7 @@ class SurrogateSVM(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-        test_point = np.append(x, 1)[None, :]
-
-        y = self.surrogate_objective.predict(test_point)[0]
-        c = self.surrogate_cost.predict(test_point)[0]
-        return {'function_value': y, "cost": c}
+        return(self.objective_function(x, dataset_fraction=1, **kwargs))
 
     @staticmethod
     def get_configuration_space():

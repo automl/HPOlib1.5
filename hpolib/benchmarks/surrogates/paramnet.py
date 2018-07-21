@@ -7,27 +7,21 @@ import ConfigSpace as CS
 from copy import deepcopy
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-
-# import sys
-# sys.path.append("/ihome/kleinaa/devel/git/lc_extrapolation")
-# sys.path.append("/home/kleinaa/devel/git/lc_extrapolation")
-# from learning_curves_2 import MCMCCurveModelCombination
+from hpolib.benchmarks.surrogates.surrogate_benchmark import SurrogateBenchmark
 
 
-class SurrogateParamNet(AbstractBenchmark):
+class SurrogateParamNet(SurrogateBenchmark):
 
-    def __init__(self, dataset, path=None, rng=None):
+    def __init__(self, dataset, **kwargs):
 
-        super(SurrogateParamNet, self).__init__()
-
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_paramnet_%s.pkl" % dataset), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_paramnet_%s.pkl" % dataset), "rb"))
         self.n_epochs = 50
         self.dataset = dataset
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+        
+        objective_fn = "rf_surrogate_paramnet_%s.pkl" % dataset
+        cost_fn = "rf_cost_surrogate_paramnet_%s.pkl" % dataset
+
+        super(SurrogateParamNet, self).__init__(objective_surrogate_fn = objective_fn, cost_surrogate_fn=cost_fn, **kwargs)
+
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
@@ -91,18 +85,7 @@ class SurrogateParamNet(AbstractBenchmark):
 
 
 
-class SurrogateReducedParamNetTime(AbstractBenchmark):
-
-    def __init__(self, dataset, path=None, rng=None):
-        super(SurrogateReducedParamNetTime, self).__init__()
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_paramnet_%s.pkl" % dataset), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_paramnet_%s.pkl" % dataset), "rb"))
-        self.n_epochs = 50
-        self.dataset = dataset
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+class SurrogateReducedParamNetTime(SurrogateParamNet):
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
