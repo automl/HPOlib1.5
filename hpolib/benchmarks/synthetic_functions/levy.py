@@ -28,5 +28,5 @@ class Levy(AbstractBenchmark):
         return {'name': 'Levy',
                 'num_function_evals': 200,
                 'optima': ([[1.0]]),
-                'bounds': [[-15, 10]],
+                'bounds': [[-15.0, 10.0]],
                 'f_opt': 0.0}
