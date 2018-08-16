@@ -56,5 +56,5 @@ class Forrester(AbstractBenchmark):
         return {'name': 'Forrester',
                 'num_function_evals': 20,
                 'optima': ([[0.75724875]]),
-                'bounds': [[0, 1]],
+                'bounds': [[0.0, 1.0]],
                 'f_opt': -6.02074}

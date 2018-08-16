@@ -28,7 +28,7 @@ class Rosenbrock(AbstractBenchmark):
         return {'name': 'Rosenbrock',
                 'num_function_evals': 200,
                 'optima': ([[1, 1]]),
-                'bounds': [[-5, 10], [-5, 10]],
+                'bounds': [[-5.0, 10.0], [-5, 10.0]],
                 'f_opt': 0.0}
 
 
@@ -58,7 +58,7 @@ class Rosenbrock5D(AbstractBenchmark):
         return {'name': 'Rosenbrock5D',
                 'num_function_evals': 500,
                 'optima': ([[1] * 5]),
-                'bounds': [[-5, 10]] * 5,
+                'bounds': [[-5.0, 10.0]] * 5,
                 'f_opt': 0.0}
 
 
@@ -88,7 +88,7 @@ class Rosenbrock10D(AbstractBenchmark):
         return {'name': 'Rosenbrock10D',
                 'num_function_evals': 1000,
                 'optima': ([[1] * 10]),
-                'bounds': [[-5, 10]] * 10,
+                'bounds': [[-5.0, 10.0]] * 10,
                 'f_opt': 0.0}
 
 
@@ -118,5 +118,5 @@ class Rosenbrock20D(AbstractBenchmark):
         return {'name': 'Rosenbrock20D',
                 'num_function_evals': 2000,
                 'optima': ([[1] * 20]),
-                'bounds': [[-5, 10]] * 20,
+                'bounds': [[-5.0, 10.0]] * 20,
                 'f_opt': 0.0}
