@@ -28,5 +28,5 @@ class Bohachevsky(AbstractBenchmark):
         return {'name': 'Bohachevsky',
                 'num_function_evals': 200,
                 'optima': ([[0, 0]]),
-                'bounds': [[-100, 100], [-100, 100]],
+                'bounds': [[-100.0, 100.0], [-100.0, 100.0]],
                 'f_opt': 0.0}
