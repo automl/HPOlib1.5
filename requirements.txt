@@ -1,23 +1,12 @@
 configparser
-cython
-unittest2
-nose
+requests
+xmltodict
 setuptools
-
 six
-
 numpy>=1.9.0
 scipy>=0.14.1
 matplotlib
-
-# We need lasagne 0.2dev1 + corresponding theano version
-theano==0.8.2
-git+https://github.com/Lasagne/Lasagne.git@master
-
 scikit-learn>=0.19.0,<0.20.0
-ConfigSpace>=0.4.0
-
-requests
-xmltodict
 liac-arff>=2.1.1
+ConfigSpace>=0.4.0
 git+https://github.com/openml/openml-python@develop
