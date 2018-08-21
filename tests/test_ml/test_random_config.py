@@ -68,20 +68,6 @@ class TestRandomConfig(unittest.TestCase):
                         # Make sure to only test correct implementations
                         print(obj, name)
 
-                        if name in ("MulticlassClassificationBenchmark",
-                                    "ConvolutionalNeuralNetworkOnCIFAR10",
-                                    "ConvolutionalNeuralNetworkOnSVHN",
-                                    "FCNetOnMnist",
-                                    "LogisticRegressionOnMnist",
-                                    "ResidualNeuralNetworkOnCIFAR10",
-                                    #"SvmOnAdult",
-                                    "SvmOnCovertype",
-                                    "SvmOnHiggs",
-                                    "SvmOnLetter",
-                                    "SvmOnMnist", "SvmOnVehicle"):
-                            continue
-                        print("continue")
-
                         if issubclass(obj, AutoSklearnBenchmark) and not \
                                 MulticlassClassificationBenchmark in obj.__bases__:
                             # Special case for auto-sklearn which has
