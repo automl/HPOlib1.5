@@ -4,7 +4,6 @@ import pkgutil
 import os
 import sys
 
-import unittest
 import unittest.mock
 
 import numpy as np
@@ -67,7 +66,7 @@ class TestRandomConfig(unittest.TestCase):
                             inspect.isclass(obj) and \
                             abstract_class in obj.__bases__:
                         # Make sure to only test correct implementations
-                        print(obj)
+                        print(obj, name)
 
                         if issubclass(obj, AutoSklearnBenchmark) and not \
                                 MulticlassClassificationBenchmark in obj.__bases__:
@@ -94,7 +93,7 @@ class TestRandomConfig(unittest.TestCase):
                             # Limit Wallclocktime using pynisher
                             obj = pynisher.enforce_limits(
                                 wall_time_in_s=10,
-                                mem_in_mb=2000
+                                mem_in_mb=4000
                             )(b.objective_function)
                             res = obj(c)
                             if res is not None:
@@ -109,6 +108,6 @@ class TestRandomConfig(unittest.TestCase):
                                     msg=str(obj.exit_status)
                                 )
             else:
-                raise ValueError("{:s} does not contain basic benchmark that is"
+                raise ValueError("{:s} does not contain a basic benchmark that is"
                                  " derived from AbstractBenchmark".
                                  format(mod_name))
