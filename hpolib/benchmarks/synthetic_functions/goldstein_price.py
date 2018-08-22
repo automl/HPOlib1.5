@@ -26,5 +26,5 @@ class GoldsteinPrice(AbstractBenchmark):
         return {'name': 'GoldsteinPrice',
                 'num_function_evals': 200,
                 'optima': ([[0.0, -1.0]]),
-                'bounds': [[-2, 2], [-2, 2]],
+                'bounds': [[-2.0, 2.0], [-2.0, 2.0]],
                 'f_opt': 3}
