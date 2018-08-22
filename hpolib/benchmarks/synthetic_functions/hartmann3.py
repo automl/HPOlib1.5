@@ -50,5 +50,5 @@ class Hartmann3(AbstractBenchmark):
         return {'name': 'Hartmann3',
                 'num_function_evals': 200,
                 'optima': ([[0.114614, 0.555649, 0.852547]]),
-                'bounds': [[0, 1]] * 3,
+                'bounds': [[0.0, 1.0]] * 3,
                 'f_opt': -3.8627795317627736}
