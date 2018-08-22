@@ -1,5 +1,6 @@
 import time
 
+import os
 import numpy as np
 import ConfigSpace as CS
 
@@ -24,21 +25,26 @@ class SupportVectorMachine(AbstractBenchmark):
         a configuration. For that the validation and training data is
         concatenated to form the whole training data set.
     """
-    def __init__(self, rng=None):
+    def __init__(self, rng=None, cache_size=2000):
         """
 
         Parameters
         ----------
         rng: int/None/RandomState
             set up rng
+        cache_size: int
+            kernel cache size (in MB) for the SVM
         """
-
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
 
         # Use 10 time the number of classes as lower bound for the dataset
         # fraction
         n_classes = np.unique(self.train_targets).shape[0]
+        self.cache_size = cache_size
+        if os.environ.get("TRAVIS", 0) == "true":
+            # If run on travis.ci, don't use higher cache size
+            self.cache_size = 200
         self.s_min = float(10 * n_classes) / self.train.shape[0]
 
         super(SupportVectorMachine, self).__init__()
@@ -73,7 +79,7 @@ class SupportVectorMachine(AbstractBenchmark):
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng)
+        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng, cache_size=self.cache_size)
         clf.fit(train, train_targets)
 
         # Compute validation error
@@ -103,7 +109,7 @@ class SupportVectorMachine(AbstractBenchmark):
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng)
+        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng, cache_size=self.cache_size)
         clf.fit(train, train_targets)
 
         # Compute test error
@@ -123,6 +129,8 @@ class SupportVectorMachine(AbstractBenchmark):
         return {'name': 'Support Vector Machine',
                 'bounds': [[-10, 10],  # C
                            [-10, 10]],  # gamma
+                # as defined in https://github.com/automl/RoBO/blob/master/experiments/fabolas/run_bo.py#L24
+                'num_function_evals': 15,
                 'references': ["@InProceedings{klein-aistats17,"
                                "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
                                "title = {Fast {Bayesian} Optimization of Machine"
@@ -141,14 +149,14 @@ class SvmOnMnist(SupportVectorMachine):
     @staticmethod
     def get_meta_information():
         d = SupportVectorMachine.get_meta_information()
-        d["references"].append("@article{lecun-ieee98,"
-                               "title={Gradient-based learning applied to document recognition},"
-                               "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
-                               "journal={Proceedings of the IEEE},"
-                               "pages={2278--2324},"
-                               "year={1998},"
-                               "publisher={IEEE}"
-                               )
+        dataset_ref = ["@article{lecun-ieee98,"
+                       "title={Gradient-based learning applied to document recognition},"
+                       "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
+                       "journal={Proceedings of the IEEE},"
+                       "pages={2278--2324},"
+                       "year={1998},"
+                       "publisher={IEEE}"]
+        d["references"].append(dataset_ref)
         return d
 
 
