@@ -30,7 +30,7 @@ class Branin(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'Branin',
-                'num_function_evals': 100,
+                'num_function_evals': 200,
                 'optima': ([[-np.pi, 12.275],
                             [np.pi, 2.275],
                             [9.42478, 2.475]]),
