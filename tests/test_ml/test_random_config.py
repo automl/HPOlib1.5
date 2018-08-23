@@ -84,6 +84,7 @@ class TestRandomConfig(unittest.TestCase):
                             # Special case for networks as they require
                             # different theano flags to run on CPU
                             theano.config.floatX = "float32"
+                            theano.config.optimizer = None
 
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
