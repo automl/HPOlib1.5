@@ -127,8 +127,8 @@ class SupportVectorMachine(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'Support Vector Machine',
-                'bounds': [[-10, 10],  # C
-                           [-10, 10]],  # gamma
+                'bounds': [[-10.0, 10.0],  # C
+                           [-10.0, 10.0]],  # gamma
                 # as defined in https://github.com/automl/RoBO/blob/master/experiments/fabolas/run_bo.py#L24
                 'num_function_evals': 15,
                 'references': ["@InProceedings{klein-aistats17,"
