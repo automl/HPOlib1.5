@@ -111,7 +111,7 @@ class ConvNetworkPytorch(AbstractBenchmark):
 
     @staticmethod
     def get_meta_information():
-        return {'name': 'Fully Connected Network Pytorch',
+        return {'name': 'Convolutional Connected Network Pytorch',
                 'bounds': [[-5.0, -1.0],  # init_learning_rate
                            [-6.0, -2.0],  # l2_reg
                            [0.3, 1-1e-5], # momentum
@@ -121,7 +121,7 @@ class ConvNetworkPytorch(AbstractBenchmark):
                 'note': "Uses as many cores as are available. Can be fixed with OMP_NUM_THREADS=1",
                 'requires': ["pytorch",
                              "torchvision"],
-                'note': 'Mostly based on the Pytorch tutorial',
+                'references': ["None"]
                 }
 
     def __train(self, model, train_loader, optimizer):

@@ -12,10 +12,9 @@ openml
 auto-sklearn==0.3.0
 pynisher
 
-
 # ml/bnn_benchmark
 theano
 git+https://github.com/Lasagne/Lasagne.git@master
 git+https://github.com/automl/sgmcmc.git
-
-
+pytorch
+torchvision
