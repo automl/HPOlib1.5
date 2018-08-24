@@ -57,8 +57,7 @@ class MNISTData(HoldoutDataManager):
 
     def __init__(self):
         self.url_source = 'http://yann.lecun.com/exdb/mnist/'
-        self.logger = logging.getLogger("DataManager")
-        self.save_to = os.path.join(hpolib._config.data_dir, "MNIST")
+        self.save_to = os.path.join(hpolib._config.data_dir, "MNIST", "raw")
 
         if not os.path.isdir(self.save_to):
             self.logger.debug("Create directory %s", self.save_to)
@@ -146,7 +145,6 @@ class MNISTData(HoldoutDataManager):
                 data = np.frombuffer(f.read(), np.uint8, offset=8)
 
         return data
-
 
 class MNISTDataCrossvalidation(MNISTData, CrossvalidationDataManager):
 
