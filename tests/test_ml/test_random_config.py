@@ -1,5 +1,6 @@
 import importlib
 import inspect
+import logging
 import pkgutil
 import os
 import sys
@@ -24,6 +25,10 @@ from hpolib.benchmarks.ml.conv_net import ConvolutionalNeuralNetwork
 
 
 class TestRandomConfig(unittest.TestCase):
+
+    def setUp(self):
+        self.logger = logging.getLogger("TestRandomConfig")
+        self.logger.setLevel(logging.DEBUG)
 
     def test_random_config_synthetic(self):
         path = os.path.dirname(hpolib.benchmarks.synthetic_functions.__file__)
@@ -84,6 +89,8 @@ class TestRandomConfig(unittest.TestCase):
                             # Special case for networks as they require
                             # different theano flags to run on CPU
                             theano.config.floatX = "float32"
+                            if sys.version_info > (3, 5, 0):
+                                theano.config.optimizer = 'None'
 
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
@@ -93,7 +100,9 @@ class TestRandomConfig(unittest.TestCase):
                             # Limit Wallclocktime using pynisher
                             obj = pynisher.enforce_limits(
                                 wall_time_in_s=10,
-                                mem_in_mb=4000
+                                mem_in_mb=3000,
+                                grace_period_in_s=5,
+                                logger=self.logger
                             )(b.objective_function)
                             res = obj(c)
                             if res is not None:
