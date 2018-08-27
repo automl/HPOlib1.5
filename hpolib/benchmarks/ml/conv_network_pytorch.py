@@ -174,14 +174,14 @@ class ConvNetworkPytorch(AbstractBenchmark):
             _, trn_loss = self.__train(model=model, train_loader=train_loader, optimizer=optimizer)
             val_acc, val_loss = self.__test(model=model, test_loader=valid_loader)
 
-            learning_curve.append(1 - val_acc)
+            learning_curve.append(100 - val_acc)
             train_loss.append(trn_loss)
             valid_loss.append(val_loss)
             cost_curve.append(time.time() - start_time)
 
             if not np.isfinite(val_acc):
                 # Training failed, stop training
-                learning_curve[-1] = 1
+                learning_curve[-1] = 100
                 break
 
         return learning_curve, cost_curve, train_loss, valid_loss
