@@ -159,7 +159,7 @@ class ConvNetworkPytorch(AbstractBenchmark):
 
         test_loss /= len(test_loader.dataset)
         test_acc = 100. * correct / len(test_loader.dataset)
-        return test_loss, test_acc
+        return test_acc, test_loss
 
     def _train_net(self, init_lr, momentum, weight_decay, dropout_rate, train_loader, valid_loader):
         start_time = time.time()
@@ -179,6 +179,11 @@ class ConvNetworkPytorch(AbstractBenchmark):
             train_loss.append(trn_loss)
             valid_loss.append(val_loss)
             cost_curve.append(time.time() - start_time)
+
+            if not np.isfinite(val_acc):
+                # Training failed, stop training
+                learning_curve[-1] = 1
+                break
 
         return learning_curve, cost_curve, train_loss, valid_loss
 
