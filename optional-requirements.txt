@@ -18,3 +18,4 @@ git+https://github.com/Lasagne/Lasagne.git@master
 git+https://github.com/automl/sgmcmc.git
 pytorch
 torchvision
+xgboost
