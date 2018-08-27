@@ -126,7 +126,7 @@ class ConvNetworkPytorch(AbstractBenchmark):
     def __train(self, model, train_loader, optimizer):
         # train model for one epoch
         model.train()
-        train_acc = 0
+        train_err = 0
         train_loss = 0
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(self.device), target.to(self.device)
@@ -137,10 +137,10 @@ class ConvNetworkPytorch(AbstractBenchmark):
             optimizer.step()
             train_loss += loss.item()
             pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
-            train_acc += pred.eq(target.view_as(pred)).sum().item()
-        train_acc = 100. * train_acc / len(train_loader.dataset)
+            train_err += pred.eq(target.view_as(pred)).sum().item()
+        train_err = 1 - (train_err / len(train_loader.dataset))
         train_loss /= len(train_loader.dataset)
-        return train_acc, train_loss
+        return train_err, train_loss
 
     def __test(self, model, test_loader):
         # get validation accuracy for test_loader
@@ -157,8 +157,8 @@ class ConvNetworkPytorch(AbstractBenchmark):
                 correct += pred.eq(target.view_as(pred)).sum().item()
 
         test_loss /= len(test_loader.dataset)
-        test_acc = 100. * correct / len(test_loader.dataset)
-        return test_acc, test_loss
+        test_err = 1 - (correct / len(test_loader.dataset))
+        return test_err, test_loss
 
     def _train_net(self, init_lr, momentum, weight_decay, dropout_rate, train_loader, valid_loader):
         start_time = time.time()
@@ -172,16 +172,16 @@ class ConvNetworkPytorch(AbstractBenchmark):
         valid_loss = []
         for epoch in range(1, self.max_epochs + 1):
             _, trn_loss = self.__train(model=model, train_loader=train_loader, optimizer=optimizer)
-            val_acc, val_loss = self.__test(model=model, test_loader=valid_loader)
+            val_err, val_loss = self.__test(model=model, test_loader=valid_loader)
 
-            learning_curve.append(100 - val_acc)
+            learning_curve.append(val_err)
             train_loss.append(trn_loss)
             valid_loss.append(val_loss)
             cost_curve.append(time.time() - start_time)
 
-            if not np.isfinite(val_acc):
+            if not np.isfinite(val_err):
                 # Training failed, stop training
-                learning_curve[-1] = 100
+                learning_curve[-1] = 1
                 break
 
         return learning_curve, cost_curve, train_loss, valid_loss
