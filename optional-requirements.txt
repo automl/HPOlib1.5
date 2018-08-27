@@ -7,3 +7,4 @@ git+https://github.com/Lasagne/Lasagne.git@master
 
 pytorch
 torchvision
+xgboost
