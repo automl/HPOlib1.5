@@ -38,8 +38,7 @@ class ConvNetworkPytorch(AbstractBenchmark):
         self.max_epochs = max_epochs
 
     def get_data(self):
-        raise NotImplementedError("Do not use this benchmark as this is only "
-                                  "a skeleton for further implementations.")
+        raise NotImplementedError("Do not use this class as this is only a skeleton for further implementations.")
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
