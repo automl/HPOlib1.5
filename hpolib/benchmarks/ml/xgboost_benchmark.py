@@ -105,6 +105,7 @@ class XGBoost(AbstractBenchmark):
         acc = accuracy_score(y_pred=y_pred, y_true=y)
         return 1-acc
 
+
 class XGBoostOnHiggs(XGBoost):
 
     def get_data(self):
