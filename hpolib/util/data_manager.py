@@ -58,10 +58,9 @@ class MNISTData(HoldoutDataManager):
 
     def __init__(self):
         self.url_source = 'http://yann.lecun.com/exdb/mnist/'
-        self.save_to = os.path.join(hpolib._config.data_dir, "MNIST", "raw")
+        self.save_to = os.path.join(hpolib._config.data_dir, "MNIST")
 
         if not os.path.isdir(self.save_to):
-            self.logger.debug("Create directory %s", self.save_to)
             os.makedirs(self.save_to)
 
         super(MNISTData, self).__init__()
