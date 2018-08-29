@@ -130,7 +130,7 @@ class SupportVectorMachine(AbstractBenchmark):
                 'bounds': [[-10.0, 10.0],  # C
                            [-10.0, 10.0]],  # gamma
                 # as defined in https://github.com/automl/RoBO/blob/master/experiments/fabolas/run_bo.py#L24
-                'num_function_evals': 15,
+                'num_function_evals': 20,
                 'references': ["@InProceedings{klein-aistats17,"
                                "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
                                "title = {Fast {Bayesian} Optimization of Machine"
@@ -207,3 +207,10 @@ class SvmOnHiggs(SupportVectorMachine):
         X_val = imp.transform(X_val)
         X_test = imp.transform(X_test)
         return X_train, y_train, X_val, y_val, X_test, y_test
+
+    @staticmethod
+    def get_meta_information():
+        d = SupportVectorMachine.get_meta_information()
+        # 29.08.2018 (KE) 15 Evaluations seem to too few for this dataset
+        d['num_function_evals'] = 20
+        return d
