@@ -34,7 +34,7 @@ class Levy1D(AbstractBenchmark):
     @staticmethod
     def get_configuration_space():
         cs = CS.ConfigurationSpace()
-        cs.generate_all_continuous_from_bounds(Levy.get_meta_information()['bounds'])
+        cs.generate_all_continuous_from_bounds(Levy1D.get_meta_information()['bounds'])
         return cs
 
     @staticmethod
