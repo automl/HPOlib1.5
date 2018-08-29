@@ -95,7 +95,8 @@ class XGBoost(AbstractBenchmark):
                 }
 
     def _get_pipeline(self, learning_rate, subsample, colsample_bytree, colsample_bylevel):
-        clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
+        clf = pipeline.Pipeline([# No normalizing as it should not make a difference
+                                 #('preproc', preprocessing.StandardScaler()),
                                  ('xgb', xgb.XGBClassifier(learning_rate=learning_rate, n_estimators=self.n_estimators,
                                                            objective='binary:logistic', n_jobs=self.n_threads,
                                                            subsample=subsample, colsample_bytree=colsample_bytree,
@@ -118,7 +119,8 @@ class XGBoostOnHiggs(XGBoost):
 
     def _get_pipeline(self, learning_rate, subsample, colsample_bytree, colsample_bylevel):
         clf = pipeline.Pipeline([('preproc1', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
-                                 ('preproc2', preprocessing.StandardScaler()),
+                                 # No normalizing as it should not make a difference
+                                 #('preproc2', preprocessing.StandardScaler()),
                                  ('xgb', xgb.XGBClassifier(learning_rate=learning_rate, n_estimators=self.n_estimators,
                                   objective='binary:logistic', n_jobs=self.n_threads,
                                   subsample=subsample, colsample_bytree=colsample_bytree,
