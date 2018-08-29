@@ -7,7 +7,7 @@ import ConfigSpace as CS
 from scipy import sparse
 from sklearn import svm
 from sklearn.model_selection import StratifiedShuffleSplit
-
+from sklearn import preprocessing, pipeline
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.data_manager import MNISTData
@@ -79,7 +79,7 @@ class SupportVectorMachine(AbstractBenchmark):
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng, cache_size=self.cache_size)
+        clf = self._get_pipeline(C=C, gamma=gamma)
         clf.fit(train, train_targets)
 
         # Compute validation error
@@ -109,7 +109,7 @@ class SupportVectorMachine(AbstractBenchmark):
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng, cache_size=self.cache_size)
+        clf = self._get_pipeline(C=C, gamma=gamma)
         clf.fit(train, train_targets)
 
         # Compute test error
@@ -117,6 +117,13 @@ class SupportVectorMachine(AbstractBenchmark):
         c = time.time() - start_time
 
         return {'function_value': y, "cost": c}
+
+    def _get_pipeline(self, C, gamma):
+        """
+        Simply returns the pipeline used for training and prediction
+        """
+        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng, cache_size=self.cache_size)
+        return clf
 
     @staticmethod
     def get_configuration_space():
@@ -211,6 +218,65 @@ class SvmOnHiggs(SupportVectorMachine):
     @staticmethod
     def get_meta_information():
         d = SupportVectorMachine.get_meta_information()
-        # 29.08.2018 (KE) 15 Evaluations seem to too few for this dataset
-        d['num_function_evals'] = 20
+        return d
+
+
+class SvmOnNormalizedMnist(SvmOnMnist):
+
+    def _get_pipeline(self, C, gamma):
+        clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
+                                 ('svm', svm.SVC(random_state=self.rng, cache_size=self.cache_size))])
+        return clf
+
+    @staticmethod
+    def get_meta_information():
+        d = SvmOnNormalizedMnist.get_meta_information()
+        dataset_ref = ["@article{lecun-ieee98,"
+                       "title={Gradient-based learning applied to document recognition},"
+                       "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
+                       "journal={Proceedings of the IEEE},"
+                       "pages={2278--2324},"
+                       "year={1998},"
+                       "publisher={IEEE}"]
+        d["references"] = dataset_ref
+        d["num_function_evals"] = 20
+        d["note"] = "This is an updated version using normalized data to speed up training."
+        return d
+
+
+class SvmOnNormalizedVehicle(SvmOnVehicle):
+
+    def _get_pipeline(self, C, gamma):
+        clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
+                                 ('svm', svm.SVC(random_state=self.rng, cache_size=self.cache_size))])
+        return clf
+
+    @staticmethod
+    def get_meta_information():
+        d = SvmOnNormalizedVehicle.get_meta_information()
+        d["references"] = []
+        d["num_function_evals"] = 20
+        d["note"] = "This is an updated version using normalized data to speed up training."
+        return d
+
+
+class SvmOnNormalizedHiggs(SvmOnHiggs):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=75101)
+        X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
+        return X_train, y_train, X_val, y_val, X_test, y_test
+
+    def _get_pipeline(self, C, gamma):
+        clf = pipeline.Pipeline([('preproc1', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
+                                 ('preproc2', preprocessing.StandardScaler()),
+                                 ('svm', svm.SVC(random_state=self.rng, cache_size=self.cache_size))])
+        return clf
+
+    @staticmethod
+    def get_meta_information():
+        d = SvmOnNormalizedHiggs.get_meta_information()
+        d["references"] = []
+        d["num_function_evals"] = 20
+        d["note"] = "This is an updated version using normalized data to speed up training."
         return d
