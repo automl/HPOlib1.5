@@ -46,13 +46,13 @@ class Levy1D(AbstractBenchmark):
                 'f_opt': 0.0}
 
 
-dimensions = list(range(2, 10))
+dimensions = list(range(2, 11))
 for d in dimensions:
-    benchmark_string = """class Levy%d(Levy1D):
+    benchmark_string = """class Levy%dD(Levy1D):
     
     @staticmethod
     def get_meta_information():
-        return {'name': 'Levy%d',
+        return {'name': 'Levy%dD',
                 'num_function_evals': 200,
                 'optima': ([[1.0]*%d]),
                 'bounds': [[-15.0, 10.0]*%d],
