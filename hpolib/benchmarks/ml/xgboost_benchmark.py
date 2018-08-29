@@ -1,15 +1,17 @@
-import os
 import time
 
 import numpy as np
 import xgboost as xgb
 from sklearn.metrics import accuracy_score
+from sklearn import preprocessing, pipeline
+
 
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.openml_data_manager import OpenMLHoldoutDataManager
 import hpolib.util.rng_helper as rng_helper
+from hpolib.util.data_manager import MNISTData
 
 
 class XGBoost(AbstractBenchmark):
@@ -43,11 +45,11 @@ class XGBoost(AbstractBenchmark):
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
         start = time.time()
-        model = self._train_xgb(X=self.X_trn, y=self.y_trn,
-                            learning_rate=learning_rate,
-                            subsample=subsample,
-                            colsample_bytree=colsample_bytree,
-                            colsample_bylevel=colsample_bylevel, random_state=self.rng)
+        model = self._get_pipeline(learning_rate=learning_rate,
+                                   subsample=subsample,
+                                   colsample_bytree=colsample_bytree,
+                                   colsample_bylevel=colsample_bylevel)
+        model.fit(X=self.X_trn, y=self.y_trn)
         val_loss = self._test_xgb(model=model, X=self.X_val, y=self.y_val)
         cost = time.time() - start
         return {'function_value': val_loss, "cost": cost}
@@ -55,7 +57,7 @@ class XGBoost(AbstractBenchmark):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-        learning_rate = 10 ** x[0]
+        learning_rate = 10**x[0]
         subsample = x[1]
         colsample_bytree = x[2]
         colsample_bylevel = x[3]
@@ -63,12 +65,12 @@ class XGBoost(AbstractBenchmark):
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
         start = time.time()
-        model = self._train_xgb(X=np.concatenate((self.X_trn, self.X_val)),
-                            y=np.concatenate((self.y_trn, self.y_val)),
-                            learning_rate=learning_rate,
-                            subsample=subsample,
-                            colsample_bytree=colsample_bytree,
-                            colsample_bylevel=colsample_bylevel, random_state=self.rng)
+        model = self._get_pipeline(learning_rate=learning_rate,
+                                   subsample=subsample,
+                                   colsample_bytree=colsample_bytree,
+                                   colsample_bylevel=colsample_bylevel)
+        model.fit(X=np.concatenate((self.X_trn, self.X_val)),
+                  y=np.concatenate((self.y_trn, self.y_val)),)
         tst_loss = self._test_xgb(model=model, X=self.X_tst, y=self.y_tst)
         cost = time.time() - start
         return {'function_value': tst_loss, "cost": cost}
@@ -92,13 +94,14 @@ class XGBoost(AbstractBenchmark):
                 'references': ["None"]
                 }
 
-    def _train_xgb(self, X, y, learning_rate, subsample, colsample_bytree, colsample_bylevel, random_state):
-        model = xgb.XGBClassifier(learning_rate=learning_rate, n_estimators=self.n_estimators,
-                                  objective='binary:logistic', n_jobs=self.n_threads,
-                                  subsample=subsample, colsample_bytree=colsample_bytree,
-                                  colsample_bylevel=colsample_bylevel, random_state=random_state.randint(1, 100000))
-        model.fit(X, y)
-        return model
+    def _get_pipeline(self, learning_rate, subsample, colsample_bytree, colsample_bylevel):
+        clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
+                                 ('xgb', xgb.XGBClassifier(learning_rate=learning_rate, n_estimators=self.n_estimators,
+                                                           objective='binary:logistic', n_jobs=self.n_threads,
+                                                           subsample=subsample, colsample_bytree=colsample_bytree,
+                                                           colsample_bylevel=colsample_bylevel,
+                                                           random_state=self.rng.randint(1, 100000)))])
+        return clf
 
     def _test_xgb(self, X, y, model):
         y_pred = model.predict(X)
@@ -111,24 +114,27 @@ class XGBoostOnHiggs(XGBoost):
     def get_data(self):
         dm = OpenMLHoldoutDataManager(openml_task_id=75101)
         X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
-        from sklearn.preprocessing import Imputer
-        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
-        imp.fit(X_train)
-        X_train = imp.transform(X_train)
-        X_val = imp.transform(X_val)
-        X_test = imp.transform(X_test)
         return X_train, y_train, X_val, y_val, X_test, y_test
 
+    def _get_pipeline(self, learning_rate, subsample, colsample_bytree, colsample_bylevel):
+        clf = pipeline.Pipeline([('preproc1', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
+                                 ('preproc2', preprocessing.StandardScaler()),
+                                 ('xgb', xgb.XGBClassifier(learning_rate=learning_rate, n_estimators=self.n_estimators,
+                                  objective='binary:logistic', n_jobs=self.n_threads,
+                                  subsample=subsample, colsample_bytree=colsample_bytree,
+                                  colsample_bylevel=colsample_bylevel, random_state=self.rng.randint(1, 100000)))])
+        return clf
 
-class XGBoostOnAdult(XGBoost):
+
+class XGBoostOnMnist(XGBoost):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=2117)
-        X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
-        from sklearn.preprocessing import Imputer
-        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
-        imp.fit(X_train)
-        X_train = imp.transform(X_train)
-        X_val = imp.transform(X_val)
-        X_test = imp.transform(X_test)
-        return X_train, y_train, X_val, y_val, X_test, y_test
+        dm = MNISTData()
+        return dm.load()
+
+
+class XGBoostOnVehicle(XGBoost):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=75191)
+        return dm.load()
