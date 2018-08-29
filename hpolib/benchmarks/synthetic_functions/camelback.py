@@ -26,5 +26,6 @@ class Camelback(AbstractBenchmark):
                 'num_function_evals': 200,
                 'optima': ([[0.0898, -0.7126],
                             [-0.0898, 0.7126]]),
-                'bounds': [[-3, 3], [-2, 2]],
+                'bounds': [[-3.0, 3.0],
+                           [-2.0, 2.0]],
                 'f_opt': -1.03162842}

@@ -1,3 +1,5 @@
+import os
+import shutil
 import unittest
 import unittest.mock
 
@@ -34,6 +36,15 @@ class TestAutoSklearnBenchmark(unittest.TestCase):
     @unittest.mock.patch('hpolib.benchmarks.ml.autosklearn_benchmark.AutoSklearnBenchmark.__init__',
                          unittest.mock.Mock(return_value=None))
     def test_get_data_manager(self):
+        real_cache_dir = hpolib._config.data_dir
+        cache_dir = os.path.join(os.path.abspath('.'), '.cache')
+        hpolib._config.data_dir = cache_dir
+        autosklearn_cache_dir = os.path.join(cache_dir, 'auto-sklearn')
+        try:
+            os.makedirs(autosklearn_cache_dir)
+        except:
+            pass
+
         # Test an allowed task - a task which is a 33% holdout task
         auto = hpolib.benchmarks.ml.autosklearn_benchmark.AutoSklearnBenchmark()
         auto._get_data_manager(289)
@@ -45,6 +56,9 @@ class TestAutoSklearnBenchmark(unittest.TestCase):
         self.assertEqual(auto.data_manager.info['task'], MULTICLASS_CLASSIFICATION)
         self.assertEqual(auto.data_manager.feat_type, ['numerical', 'numerical',
                                                        'numerical', 'numerical'])
+
+        hpolib._config.data_dir = real_cache_dir
+        shutil.rmtree(cache_dir)
 
         # Test that tasks with more than one repeat fail
         auto = hpolib.benchmarks.ml.autosklearn_benchmark.AutoSklearnBenchmark()
@@ -82,3 +96,31 @@ class TestIntegration(unittest.TestCase):
         self.assertGreaterEqual(np.max(all_rvals), 0.0)
         self.assertLessEqual(np.max(all_rvals), 2.0)
         self.assertEqual(len(all_rvals), 20)
+
+    def test_default_on_sick(self):
+        auto = hpolib.benchmarks.ml.autosklearn_benchmark.MulticlassClassificationBenchmark(3043)
+
+        fixtures = [
+            {'function_value': 0.15126103404791924},
+            {'function_value': 0.053152585119798257},
+            {'function_value': 0.11350593200710302},
+        ]
+
+        cs = auto.get_configuration_space()
+        config = cs.get_default_configuration()
+        for fold, fixture in zip(range(3), fixtures):
+            rval = auto.objective_function(
+                configuration=config,
+                fold=fold,
+                folds=3,
+            )
+            for key in fixture:
+                self.assertAlmostEqual(rval[key], fixture[key])
+
+        fixture = {'function_value': 0.13629780445825113}
+        rval = auto.objective_function_test(
+            configuration=config,
+        )
+
+        for key in fixture:
+            self.assertAlmostEqual(rval[key], fixture[key])

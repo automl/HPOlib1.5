@@ -1,10 +1,10 @@
 import importlib
 import inspect
+import logging
 import pkgutil
 import os
 import sys
 
-import unittest
 import unittest.mock
 
 import numpy as np
@@ -25,6 +25,10 @@ from hpolib.benchmarks.ml.conv_net import ConvolutionalNeuralNetwork
 
 
 class TestRandomConfig(unittest.TestCase):
+
+    def setUp(self):
+        self.logger = logging.getLogger("TestRandomConfig")
+        self.logger.setLevel(logging.DEBUG)
 
     def test_random_config_synthetic(self):
         path = os.path.dirname(hpolib.benchmarks.synthetic_functions.__file__)
@@ -67,7 +71,7 @@ class TestRandomConfig(unittest.TestCase):
                             inspect.isclass(obj) and \
                             abstract_class in obj.__bases__:
                         # Make sure to only test correct implementations
-                        print(obj)
+                        print(obj, name)
 
                         if issubclass(obj, AutoSklearnBenchmark) and not \
                                 MulticlassClassificationBenchmark in obj.__bases__:
@@ -85,6 +89,8 @@ class TestRandomConfig(unittest.TestCase):
                             # Special case for networks as they require
                             # different theano flags to run on CPU
                             theano.config.floatX = "float32"
+                            if sys.version_info > (3, 5, 0):
+                                theano.config.optimizer = 'None'
 
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
@@ -92,17 +98,25 @@ class TestRandomConfig(unittest.TestCase):
                             c = cfg.sample_configuration()
 
                             # Limit Wallclocktime using pynisher
-                            obj = pynisher.enforce_limits(wall_time_in_s=10,
-                                                          mem_in_mb=3072)(b.objective_function)
+                            obj = pynisher.enforce_limits(
+                                wall_time_in_s=10,
+                                mem_in_mb=3000,
+                                grace_period_in_s=5,
+                                logger=self.logger
+                            )(b.objective_function)
                             res = obj(c)
                             if res is not None:
                                 self.assertTrue(np.isfinite(res['cost']))
                                 self.assertTrue(np.isfinite(res['function_value']))
                             else:
-                                self.assertTrue(obj.exit_status in
-                                                (pynisher.TimeoutException,
-                                                 pynisher.MemorylimitException))
+                                self.assertTrue(
+                                    obj.exit_status in (
+                                        pynisher.TimeoutException,
+                                        pynisher.MemorylimitException,
+                                    ),
+                                    msg=str(obj.exit_status)
+                                )
             else:
-                raise ValueError("{:s} does not contain basic benchmark that is"
+                raise ValueError("{:s} does not contain a basic benchmark that is"
                                  " derived from AbstractBenchmark".
                                  format(mod_name))

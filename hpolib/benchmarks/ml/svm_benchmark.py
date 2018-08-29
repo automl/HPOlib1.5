@@ -1,10 +1,12 @@
 import time
 
+import os
 import numpy as np
 import ConfigSpace as CS
 
 from scipy import sparse
 from sklearn import svm
+from sklearn.model_selection import StratifiedShuffleSplit
 
 
 from hpolib.abstract_benchmark import AbstractBenchmark
@@ -23,21 +25,26 @@ class SupportVectorMachine(AbstractBenchmark):
         a configuration. For that the validation and training data is
         concatenated to form the whole training data set.
     """
-    def __init__(self, rng=None):
+    def __init__(self, rng=None, cache_size=2000):
         """
 
         Parameters
         ----------
         rng: int/None/RandomState
             set up rng
+        cache_size: int
+            kernel cache size (in MB) for the SVM
         """
-
         self.train, self.train_targets, self.valid, self.valid_targets, \
             self.test, self.test_targets = self.get_data()
 
         # Use 10 time the number of classes as lower bound for the dataset
         # fraction
         n_classes = np.unique(self.train_targets).shape[0]
+        self.cache_size = cache_size
+        if os.environ.get("TRAVIS", 0) == "true":
+            # If run on travis.ci, don't use higher cache size
+            self.cache_size = 200
         self.s_min = float(10 * n_classes) / self.train.shape[0]
 
         super(SupportVectorMachine, self).__init__()
@@ -56,20 +63,23 @@ class SupportVectorMachine(AbstractBenchmark):
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
-        # Shuffle training data
-        shuffle = self.rng.permutation(self.train.shape[0])
-        size = int(dataset_fraction * self.train.shape[0])
+        # Stratified shuffle training data
+        if np.round(dataset_fraction, 3) < 1.0:
+            sss = StratifiedShuffleSplit(n_splits=1, train_size=np.round(dataset_fraction, 3), test_size=None)
+            idx = list(sss.split(self.train, self.train_targets))[0][0]
 
-        # Split of dataset subset
-        train = self.train[shuffle[:size]]
-        train_targets = self.train_targets[shuffle[:size]]
+            train = self.train[idx]
+            train_targets = self.train_targets[idx]
+        else:
+            train = self.train
+            train_targets = self.train_targets
 
         # Transform hyperparameters to linear scale
         C = np.exp(float(x[0]))
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng)
+        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng, cache_size=self.cache_size)
         clf.fit(train, train_targets)
 
         # Compute validation error
@@ -99,7 +109,7 @@ class SupportVectorMachine(AbstractBenchmark):
         gamma = np.exp(float(x[1]))
 
         # Train support vector machine
-        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng)
+        clf = svm.SVC(gamma=gamma, C=C, random_state=self.rng, cache_size=self.cache_size)
         clf.fit(train, train_targets)
 
         # Compute test error
@@ -117,15 +127,16 @@ class SupportVectorMachine(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'Support Vector Machine',
-                'bounds': [[-10, 10],  # C
-                           [-10, 10]],  # gamma
-                'references': ["@article{klein-corr16,"
+                'bounds': [[-10.0, 10.0],  # C
+                           [-10.0, 10.0]],  # gamma
+                # as defined in https://github.com/automl/RoBO/blob/master/experiments/fabolas/run_bo.py#L24
+                'num_function_evals': 15,
+                'references': ["@InProceedings{klein-aistats17,"
                                "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
-                               "title = {Fast Bayesian Optimization of Machine Learning"
-                               "Hyperparameters on Large Datasets},"
-                               "journal = corr,"
-                               "llvolume = {abs/1605.07079},"
-                               "lurl = {http://arxiv.org/abs/1605.07079}, year = {2016} }"]
+                               "title = {Fast {Bayesian} Optimization of Machine"
+                               "Learning Hyperparameters on Large Datasets},"
+                               "booktitle = {Proceedings of the AISTATS conference},"
+                               "year = {2017}}"]
                 }
 
 
@@ -138,14 +149,14 @@ class SvmOnMnist(SupportVectorMachine):
     @staticmethod
     def get_meta_information():
         d = SupportVectorMachine.get_meta_information()
-        d["references"].append("@article{lecun-ieee98,"
-                               "title={Gradient-based learning applied to document recognition},"
-                               "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
-                               "journal={Proceedings of the IEEE},"
-                               "pages={2278--2324},"
-                               "year={1998},"
-                               "publisher={IEEE}"
-                               )
+        dataset_ref = ["@article{lecun-ieee98,"
+                       "title={Gradient-based learning applied to document recognition},"
+                       "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
+                       "journal={Proceedings of the IEEE},"
+                       "pages={2278--2324},"
+                       "year={1998},"
+                       "publisher={IEEE}"]
+        d["references"].append(dataset_ref)
         return d
 
 
@@ -161,3 +172,38 @@ class SvmOnCovertype(SupportVectorMachine):
     def get_data(self):
         dm = OpenMLHoldoutDataManager(openml_task_id=2118)
         return dm.load()
+
+
+class SvmOnLetter(SupportVectorMachine):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=236)
+        return dm.load()
+
+
+class SvmOnAdult(SupportVectorMachine):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=2117)
+        X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
+        from sklearn.preprocessing import Imputer
+        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+        imp.fit(X_train)
+        X_train = imp.transform(X_train)
+        X_val = imp.transform(X_val)
+        X_test = imp.transform(X_test)
+        return X_train, y_train, X_val, y_val, X_test, y_test
+
+
+class SvmOnHiggs(SupportVectorMachine):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=75101)
+        X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
+        from sklearn.preprocessing import Imputer
+        imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+        imp.fit(X_train)
+        X_train = imp.transform(X_train)
+        X_val = imp.transform(X_val)
+        X_test = imp.transform(X_test)
+        return X_train, y_train, X_val, y_val, X_test, y_test
