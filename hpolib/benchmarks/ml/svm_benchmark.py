@@ -225,7 +225,7 @@ class SvmOnNormalizedMnist(SvmOnMnist):
 
     def _get_pipeline(self, C, gamma):
         clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
-                                 ('svm', svm.SVC(random_state=self.rng, cache_size=self.cache_size))])
+                                 ('svm', svm.SVC(C=C, gamma=gamma, random_state=self.rng, cache_size=self.cache_size))])
         return clf
 
     @staticmethod
