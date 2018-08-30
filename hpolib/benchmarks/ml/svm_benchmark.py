@@ -248,7 +248,7 @@ class SvmOnNormalizedVehicle(SvmOnVehicle):
 
     def _get_pipeline(self, C, gamma):
         clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
-                                 ('svm', svm.SVC(random_state=self.rng, cache_size=self.cache_size))])
+                                 ('svm', svm.SVC(C=C, gamma=gamma, random_state=self.rng, cache_size=self.cache_size))])
         return clf
 
     @staticmethod
@@ -270,7 +270,7 @@ class SvmOnNormalizedHiggs(SvmOnHiggs):
     def _get_pipeline(self, C, gamma):
         clf = pipeline.Pipeline([('preproc1', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
                                  ('preproc2', preprocessing.StandardScaler()),
-                                 ('svm', svm.SVC(random_state=self.rng, cache_size=self.cache_size))])
+                                 ('svm', svm.SVC(C=C, gamma=gamma, random_state=self.rng, cache_size=self.cache_size))])
         return clf
 
     @staticmethod
