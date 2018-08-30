@@ -55,7 +55,14 @@ for d in dimensions:
         return {'name': 'Levy%dD',
                 'num_function_evals': 200,
                 'optima': ([[1.0]*%d]),
-                'bounds': [[-15.0, 10.0]*%d],
-                'f_opt': 0.0}""" % (d, d, d, d)
+                'bounds': [[-15.0, 10.0]]*%d,
+                'f_opt': 0.0}
+    
+    @staticmethod
+    def get_configuration_space():
+        cs = CS.ConfigurationSpace()
+        cs.generate_all_continuous_from_bounds(Levy%dD.get_meta_information()['bounds'])
+        return cs""" % (d, d, d, d, d)
+
 
     exec(benchmark_string)
