@@ -230,7 +230,7 @@ class SvmOnNormalizedMnist(SvmOnMnist):
 
     @staticmethod
     def get_meta_information():
-        d = SvmOnNormalizedMnist.get_meta_information()
+        d = SvmOnMnist.get_meta_information()
         dataset_ref = ["@article{lecun-ieee98,"
                        "title={Gradient-based learning applied to document recognition},"
                        "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
@@ -253,7 +253,7 @@ class SvmOnNormalizedVehicle(SvmOnVehicle):
 
     @staticmethod
     def get_meta_information():
-        d = SvmOnNormalizedVehicle.get_meta_information()
+        d = SvmOnVehicle.get_meta_information()
         d["references"] = []
         d["num_function_evals"] = 20
         d["note"] = "This is an updated version using normalized data to speed up training."
@@ -275,7 +275,7 @@ class SvmOnNormalizedHiggs(SvmOnHiggs):
 
     @staticmethod
     def get_meta_information():
-        d = SvmOnNormalizedHiggs.get_meta_information()
+        d = SvmOnHiggs.get_meta_information()
         d["references"] = []
         d["num_function_evals"] = 20
         d["note"] = "This is an updated version using normalized data to speed up training."
