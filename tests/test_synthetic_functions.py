@@ -31,10 +31,11 @@ class TestAbstractBenchmark(unittest.TestCase):
             np.testing.assert_approx_equal(f(x), f.get_meta_information()["f_opt"], significant=9)
 
     def test_levy(self):
-        f = synthetic_functions.Levy()
+        for i in range(1, 11):
+            f = getattr(synthetic_functions, "Levy%dD" % i)()
 
-        for x in f.get_meta_information()["optima"]:
-            assert np.isclose(f(x), f.get_meta_information()["f_opt"])
+            for x in f.get_meta_information()["optima"]:
+                assert np.isclose(f(x), f.get_meta_information()["f_opt"])
 
     def test_goldstein_price(self):
         f = synthetic_functions.GoldsteinPrice()
@@ -43,7 +44,7 @@ class TestAbstractBenchmark(unittest.TestCase):
             assert np.isclose(f(x), f.get_meta_information()["f_opt"])
 
     def test_rosenbrock(self):
-        f = synthetic_functions.Rosenbrock()
+        f = synthetic_functions.Rosenbrock2D()
 
         for x in f.get_meta_information()["optima"]:
             np.testing.assert_approx_equal(f(x), f.get_meta_information()["f_opt"], significant=9)
