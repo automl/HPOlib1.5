@@ -123,21 +123,21 @@ class MLPOnHiggs(MLP):
     def _get_pipeline(self, l2_reg, init_lr, momentum, power_t):
         clf = pipeline.Pipeline([('preproc1', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
                                  ('preproc2', preprocessing.StandardScaler()),
-                                 (MLPClassifier(hidden_layer_sizes=(300, 300),
-                                                activation='relu',
-                                                solver='sgd',
-                                                alpha=l2_reg,
-                                                batch_size='auto',
-                                                learning_rate='invscaling',
-                                                learning_rate_init=init_lr,
-                                                momentum=momentum,
-                                                power_t=power_t,
-                                                nesterovs_momentum=True,
-                                                early_stopping=True,
-                                                validation_fraction=0.2,
-                                                max_iter=200,
-                                                shuffle=True,
-                                                random_state=self.rng))
+                                 ('classifier', MLPClassifier(hidden_layer_sizes=(300, 300),
+                                                              activation='relu',
+                                                              solver='sgd',
+                                                              alpha=l2_reg,
+                                                              batch_size='auto',
+                                                              learning_rate='invscaling',
+                                                              learning_rate_init=init_lr,
+                                                              momentum=momentum,
+                                                              power_t=power_t,
+                                                              nesterovs_momentum=True,
+                                                              early_stopping=True,
+                                                              validation_fraction=0.2,
+                                                              max_iter=200,
+                                                              shuffle=True,
+                                                              random_state=self.rng))
                                  ])
         return clf
 
