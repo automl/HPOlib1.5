@@ -43,9 +43,10 @@ class MLP(AbstractBenchmark):
 
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
+        print(self.rng, rng)
         start = time.time()
         model = self._get_pipeline(l2_reg=l2_reg, momentum=momentum, init_lr=init_lr, power_t=power_t)
-        model.fit(X=self.X_trn, y=self.y_trn)
+        model.fit(X=self.X_trn.copy(), y=self.y_trn.copy())
         val_loss = self._test_model(model=model, X=self.X_val, y=self.y_val)
         cost = time.time() - start
         return {'function_value': val_loss, "cost": cost}
@@ -99,8 +100,8 @@ class MLP(AbstractBenchmark):
                                                          momentum=momentum,
                                                          power_t=power_t,
                                                          nesterovs_momentum=True,
-                                                         early_stopping=False,
-                                                         #validation_fraction=0.2,
+                                                         early_stopping=True,
+                                                         validation_fraction=0.2,
                                                          max_iter=200,
                                                          shuffle=True,
                                                          random_state=self.rng))
@@ -133,8 +134,8 @@ class MLPOnHiggs(MLP):
                                                               momentum=momentum,
                                                               power_t=power_t,
                                                               nesterovs_momentum=True,
-                                                              early_stopping=False,
-                                                              #validation_fraction=0.2,
+                                                              early_stopping=True,
+                                                              validation_fraction=0.2,
                                                               max_iter=200,
                                                               shuffle=True,
                                                               random_state=self.rng))
