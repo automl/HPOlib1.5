@@ -99,8 +99,8 @@ class MLP(AbstractBenchmark):
                                                          momentum=momentum,
                                                          power_t=power_t,
                                                          nesterovs_momentum=True,
-                                                         early_stopping=True,
-                                                         validation_fraction=0.2,
+                                                         early_stopping=False,
+                                                         #validation_fraction=0.2,
                                                          max_iter=200,
                                                          shuffle=True,
                                                          random_state=self.rng))
@@ -133,8 +133,8 @@ class MLPOnHiggs(MLP):
                                                               momentum=momentum,
                                                               power_t=power_t,
                                                               nesterovs_momentum=True,
-                                                              early_stopping=True,
-                                                              validation_fraction=0.2,
+                                                              early_stopping=False,
+                                                              #validation_fraction=0.2,
                                                               max_iter=200,
                                                               shuffle=True,
                                                               random_state=self.rng))
