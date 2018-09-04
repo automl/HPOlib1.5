@@ -43,7 +43,6 @@ class MLP(AbstractBenchmark):
 
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
-        print(self.rng, rng)
         start = time.time()
         model = self._get_pipeline(l2_reg=l2_reg, momentum=momentum, init_lr=init_lr, power_t=power_t)
         model.fit(X=self.X_trn.copy(), y=self.y_trn.copy())
@@ -71,7 +70,7 @@ class MLP(AbstractBenchmark):
 
     @staticmethod
     def get_configuration_space():
-        cs = CS.ConfigurationSpace(seed=np.random.randint(1, 100000))
+        cs = CS.ConfigurationSpace(seed=1)
         cs.generate_all_continuous_from_bounds(MLP.get_meta_information()['bounds'])
         return cs
 
@@ -117,7 +116,7 @@ class MLP(AbstractBenchmark):
 class MLPOnHiggs(MLP):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75101)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75101, rng=self.rng)
         X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
         return X_train, y_train, X_val, y_val, X_test, y_test
 
@@ -153,5 +152,5 @@ class MLPOnMnist(MLP):
 class MLPOnVehicle(MLP):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75191)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75191, rng=self.rng)
         return dm.load()

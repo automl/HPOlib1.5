@@ -113,7 +113,7 @@ class XGBoost(AbstractBenchmark):
 class XGBoostOnHiggs(XGBoost):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75101)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75101, rng=self.rng)
         X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
         return X_train, y_train, X_val, y_val, X_test, y_test
 
@@ -138,5 +138,5 @@ class XGBoostOnMnist(XGBoost):
 class XGBoostOnVehicle(XGBoost):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75191)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75191, rng=self.rng)
         return dm.load()
