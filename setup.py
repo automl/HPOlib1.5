@@ -4,12 +4,22 @@ import setuptools
 with open("hpolib/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
 
+with open('requirements.txt') as fh:
+    requirements = fh.read()
+requirements = requirements.split('\n')
+requirements = [requirement.strip() for requirement in requirements]
+
+
 setuptools.setup(
     name='hpolib2',
     description='Automated machine learning.',
     version=version,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['cython', 'numpy>=1.9.0', 'scipy>=0.14.1', 'ConfigSpace>=0.4.0', 'configparser', 'matplotlib'],
+    install_requires=requirements,
+    tests_require=[
+        'pynisher',
+        'nose',
+        'mock'],
     test_suite='nose.collector',
     scripts=[],
     #include_package_data=True,

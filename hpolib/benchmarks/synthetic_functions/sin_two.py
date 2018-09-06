@@ -34,5 +34,6 @@ class SinTwo(AbstractBenchmark):
         return {'name': 'SinTwo',
                 'num_function_evals': 200,
                 'optima': ([[0.6330131633013163, 0.6330131633013163]]),
-                'bounds': [[0, 1], [0, 1]],
+                'bounds': [[0.0, 1.0],
+                           [0.0, 1.0]],
                 'f_opt': 0.042926342433644127 ** 2}

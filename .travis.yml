@@ -27,6 +27,8 @@ before_install:
 
 install:
   - pip install coverage pep8 codecov
+  # Temporarily pin the numpy version for travis-ci
+  - pip install "numpy<1.15"
   # Inverse grep allows comments in requirements file
   #- cat requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
   #- cat optional-requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install

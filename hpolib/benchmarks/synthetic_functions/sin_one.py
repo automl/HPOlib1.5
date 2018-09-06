@@ -33,7 +33,7 @@ class SinOne(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'SinOne',
-                'num_function_evals': 200,
+                'num_function_evals': 100,
                 'optima': ([[0.6330131633013163]]),
-                'bounds': [[0, 1]],
+                'bounds': [[0.0, 1.0]],
                 'f_opt': 0.042926342433644127}
