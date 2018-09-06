@@ -141,6 +141,21 @@ class MLPOnHiggs(MLP):
                                  ])
         return clf
 
+    @staticmethod
+    def get_meta_information():
+        d = MLP.get_meta_information()
+        data_ref = ["@inproceedings{baldi-nature14,"
+                    "author = {P. Baldi and P. Sadowski and D. Whiteson},"
+                    "year = {2014},"
+                    "month = {07},"
+                    "pages = {1-9},"
+                    "title = {Searching for Exotic Particles in High-Energy Physics with Deep Learning},"
+                    "volume = {5},"
+                    "booktitle = {Nature Communications}"
+                    ]
+        d["references"].append(data_ref)
+        return d
+
 
 class MLPOnMnist(MLP):
 
@@ -148,6 +163,18 @@ class MLPOnMnist(MLP):
         dm = MNISTData()
         return dm.load()
 
+    @staticmethod
+    def get_meta_information():
+        d = MLP.get_meta_information()
+        data_ref = ["@inproceedings{lecun-ieee98,"
+                    "title={Gradient-based learning applied to document recognition},"
+                    "author={Y. LeCun and L. Bottou and Y. Bengio and P. Haffner},"
+                    "journal={Proceedings of the IEEE},"
+                    "pages={2278--2324},"
+                    "year={1998},"
+                    "publisher={IEEE}"]
+        d["references"].append(data_ref)
+        return d
 
 class MLPOnVehicle(MLP):
 
