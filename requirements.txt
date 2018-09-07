@@ -15,3 +15,7 @@ git+https://github.com/Lasagne/Lasagne.git@master
 
 scikit-learn
 ConfigSpace>=0.3.3
+
+openml
+pynisher
+auto-sklearn
