@@ -11,3 +11,7 @@ liac-arff>=2.1.1
 Cython
 ConfigSpace>=0.4.0
 openml
+pynisher
+lockfile
+theano==0.8.2
+lasagne
