@@ -78,7 +78,11 @@ class DataDetergent(object):
         """
 
         if self.remove_constant_features:
-            self.active_indices = np.nonzero(np.var(X, axis=0))[0]
+
+            idx = np.var(X, axis=0)  # remove all features with 0 variance
+            mask = np.all(np.isnan(X), axis=0)  # remove all features that are continuously NAN
+            idx[mask] = 0
+            self.active_indices = np.nonzero(idx)[0]
             if self.categorical_features is not None:
                 self.OHE.set_params(categorical_features=self.categorical_features[self.active_indices])
         else:
