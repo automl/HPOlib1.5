@@ -570,7 +570,7 @@ class YearPredictionMSDData(HoldoutDataManager):
             
                 urlretrieve(self.url_source + 'YearPredictionMSD.txt.zip', orig_data_fn, reporthook=lambda x: print(x))      
         
-            with zipfile.ZipFile(tmp_fn, 'r') as zf:
+            with zipfile.ZipFile(orig_data_fn, 'r') as zf:
                 with zf.open('YearPredictionMSD.txt','r') as fh:
                     data = np.loadtxt(fh, delimiter=',')        
         
