@@ -568,13 +568,13 @@ class YearPredictionMSDData(HoldoutDataManager):
                 self.logger.debug("Downloading %s to %s",
                               self.url_source + 'YearPredictionMSD.txt.zip', orig_data_fn)
             
-                urlretrieve(self.url_source + 'YearPredictionMSD.txt.zip', orig_data_fn, reporthook=lambda x: print(x))      
-        
+                urlretrieve(self.url_source + 'YearPredictionMSD.txt.zip', orig_data_fn)
+
             with zipfile.ZipFile(orig_data_fn, 'r') as zf:
                 with zf.open('YearPredictionMSD.txt','r') as fh:
                     data = np.loadtxt(fh, delimiter=',')        
         
-            numpy.save(data_fn, data)
+            np.save(data_fn, data)
         else:
             data = np.load(data_fn)
 
