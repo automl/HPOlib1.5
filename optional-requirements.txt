@@ -1,6 +1,21 @@
+# for running the unittests (should not be installed if you only want to use HPOlib
+unittest2
+nose
+
+# benchmarks using sklearn
+scikit-learn>=0.19.0,<0.20.0
+
+# openml connector
+openml
+
+# for benchmarks using auto-sklearn
 auto-sklearn==0.3.0
 pynisher
 
-# We need lasagne 0.2dev1 + corresponding theano version
-theano==0.8.2
+
+# ml/bnn_benchmark
+theano
 git+https://github.com/Lasagne/Lasagne.git@master
+git+https://github.com/automl/sgmcmc.git
+
+
