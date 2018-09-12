@@ -8,5 +8,6 @@ from hpolib.benchmarks.synthetic_functions.sin_one import SinOne
 from hpolib.benchmarks.synthetic_functions.sin_two import SinTwo
 from hpolib.benchmarks.synthetic_functions.goldstein_price import GoldsteinPrice
 from hpolib.benchmarks.synthetic_functions.rosenbrock import Rosenbrock2D, Rosenbrock5D, Rosenbrock10D, Rosenbrock20D
+from hpolib.benchmarks.synthetic_functions.rosenbrock import MultiFidelityRosenbrock2D, MultiFidelityRosenbrock5D, MultiFidelityRosenbrock10D, MultiFidelityRosenbrock20D
 from hpolib.benchmarks.synthetic_functions.forrester import Forrester
 from hpolib.benchmarks.synthetic_functions.wrapper.synthetic_noise_and_cost import SyntheticNoiseAndCost

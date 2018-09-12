@@ -4,6 +4,7 @@ import logging
 import pickle
 import os
 import tarfile
+import zipfile
 
 from urllib.request import urlretrieve
 
@@ -358,3 +359,224 @@ class SVHNData(DataManager):
         y_test = test_data['y']
 
         return X_train, y_train, X_test, y_test
+
+
+class BostonHousingData(HoldoutDataManager):
+
+    def __init__(self):
+        super(BostonHousingData, self).__init__()
+        self.url_source = 'https://archive.ics.uci.edu/ml/machine-learning-databases/housing/'
+        self.logger = logging.getLogger("DataManager")
+        self.save_to = os.path.join(hpolib._config.data_dir, "BostonHousing")
+
+        if not os.path.isdir(self.save_to):
+            self.logger.debug("Create directory %s", self.save_to)
+            os.makedirs(self.save_to)
+
+    def load(self):
+        """
+        Loads BostonHousing from data directory as defined in _config.data_directory.
+        Downloads data if necessary.
+
+        Returns
+        -------
+        X_train: np.array
+        y_train: np.array
+        X_val: np.array
+        y_val: np.array
+        X_test: np.array
+        y_test: np.array
+        """
+        
+        data = self.__load_data('housing.data')
+        
+        N = data.shape[0]
+        
+        n_train = int(N * 0.6)
+        n_val = int(N * 0.2)
+        
+        X_train, y_train = data[:n_train, :-1], data[:n_train,-1]
+        X_val, y_val = data[n_train:n_train+n_val, :-1], data[n_train:n_train+n_val,-1]
+        X_test, y_test = data[n_train+n_val:, :-1], data[n_train+n_val:,-1]
+        
+        return X_train, y_train, X_val, y_val, X_test, y_test
+
+    def __load_data(self, filename, images=False):
+        """
+        Loads data from UCI website
+        https://archive.ics.uci.edu/ml/machine-learning-databases/housing/
+        If necessary downloads data, otherwise loads data from data_directory
+
+        Parameters
+        ----------
+        filename: str
+            file to download
+        Returns
+        -------
+        data: array
+        """
+
+        # 1) If necessary download data
+        save_fl = os.path.join(self.save_to, filename)
+        if not os.path.exists(save_fl):
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source + filename, save_fl)
+            urlretrieve(self.url_source + filename, save_fl)
+        else:
+            self.logger.debug("Load data %s", save_fl)
+
+        return(np.loadtxt(save_fl))
+
+
+class ProteinStructureData(HoldoutDataManager):
+
+    def __init__(self):
+        super(ProteinStructureData, self).__init__()
+        self.url_source = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00265/'
+        self.logger = logging.getLogger("DataManager")
+        self.save_to = os.path.join(hpolib._config.data_dir, "ProteinStructure")
+
+        if not os.path.isdir(self.save_to):
+            self.logger.debug("Create directory %s", self.save_to)
+            os.makedirs(self.save_to)
+
+
+
+    def load(self):
+        """
+        Loads Physicochemical Properties of Protein Tertiary Structure Data Set
+        from data directory as defined in _config.data_directory.
+        Downloads data if necessary from UCI.
+
+        Returns
+        -------
+        X_train: np.array
+        y_train: np.array
+        X_val: np.array
+        y_val: np.array
+        X_test: np.array
+        y_test: np.array
+        """
+        
+        data = self.__load_data('CASP.csv')
+        
+        N = data.shape[0]
+        
+        n_train = int(N * 0.6)
+        n_val = int(N * 0.2)
+        
+        # note the target value is the first column for this dataset!
+        X_train, y_train = data[:n_train, 1:], data[:n_train,0]
+        X_val, y_val = data[n_train:n_train+n_val, 1:], data[n_train:n_train+n_val,0]
+        X_test, y_test = data[n_train+n_val:, 1:], data[n_train+n_val:,0]
+        
+        return X_train, y_train, X_val, y_val, X_test, y_test
+
+    def __load_data(self, filename, images=False):
+        """
+        Loads data from UCI website
+        https://archive.ics.uci.edu/ml/machine-learning-databases/housing/
+        If necessary downloads data, otherwise loads data from data_directory
+
+        Parameters
+        ----------
+        filename: str
+            file to download
+        Returns
+        -------
+        data: array
+        """
+
+        # 1) If necessary download data
+        save_fl = os.path.join(self.save_to, filename)
+        if not os.path.exists(save_fl):
+            self.logger.debug("Downloading %s to %s",
+                              self.url_source + filename, save_fl)
+            urlretrieve(self.url_source + filename, save_fl)
+        else:
+            self.logger.debug("Load data %s", save_fl)
+
+        return(np.loadtxt(save_fl, delimiter=',', skiprows=1))
+
+
+
+
+class YearPredictionMSDData(HoldoutDataManager):
+
+    def __init__(self):
+        super(YearPredictionMSDData, self).__init__()
+        self.url_source = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00203/'
+        self.logger = logging.getLogger("DataManager")
+        self.save_to = os.path.join(hpolib._config.data_dir, "YearPredictionMSD")
+
+        if not os.path.isdir(self.save_to):
+            self.logger.debug("Create directory %s", self.save_to)
+            os.makedirs(self.save_to)
+
+
+
+    def load(self):
+        """
+        Loads Physicochemical Properties of Protein Tertiary Structure Data Set
+        from data directory as defined in _config.data_directory.
+        Downloads data if necessary from UCI.
+
+        Returns
+        -------
+        X_train: np.array
+        y_train: np.array
+        X_val: np.array
+        y_val: np.array
+        X_test: np.array
+        y_test: np.array
+        """
+        
+        data = self.__load_data()
+        
+        n_trn = int(data.shape[0]* 0.7)
+        n_val   = int(data.shape[0]* 0.2)
+        
+        # note the target value is the first column for this dataset!
+        X_trn, y_trn = data[           :n_trn,       1:], data[:n_trn,0]
+        X_val, y_val = data[n_trn      :n_trn+n_val, 1:], data[n_trn:n_trn+n_val,0]
+        X_tst, y_tst = data[n_trn+n_val:,            1:], data[n_trn+n_val:,0]
+        
+        return X_trn, y_trn, X_val, y_val, X_tst, y_tst
+
+    def __load_data(self):
+        """
+        Loads data from UCI website
+        https://archive.ics.uci.edu/ml/machine-learning-databases/00203/
+        If necessary downloads data, otherwise loads data from data_directory
+
+        Parameters
+        ----------
+        filename: str
+            file to download
+        Returns
+        -------
+        data: array
+        """
+
+        data_fn = os.path.join(self.save_to, 'data.npy')
+
+        if not os.path.exists(data_fn):
+            
+            orig_data_fn = os.path.join(self.save_to, 'YearPredictionMSD.txt.zip')
+            if not os.path.exists(orig_data_fn):
+            
+                self.logger.debug("Downloading %s to %s",
+                              self.url_source + 'YearPredictionMSD.txt.zip', orig_data_fn)
+            
+                urlretrieve(self.url_source + 'YearPredictionMSD.txt.zip', orig_data_fn)
+
+            with zipfile.ZipFile(orig_data_fn, 'r') as zf:
+                with zf.open('YearPredictionMSD.txt','r') as fh:
+                    data = np.loadtxt(fh, delimiter=',')        
+        
+            np.save(data_fn, data)
+        else:
+            data = np.load(data_fn)
+
+        return(data)
+

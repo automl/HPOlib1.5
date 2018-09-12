@@ -44,10 +44,17 @@ class TestAbstractBenchmark(unittest.TestCase):
             assert np.isclose(f(x), f.get_meta_information()["f_opt"])
 
     def test_rosenbrock(self):
-        f = synthetic_functions.Rosenbrock2D()
+        for i in (2, 5, 10, 20):
+            f = getattr(synthetic_functions, "Rosenbrock%dD" % i)()
 
-        for x in f.get_meta_information()["optima"]:
-            np.testing.assert_approx_equal(f(x), f.get_meta_information()["f_opt"], significant=9)
+            for x in f.get_meta_information()["optima"]:
+                assert np.isclose(f(x), f.get_meta_information()["f_opt"])
+
+        for i in (2, 5, 10, 20):
+            f = getattr(synthetic_functions, "MultiFidelityRosenbrock%dD" % i)()
+
+            for x in f.get_meta_information()["optima"]:
+                assert np.isclose(f(x), f.get_meta_information()["f_opt"])
 
     def test_sin_one(self):
         f = synthetic_functions.SinOne()
@@ -61,5 +68,7 @@ class TestAbstractBenchmark(unittest.TestCase):
         for x in f.get_meta_information()["optima"]:
             np.testing.assert_approx_equal(f(x), f.get_meta_information()["f_opt"], significant=9)
 
+
 if __name__ == "__main__":
     unittest.main()
+
