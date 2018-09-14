@@ -3,8 +3,10 @@ import openml
 from hpolib.util.preprocessing import DataDetergent
 from hpolib.benchmarks.ml.svm_benchmark import SupportVectorMachine
 
+from scipy.sparse import csr_matrix
 
-class SupportVectorMachineOpenML100(SupportVectorMachine):
+
+class SupportVectorMachineOpenML(SupportVectorMachine):
 
     def __init__(self, task_id, rng=None):
         """
@@ -35,6 +37,9 @@ class SupportVectorMachineOpenML100(SupportVectorMachine):
         train_indices, valid_indicies = task.get_train_test_split_indices()
 
         X, y = task.get_X_and_y()
+        if type(X) == csr_matrix:
+            X = X.todense()
+
         X_train = X[train_indices]
         train_targets = y[train_indices]
 
