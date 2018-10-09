@@ -19,9 +19,6 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.benchmarks.ml.autosklearn_benchmark import AutoSklearnBenchmark
 from hpolib.benchmarks.ml.autosklearn_benchmark import \
     MulticlassClassificationBenchmark
-from hpolib.benchmarks.ml.logistic_regression import LogisticRegression
-from hpolib.benchmarks.ml.fully_connected_network import FullyConnectedNetwork
-from hpolib.benchmarks.ml.conv_net import ConvolutionalNeuralNetwork
 
 
 class TestRandomConfig(unittest.TestCase):
@@ -78,19 +75,6 @@ class TestRandomConfig(unittest.TestCase):
                             # Special case for auto-sklearn which has
                             # two baseclasses
                             continue
-
-                        if issubclass(obj, LogisticRegression):
-                            # Special case for log reg as it does require
-                            # different theano flags
-                            theano.config.floatX = "float64"
-
-                        if issubclass(obj, FullyConnectedNetwork) or \
-                                issubclass(obj, ConvolutionalNeuralNetwork):
-                            # Special case for networks as they require
-                            # different theano flags to run on CPU
-                            theano.config.floatX = "float32"
-                            if sys.version_info > (3, 5, 0):
-                                theano.config.optimizer = 'None'
 
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
