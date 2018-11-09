@@ -59,7 +59,7 @@ class SupportVectorMachine(AbstractBenchmark):
 
         # Stratified shuffle training data
         if np.round(dataset_fraction, 3) < 1.0:
-            sss = StratifiedShuffleSplit(n_splits=1, train_size=np.round(dataset_fraction, 3), test_size=None)
+            sss = StratifiedShuffleSplit(n_splits=1, train_size=dataset_fraction, test_size=None)
             idx = list(sss.split(self.train, self.train_targets))[0][0]
 
             train = self.train[idx]
