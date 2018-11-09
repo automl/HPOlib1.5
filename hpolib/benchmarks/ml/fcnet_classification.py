@@ -10,6 +10,8 @@ import ConfigSpace
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.preprocessing import DataDetergent
 
+from scipy.sparse import csr_matrix
+
 
 class DatasetWrapper(Dataset):
 
@@ -65,6 +67,9 @@ class ClassificationNeuralNetwork(AbstractBenchmark):
         train_indices, valid_indicies = task.get_train_test_split_indices()
 
         X, y = task.get_X_and_y()
+
+        if type(X) == csr_matrix:
+            X = X.todense()
         X_train = X[train_indices]
         self.train_targets = y[train_indices]
 
