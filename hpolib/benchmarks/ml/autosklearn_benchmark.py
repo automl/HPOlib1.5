@@ -21,7 +21,7 @@ from hpolib.util.openml_data_manager import OpenMLCrossvalidationDataManager
 from hpolib.util import rng_helper
 import hpolib
 
-__version__ = 0.1
+__version__ = 0.2
 
 
 class AutoSklearnBenchmark(AbstractBenchmark):
@@ -30,18 +30,36 @@ class AutoSklearnBenchmark(AbstractBenchmark):
     auto-sklearn benchmarks implement Section 6 of the paper 'Efficient and
     Robust Automated Machine Learning' by Feurer et al., published in
     Proceedings of NIPS 2015.
+
+    Parameters
+    ----------
+
+    task_id : int
+        OpenML task ID.
+    resampling_strategy : int
+        Can be either ``'cv'`` or ``'partial-cv'``. ``'cv'`` is only
+        implemented as a fallback for optimizers which cannot natively handle
+        instances.
     """
 
-    def __init__(self, task_id, rng=None):
+    def __init__(self, task_id, resampling_strategy='partial-cv', rng=None):
 
         self._check_dependencies()
         self._get_data_manager(task_id)
         self._setup_backend()
-        self.metric = autosklearn.metrics.balanced_accuracy
 
         # Setup of the datamanager etc has to be done before call to super
         # which itselfs calls get_hyperparameter_configuration_space
         super().__init__(rng)
+
+        if resampling_strategy in ['partial-cv', 'cv']:
+            self.resampling_strategy = resampling_strategy
+        else:
+            raise ValueError(
+                "A resampling strategy other than 'partial-cv' or 'cv'"
+                "does not reproduce Section 6 of the Auto-sklearn paper."
+            )
+        self.metric = autosklearn.metrics.balanced_accuracy
 
     def _setup_backend(self):
         tmp_folder = tempfile.mkdtemp()
@@ -123,11 +141,23 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
         info['num_function_evals'] = np.inf
         info['cutoff'] = 1800
         info['memorylimit'] = 1024 * 3
+
         return info
 
     @AbstractBenchmark._check_configuration
     def objective_function(self, configuration, **kwargs):
-        fold = kwargs['fold']
+        """This objective function contains a specific fall-back for SMAC
+        which requires the optimization target to be the same for training
+        and testing and only differ by the instance (fold). Therefore,
+        if the fold passed equals the number of folds, the objective function
+        will evaluate the configuration on the test set instead of the
+        validation set."""
+
+        if self.resampling_strategy == 'partial-cv':
+            fold = kwargs['fold']
+        else:
+            fold = None
+
         folds = kwargs.get('folds', 10)
         cutoff = kwargs.get('cutoff', 1800)
         memory_limit = kwargs.get('memory_limit', 3072)
@@ -163,6 +193,10 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, configuration, **kwargs):
+        """To compensate that the configuration found during configuration
+        are now trained on a larger dataset, the cutoff and the memory limit
+        are both increased.
+        """
         cutoff = kwargs.get('cutoff', 3600)
         memory_limit = kwargs.get('memory_limit', 6144)
         instance = json.dumps({})
@@ -193,17 +227,6 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
         exclude = {}
         return include, exclude
 
-    @staticmethod
-    def get_meta_information():
-        d = AutoSklearnBenchmark.get_meta_information()
-
-        d["cvfolds"] = 10
-        d["wallclocklimit"] = 24 * 60 * 60
-        d['num_function_evals'] = np.inf
-        d['cutoff'] = 1800
-        d['memorylimit'] = 1024 * 3
-        return d
-
 
 class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
 
@@ -218,7 +241,6 @@ class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
             exclude_estimators=exclude.get('classifier'),
             exclude_preprocessors=exclude.get('preprocessor'))
         return cs
-
 
 
 class Sick(MulticlassClassificationBenchmark):
@@ -323,3 +345,26 @@ class FBIS_WC(MulticlassClassificationBenchmark):
 
     def __init__(self, rng=None):
         super().__init__(75197, rng=rng)
+
+
+all_tasks = [
+    258, 259, 261, 262, 266, 267, 271, 273, 275, 279, 283, 288, 2120,
+    2121, 2125, 336, 75093, 75092, 75095, 75097, 75099, 75103, 75107,
+    75106, 75109, 75108, 75112, 75129, 75128, 75135, 146574, 146575,
+    146572, 146573, 146578, 146579, 146576, 146577, 75154, 146582,
+    146583, 75156, 146580, 75159, 146581, 146586, 146587, 146584,
+    146585, 146590, 146591, 146588, 146589, 75169, 146594, 146595,
+    146592, 146593, 146598, 146599, 146596, 146597, 146602, 146603,
+    146600, 146601, 75181, 146604, 146605, 75215, 75217, 75219, 75221,
+    75225, 75227, 75231, 75230, 75232, 75235, 3043, 75236, 75239, 3047,
+    232, 233, 236, 3053, 3054, 3055, 241, 242, 244, 245, 246, 248, 250,
+    251, 252, 253, 254,
+]
+
+for task_id in all_tasks:
+    benchmark_string = """class OpenML100_%d(MulticlassClassificationBenchmark):
+
+     def __init__(self, rng=None):
+         super().__init__(%d, rng=rng) """ % (task_id, task_id)
+
+    exec(benchmark_string)
