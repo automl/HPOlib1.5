@@ -101,7 +101,7 @@ class TestRandomConfig(unittest.TestCase):
                             # Limit Wallclocktime using pynisher
                             obj = pynisher.enforce_limits(
                                 wall_time_in_s=15,
-                                mem_in_mb=3000,
+                                mem_in_mb=1500,
                                 grace_period_in_s=5,
                                 logger=self.logger
                             )(b.objective_function)
