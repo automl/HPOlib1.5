@@ -71,9 +71,8 @@ class TestRandomConfig(unittest.TestCase):
                     if issubclass(obj, abstract_class) and \
                             inspect.isclass(obj) and \
                             abstract_class in obj.__bases__:
-                        # Make sure to only test correct implementations
-                        print(obj, name)
 
+                        # Make sure to only test correct implementations
                         if issubclass(obj, AutoSklearnBenchmark) and not \
                                 MulticlassClassificationBenchmark in obj.__bases__:
                             # Special case for auto-sklearn which has
@@ -103,7 +102,8 @@ class TestRandomConfig(unittest.TestCase):
                                 wall_time_in_s=15,
                                 mem_in_mb=1500,
                                 grace_period_in_s=5,
-                                logger=self.logger
+                                logger=self.logger,
+                                capture_output=True,
                             )(b.objective_function)
                             res = obj(c)
                             if res is not None:
@@ -120,14 +120,18 @@ class TestRandomConfig(unittest.TestCase):
                                     ),
                                     msg=(
                                         'Failed on testing %s with pynisher '
-                                        'return status %s' % (
-                                            name, str(obj.exit_status),
+                                        'return status %s.\nstdout: %s'
+                                        '\nstderr: %s'% (
+                                            name,
+                                            str(obj.exit_status),
+                                            obj.stdout,
+                                            obj.stderr,
                                         )
                                     ),
                                 )
             else:
                 raise ValueError(
-                    "{:s} does not contain a basic benchmark that is  derived "
+                    "{:s} does not contain a basic benchmark that is derived "
                     "from AbstractBenchmark".
                     format(mod_name),
                 )
