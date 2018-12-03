@@ -118,7 +118,12 @@ class TestRandomConfig(unittest.TestCase):
                                         pynisher.TimeoutException,
                                         pynisher.MemorylimitException,
                                     ),
-                                    msg=str(obj.exit_status),
+                                    msg=(
+                                        'Failed on testing %s with pynisher '
+                                        'return status %s' % (
+                                            name, str(obj.exit_status),
+                                        )
+                                    ),
                                 )
             else:
                 raise ValueError(
