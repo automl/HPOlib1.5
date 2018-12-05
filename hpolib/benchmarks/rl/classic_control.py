@@ -151,7 +151,7 @@ class ClassicControlFull(ClassicControlBase):
         cs.add_hyperparameter(CS.UniformFloatHyperparameter(
             "discount", lower=0, default_value=.99, upper=1))
         cs.add_hyperparameter(CS.UniformFloatHyperparameter(
-            "likelihood_ratio_clipping", lower=0, default_value=.2, upper=1))
+            "likelihood_ratio_clipping", lower=1e-3, default_value=.2, upper=1))
         cs.add_hyperparameter(CS.CategoricalHyperparameter(
             "activation_1", ["tanh", "relu"]))
         cs.add_hyperparameter(CS.CategoricalHyperparameter(
@@ -192,7 +192,7 @@ class ClassicControlReduced(ClassicControlBase):
         cs.add_hyperparameter(CS.UniformFloatHyperparameter(
             "discount", lower=0, default_value=.99, upper=1))
         cs.add_hyperparameter(CS.UniformFloatHyperparameter(
-            "likelihood_ratio_clipping", lower=0, default_value=.2, upper=1))
+            "likelihood_ratio_clipping", lower=1e-3, default_value=.2, upper=1))
         cs.add_hyperparameter(CS.UniformFloatHyperparameter(
             "entropy_regularization", lower=0, default_value=0.01, upper=1))
         return cs
