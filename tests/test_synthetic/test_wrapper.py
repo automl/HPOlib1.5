@@ -40,7 +40,15 @@ class TestAbstractBenchmark(unittest.TestCase):
         cs = wrap_f.get_configuration_space()
         for c in cs.sample_configuration(3):
             wrap_f.objective_function(c)
-        
+
+        x = [0, 0]
+        tx = wrap_f._transform_config_to_disc_space(x)
+        self.assertEqual(tx["x0"], -5)
+
+        x = [9, 0]
+        tx = wrap_f._transform_config_to_disc_space(x)
+        self.assertEqual(tx["x0"], 10)
+
         self.assertEqual(wrap_f.get_meta_information()["name"], "discrete(Branin)")
 
 
