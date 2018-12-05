@@ -4,7 +4,7 @@ import numpy as np
 from hpolib.benchmarks import synthetic_functions
 from hpolib.benchmarks.synthetic_functions.wrapper.transform_objective_value import Log10ObjectiveValue,\
     ExpObjectiveValue
-from hpolib.benchmarks.synthetic_functions.wrapper.discretizer import DiscretizeDimensions
+from hpolib.benchmarks.synthetic_functions.wrapper.discretizer import IntDiscretizeDimensions, CatDiscretizeDimensions
 
 
 class TestAbstractBenchmark(unittest.TestCase):
@@ -33,9 +33,9 @@ class TestAbstractBenchmark(unittest.TestCase):
                                            np.exp(f.get_meta_information()["f_opt"]), significant=9)
         self.assertEqual(wrap_f.get_meta_information()["name"], "ExpObjectiveValue(Branin)")
 
-    def test_disc_dimensions(self):
+    def test_int_disc_dimensions(self):
         f = synthetic_functions.Branin
-        wrap_f = DiscretizeDimensions(original_benchmark=f, parameter=["x0"], steps=10, rng=1)
+        wrap_f = IntDiscretizeDimensions(original_benchmark=f, parameter=["x0"], steps=10, rng=1)
 
         cs = wrap_f.get_configuration_space()
         for c in cs.sample_configuration(3):
@@ -49,9 +49,26 @@ class TestAbstractBenchmark(unittest.TestCase):
         tx = wrap_f._transform_config_to_disc_space(x)
         self.assertEqual(tx["x0"], 10)
 
-        self.assertEqual(wrap_f.get_meta_information()["name"], "discrete(Branin)")
+        self.assertEqual(wrap_f.get_meta_information()["name"], "int_discrete(Branin)")
+
+    def test_cat_disc_dimensions(self):
+        f = synthetic_functions.Branin
+        wrap_f = CatDiscretizeDimensions(original_benchmark=f, parameter=["x0"], steps=10, rng=1)
+
+        cs = wrap_f.get_configuration_space()
+        for c in cs.sample_configuration(3):
+            wrap_f.objective_function(c)
+
+        x = [0, 0]
+        tx = wrap_f._transform_config_to_disc_space(x)
+        self.assertEqual(tx["x0"], -5)
+
+        x = [9, 0]
+        tx = wrap_f._transform_config_to_disc_space(x)
+        self.assertEqual(tx["x0"], 10)
+
+        self.assertEqual(wrap_f.get_meta_information()["name"], "cat_discrete(Branin)")
 
 
 if __name__ == "__main__":
     unittest.main()
-
