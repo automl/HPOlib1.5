@@ -22,7 +22,7 @@ class DatasetWrapper(Dataset):
         return self.data.shape[0]
 
     def __getitem__(self, item):
-        return torch.Tensor(self.data[item]).cuda(), torch.LongTensor([self.targets[item]]).cuda()
+        return self.data[item], self.targets[item]
 
 
 class ConvolutionalNeuralNetwork(AbstractBenchmark):
@@ -138,11 +138,11 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'Convolutional Neural Network',
-                'bounds': [[-6, 0],  # init_learning_rate
-                           [32, 512],  # batch_size
-                           [4, 8],  # n_units_1
-                           [4, 8],  # n_units_2
-                           [4, 8]],  # n_units_3
+                'bounds': [[-6, 0],  # log 10 learning_rate
+                           [8, 512],  # batch_size
+                           [4, 8],  # log2 n_units_1
+                           [4, 8],  # log2 n_units_2
+                           [4, 8]],  # log2 n_units_3
                 'references': ["@InProceedings{klein-aistats17,"
                                "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
                                "title = {Fast {Bayesian} Optimization of Machine"
@@ -151,7 +151,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                                "year = {2017}}"]
                 }
 
-    def get_network(self, n_channels, n_classes, n_units_1, n_units_2, n_units_3):
+    def get_network(self, width, height, n_channels, n_classes, n_units_1, n_units_2, n_units_3):
         class ConvNet(nn.Module):
             def __init__(self, n_channels, num_classes, n_units_1, n_units_2, n_units_3):
                 super(ConvNet, self).__init__()
@@ -159,18 +159,20 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                     nn.Conv2d(n_channels, n_units_1, kernel_size=5, stride=1, padding=2),
                     nn.BatchNorm2d(n_units_1),
                     nn.ReLU(),
-                    nn.MaxPool2d(kernel_size=2, stride=2))
+                    nn.MaxPool2d(kernel_size=3, stride=2))
                 self.layer2 = nn.Sequential(
                     nn.Conv2d(n_units_1, n_units_2, kernel_size=5, stride=1, padding=2),
                     nn.BatchNorm2d(n_units_2),
                     nn.ReLU(),
-                    nn.MaxPool2d(kernel_size=2, stride=2))
+                    nn.MaxPool2d(kernel_size=3, stride=2))
                 self.layer3 = nn.Sequential(
                     nn.Conv2d(n_units_2, n_units_3, kernel_size=5, stride=1, padding=2),
                     nn.BatchNorm2d(n_units_3),
                     nn.ReLU(),
-                    nn.MaxPool2d(kernel_size=2, stride=2))
-                self.fc = nn.Linear(3 * 3 * n_units_3, num_classes)
+                    nn.MaxPool2d(kernel_size=3, stride=2))
+                w = int(width / 2 / 2 / 2 - 1)
+                h = int(height / 2 / 2 / 2 - 1)
+                self.fc = nn.Linear(w * h * n_units_3, num_classes)
 
             def forward(self, x):
                 out = self.layer1(x)
@@ -180,7 +182,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                 out = self.fc(out)
                 return out
 
-        return ConvNet(n_channels, n_classes, n_units_1, n_units_2, n_units_3)
+        return ConvNet(n_channels, n_classes, n_units_1, n_units_2, n_units_3).float()
 
     def train_net(self, train, train_targets,
                   valid, valid_targets,
@@ -189,20 +191,26 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                   n_units_1=128,
                   n_units_2=128,
                   n_units_3=128,
-                  num_epochs=140):
+                  num_epochs=40):
 
         start_time = time.time()
 
-        data = DatasetWrapper(train, train_targets)
-        trainloader = DataLoader(data, batch_size=batch_size)
+        train = torch.from_numpy(train).to(self.device)
+        train_targets = torch.from_numpy(train_targets).long().to(self.device)
+        train_data = DatasetWrapper(train, train_targets)
+        trainloader = DataLoader(train_data, batch_size=batch_size)
 
-        data = DatasetWrapper(valid, valid_targets)
-        validloader = DataLoader(data, batch_size=batch_size)
+        valid = torch.from_numpy(valid).to(self.device)
+        valid_targets = torch.from_numpy(valid_targets).long().to(self.device)
+        valid_data = DatasetWrapper(valid, valid_targets)
+        validloader = DataLoader(valid_data, batch_size=batch_size)
 
-        network = self.get_network(n_channels=train.shape[1], n_classes=self.num_classes,
+        network = self.get_network(width=train.shape[2], height=train.shape[3], 
+                                   n_channels=train.shape[1], n_classes=self.num_classes,
                                    n_units_1=n_units_1, n_units_2=n_units_2, n_units_3=n_units_3)
         network.to(self.device)
-
+        print("total number of trainable parameters")
+        print(sum(p.numel() for p in network.parameters() if p.requires_grad))
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(network.parameters(), lr=init_learning_rate)
 
@@ -224,13 +232,11 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
             for i, batch in enumerate(trainloader):
 
                 inputs, targets = batch
-                inputs, targets = inputs.to(self.device), targets.to(self.device)
                 outputs = network(inputs)
 
-                loss = criterion(outputs, targets[:, 0])
+                loss = criterion(outputs, targets)
                 train_err += loss.item()
 
-                # Backward and optimize
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -246,15 +252,13 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
             for i, batch in enumerate(validloader):
 
                 inputs, targets = batch
-                inputs, targets = inputs.to(self.device), targets.to(self.device)
                 outputs = network(inputs)
-                err = criterion(outputs, targets[:, 0])
+                err = criterion(outputs, targets)
 
                 total = targets.size(0)
                 _, predicted = torch.max(outputs.data, 1)
                 acc = (predicted == targets).sum().item()
-
-                val_err += err
+                val_err += err.item()
                 val_acc += acc / total
                 val_batches += 1
 
@@ -321,14 +325,4 @@ class ConvolutionalNeuralNetworkOnSVHN(ConvolutionalNeuralNetwork):
                                "booktitle = {NIPS Workshop on Deep Learning and Unsupervised Feature Learning 2011}"
                                )
         return d
-
-
-if __name__ == '__main__':
-    b = ConvolutionalNeuralNetworkOnMNIST()
-
-    cs = b.get_configuration_space()
-    config = cs.sample_configuration()
-    results = b.objective_function(config)
-
-    print(results)
 
