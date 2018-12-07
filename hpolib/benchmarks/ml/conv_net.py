@@ -17,7 +17,6 @@ class DatasetWrapper(Dataset):
     def __init__(self, data, targets):
         self.data = data
         self.targets = targets
-        self.use_gpu = use_gpu
 
     def __len__(self):
         return self.data.shape[0]
@@ -324,7 +323,7 @@ class ConvolutionalNeuralNetworkOnSVHN(ConvolutionalNeuralNetwork):
 
 
 if __name__ == '__main__':
-    b = ConvolutionalNeuralNetworkOnMNIST(use_gpu=False)
+    b = ConvolutionalNeuralNetworkOnMNIST()
 
     cs = b.get_configuration_space()
     config = cs.sample_configuration()
