@@ -1,14 +1,29 @@
 import time
-import numpy as np
-import lasagne
-import theano
-import theano.tensor as T
 
 import ConfigSpace as CS
+import numpy as np
 
-from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util.data_manager import CIFAR10Data, SVHNData
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+
 import hpolib.util.rng_helper as rng_helper
+from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.util.data_manager import CIFAR10Data, SVHNData, MNISTData
+
+
+class DatasetWrapper(Dataset):
+
+    def __init__(self, data, targets):
+        self.data = data
+        self.targets = targets
+        self.use_gpu = use_gpu
+
+    def __len__(self):
+        return self.data.shape[0]
+
+    def __getitem__(self, item):
+        return torch.Tensor(self.data[item]).cuda(), torch.LongTensor([self.targets[item]]).cuda()
 
 
 class ConvolutionalNeuralNetwork(AbstractBenchmark):
@@ -20,7 +35,12 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         The tunable hyperparameters are the learning rate (on a log scale), the batch size and
         the number of units in each layer (on a log2 scale).
     """
-    def __init__(self, max_num_epochs=40, rng=None):
+
+    def __init__(self, max_num_epochs=40, rng=None, use_gpu=True):
+
+        print("CUDA Available: ", torch.cuda.is_available())
+        self.device = torch.device("cuda" if (use_gpu and torch.cuda.is_available()) else "cpu")
+
         super(ConvolutionalNeuralNetwork, self).__init__(rng=rng)
 
         self.train, self.train_targets, self.valid, self.valid_targets, self.test, self.test_targets = self.get_data()
@@ -40,8 +60,6 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
         self.num_classes = len(np.unique(self.train_targets))
 
-        lasagne.random.set_rng(self.rng)
-
     def get_data(self):
         raise NotImplementedError("Do not use this benchmark as this is only "
                                   "a skeleton for further implementations.")
@@ -52,9 +70,6 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
-        # if rng was not not, set rng for lasagne
-        if rng is not None:
-            lasagne.random.set_rng(self.rng)
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
@@ -91,8 +106,6 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         rng = kwargs.get("rng", None)
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
         # if rng was not not, set rng for lasagne
-        if rng is not None:
-            lasagne.random.set_rng(self.rng)
 
         num_epochs = int(1 + (self.max_num_epochs - 1) * steps)
 
@@ -139,21 +152,40 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                                "year = {2017}}"]
                 }
 
-    def iterate_minibatches(self, inputs, targets, batch_size, shuffle=False):
-        assert len(inputs) == len(targets)
-        if shuffle:
-            indices = np.arange(len(inputs))
-            self.rng.shuffle(indices)
-        for start_idx in range(0, len(inputs) - batch_size + 1, batch_size):
-            if shuffle:
-                excerpt = indices[start_idx:start_idx + batch_size]
-            else:
-                excerpt = slice(start_idx, start_idx + batch_size)
-            yield inputs[excerpt], targets[excerpt]
+    def get_network(self, n_channels, n_classes, n_units_1, n_units_2, n_units_3):
+        class ConvNet(nn.Module):
+            def __init__(self, n_channels, num_classes, n_units_1, n_units_2, n_units_3):
+                super(ConvNet, self).__init__()
+                self.layer1 = nn.Sequential(
+                    nn.Conv2d(n_channels, n_units_1, kernel_size=5, stride=1, padding=2),
+                    nn.BatchNorm2d(n_units_1),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=2, stride=2))
+                self.layer2 = nn.Sequential(
+                    nn.Conv2d(n_units_1, n_units_2, kernel_size=5, stride=1, padding=2),
+                    nn.BatchNorm2d(n_units_2),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=2, stride=2))
+                self.layer3 = nn.Sequential(
+                    nn.Conv2d(n_units_2, n_units_3, kernel_size=5, stride=1, padding=2),
+                    nn.BatchNorm2d(n_units_3),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=2, stride=2))
+                self.fc = nn.Linear(3 * 3 * n_units_3, num_classes)
+
+            def forward(self, x):
+                out = self.layer1(x)
+                out = self.layer2(out)
+                out = self.layer3(out)
+                out = out.reshape(out.size(0), -1)
+                out = self.fc(out)
+                return out
+
+        return ConvNet(n_channels, n_classes, n_units_1, n_units_2, n_units_3)
 
     def train_net(self, train, train_targets,
                   valid, valid_targets,
-                  init_learning_rate=3*1e-5,
+                  init_learning_rate=3 * 1e-5,
                   batch_size=256,
                   n_units_1=128,
                   n_units_2=128,
@@ -162,76 +194,18 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
 
         start_time = time.time()
 
-        input_var = T.ftensor4('inputs')
-        target_var = T.ivector('targets')
+        data = DatasetWrapper(train, train_targets)
+        trainloader = DataLoader(data, batch_size=batch_size)
 
-        # Build net
-        network = lasagne.layers.InputLayer(shape=(None, train.shape[1],
-                                                   train.shape[2],
-                                                   train.shape[3]),
-                                            input_var=input_var)
+        data = DatasetWrapper(valid, valid_targets)
+        validloader = DataLoader(data, batch_size=batch_size)
 
-        network = lasagne.layers.batch_norm(
-                lasagne.layers.Conv2DLayer(network,
-                                           num_filters=n_units_1,
-                                           filter_size=(5, 5),
-                                           pad="same",
-                                           stride=1,
-                                           W=lasagne.init.HeNormal(),
-                                           b=lasagne.init.Constant(val=0.0),
-                                           nonlinearity=lasagne.nonlinearities.rectify))
+        network = self.get_network(n_channels=train.shape[1], n_classes=self.num_classes,
+                                   n_units_1=n_units_1, n_units_2=n_units_2, n_units_3=n_units_3)
+        network.to(self.device)
 
-        network = lasagne.layers.MaxPool2DLayer(network, pool_size=3, stride=2)
-
-        network = lasagne.layers.batch_norm(
-                lasagne.layers.Conv2DLayer(network,
-                                           num_filters=n_units_2,
-                                           filter_size=(5, 5),
-                                           pad="same",
-                                           stride=1,
-                                           W=lasagne.init.HeNormal(),
-                                           b=lasagne.init.Constant(val=0.0),
-                                           nonlinearity=lasagne.nonlinearities.rectify))
-
-        network = lasagne.layers.MaxPool2DLayer(network, pool_size=3, stride=2)
-
-        network = lasagne.layers.batch_norm(
-                lasagne.layers.Conv2DLayer(network,
-                                           num_filters=n_units_3,
-                                           filter_size=(5, 5),
-                                           pad="same",
-                                           stride=1,
-                                           W=lasagne.init.HeNormal(),
-                                           b=lasagne.init.Constant(val=0.0),
-                                           nonlinearity=lasagne.nonlinearities.rectify))
-
-        network = lasagne.layers.MaxPool2DLayer(network, pool_size=3, stride=2)
-
-        network = lasagne.layers.DenseLayer(network, num_units=self.num_classes,
-                                            nonlinearity=lasagne.nonlinearities.softmax)
-
-        # Define Theano functions
-        params = lasagne.layers.get_all_params(network, trainable=True)
-        prediction = lasagne.layers.get_output(network)
-        loss = lasagne.objectives.categorical_crossentropy(prediction,
-                                                           target_var)
-        loss = loss.mean()
-
-        test_prediction = lasagne.layers.get_output(network, deterministic=True)
-        test_loss = lasagne.objectives.categorical_crossentropy(test_prediction,
-                                                                target_var)
-        test_loss = test_loss.mean()
-
-        test_acc = T.mean(T.eq(T.argmax(test_prediction, axis=1), target_var),
-                          dtype=theano.config.floatX)
-
-        learning_rate = theano.shared(np.float32(init_learning_rate))
-
-        updates = lasagne.updates.adam(loss, params, learning_rate=learning_rate)
-
-        train_fn = theano.function([input_var, target_var], loss, updates=updates)
-
-        val_fn = theano.function([input_var, target_var], [test_loss, test_acc])
+        criterion = nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(network.parameters(), lr=init_learning_rate)
 
         print("Starting training...")
 
@@ -246,17 +220,40 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
             train_err = 0
             train_batches = 0
 
-            for batch in self.iterate_minibatches(train, train_targets, batch_size, shuffle=True):
+            network.train()
+
+            for i, batch in enumerate(trainloader):
+
                 inputs, targets = batch
-                train_err += train_fn(inputs, targets)
+                inputs, targets = inputs.to(self.device), targets.to(self.device)
+                outputs = network(inputs)
+
+                loss = criterion(outputs, targets[:, 0])
+
+                # Backward and optimize
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
                 train_batches += 1
 
             val_err = 0
             val_acc = 0
             val_batches = 0
-            for batch in self.iterate_minibatches(valid, valid_targets, batch_size, shuffle=False):
+
+            network.eval()
+
+            for i, batch in enumerate(validloader):
+
                 inputs, targets = batch
-                err, acc = val_fn(inputs, targets)
+                inputs, targets = inputs.to(self.device), targets.to(self.device)
+                outputs = network(inputs)
+                err = criterion(outputs, targets[:, 0])
+
+                total = targets.size(0)
+                _, predicted = torch.max(outputs.data, 1)
+                acc = (predicted == targets).sum().item() / total
+
                 val_err += err
                 val_acc += acc
                 val_batches += 1
@@ -274,6 +271,23 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
         return learning_curve, cost, train_loss, valid_loss
 
 
+class ConvolutionalNeuralNetworkOnMNIST(ConvolutionalNeuralNetwork):
+
+    def get_data(self):
+        dm = MNISTData()
+        train, train_targets, valid, valid_targets, test, test_targets = dm.load()
+        train = train.reshape(train.shape[0], 1, 28, 28)
+        valid = valid.reshape(valid.shape[0], 1, 28, 28)
+        test = test.reshape(test.shape[0], 1, 28, 28)
+        return train, train_targets, valid, valid_targets, test, test_targets
+
+    @staticmethod
+    def get_meta_information():
+        d = ConvolutionalNeuralNetwork.get_meta_information()
+        d["references"].append("")
+        return d
+
+
 class ConvolutionalNeuralNetworkOnCIFAR10(ConvolutionalNeuralNetwork):
 
     def get_data(self):
@@ -283,13 +297,11 @@ class ConvolutionalNeuralNetworkOnCIFAR10(ConvolutionalNeuralNetwork):
     @staticmethod
     def get_meta_information():
         d = ConvolutionalNeuralNetwork.get_meta_information()
-        d["references"].append("@Techreport{krizhevsky-tech09a,"
-                               "author = {A. Krizhevsky},"
-                               "title = {Learning multiple layers of features from tiny images},"
-                               "institution = {University of Toronto},"
-                               "year = {2009},"
-                               "keywords = {ML}}"
-                               )
+        d["references"].append("@Techreport{krizhevsky-tech09a, "
+                               "author = {A. Krizhevsky}, "
+                               "title = {Learning multiple layers of features from tiny images}, "
+                               "institution = {University of Toronto}, "
+                               "year = {2009}}")
         return d
 
 
@@ -309,3 +321,14 @@ class ConvolutionalNeuralNetworkOnSVHN(ConvolutionalNeuralNetwork):
                                "booktitle = {NIPS Workshop on Deep Learning and Unsupervised Feature Learning 2011}"
                                )
         return d
+
+
+if __name__ == '__main__':
+    b = ConvolutionalNeuralNetworkOnMNIST(use_gpu=False)
+
+    cs = b.get_configuration_space()
+    config = cs.sample_configuration()
+    results = b.objective_function(config)
+
+    print(results)
+
