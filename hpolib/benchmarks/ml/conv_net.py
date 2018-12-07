@@ -228,6 +228,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                 outputs = network(inputs)
 
                 loss = criterion(outputs, targets[:, 0])
+                train_err += loss.item() / targets.size(0)
 
                 # Backward and optimize
                 optimizer.zero_grad()
@@ -253,7 +254,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmark):
                 _, predicted = torch.max(outputs.data, 1)
                 acc = (predicted == targets).sum().item() / total
 
-                val_err += err
+                val_err += err / total
                 val_acc += acc
                 val_batches += 1
 
