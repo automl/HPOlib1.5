@@ -101,7 +101,7 @@ class TestIntegration(unittest.TestCase):
         fixtures = [
             {'function_value': 0.14126103404791923},
             {'function_value': 0.06315258511979827},
-            {'function_value': 0.11350593200710302},
+            {'function_value': 0.12371001363975598},
         ]
 
         cs = auto.get_configuration_space()
