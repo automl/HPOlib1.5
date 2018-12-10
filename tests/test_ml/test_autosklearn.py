@@ -100,7 +100,7 @@ class TestIntegration(unittest.TestCase):
 
         fixtures = [
             {'function_value': 0.14126103404791923},
-            {'function_value': 0.053152585119798257},
+            {'function_value': 0.06315258511979827},
             {'function_value': 0.11350593200710302},
         ]
 
