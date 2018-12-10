@@ -46,6 +46,7 @@ class AutoSklearnBenchmark(AbstractBenchmark):
 
         self._check_dependencies()
         self._get_data_manager(task_id)
+        self._tmpdir = tempfile.mkdtemp()
         self._setup_backend()
 
         # Setup of the datamanager etc has to be done before call to super
@@ -61,9 +62,16 @@ class AutoSklearnBenchmark(AbstractBenchmark):
             )
         self.metric = autosklearn.metrics.balanced_accuracy
 
+    def __del__(self):
+        for i in range(5):
+            try:
+                os.rmdir(self._tmpdir)
+            except:
+                pass
+
     def _setup_backend(self):
-        tmp_folder = tempfile.mkdtemp()
-        output_folder = tempfile.mkdtemp()
+        tmp_folder = os.path.join(self._tmpdir, 'tmp')
+        output_folder = os.path.join(self._tmpdir, 'out')
         self.backend = autosklearn.util.backend.create(
             temporary_directory=tmp_folder,
             output_directory=output_folder,
