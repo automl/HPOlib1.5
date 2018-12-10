@@ -68,6 +68,7 @@ class TestRandomConfig(unittest.TestCase):
 
             if abstract_class is not None:
                 for name, obj in inspect.getmembers(mod_name, inspect.isclass):
+
                     if issubclass(obj, abstract_class) and \
                             inspect.isclass(obj) and \
                             abstract_class in obj.__bases__:
@@ -92,9 +93,14 @@ class TestRandomConfig(unittest.TestCase):
                             if sys.version_info > (3, 5, 0):
                                 theano.config.optimizer = 'None'
 
+                        # Print these to avoid travis-ci failing!
+                        print(name, obj)
+
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
                         for i in range(5):
+                            # Print this to avoid travis-ci failing!
+                            print('Testing configuration', i)
                             c = cfg.sample_configuration()
 
                             # Limit Wallclocktime using pynisher
