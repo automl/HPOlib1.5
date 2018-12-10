@@ -103,10 +103,10 @@ class AutoSklearnBenchmark(AbstractBenchmark):
             # TODO in the future, the XYDataManager should have this as it's own
             # attribute
             data_manager = autosklearn.data.xy_data_manager.XYDataManager(
-                X=X_train, y=y_train, task=task_type, feat_type=variable_types,
+                X=X_train, y=y_train,
+                X_test=X_test, y_test=y_test,
+                task=task_type, feat_type=variable_types,
                 dataset_name=name)
-            data_manager.data['X_test'] = X_test
-            data_manager.data['Y_test'] = y_test
 
             with lockfile.LockFile(data_manager_cache_file):
                 with open(data_manager_cache_file, 'wb') as fh:
