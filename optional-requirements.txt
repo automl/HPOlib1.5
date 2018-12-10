@@ -9,8 +9,8 @@ scikit-learn>=0.19.0,<0.20.0
 openml
 
 # for benchmarks using auto-sklearn
-auto-sklearn==0.3.0
 pynisher
+auto-sklearn==0.4.2
 
 
 # ml/bnn_benchmark
