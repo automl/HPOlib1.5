@@ -253,22 +253,22 @@ class MulticlassClassificationBenchmark(AutoSklearnBenchmark):
 
 class Sick(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 38."""
-    def __init__(self, rng=None):
-        super().__init__(3043, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(3043, resampling_strategy=resampling_strategy, rng=rng)
 
 
 class Splice(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 46."""
 
-    def __init__(self, rng=None):
-        super().__init__(275, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(275, resampling_strategy=resampling_strategy, rng=rng)
 
 
 class Adult(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 179."""
 
-    def __init__(self, rng=None):
-        super().__init__(2117, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(2117, resampling_strategy=resampling_strategy, rng=rng)
 
     @staticmethod
     def get_meta_information():
@@ -288,71 +288,107 @@ year={1996}
 class KROPT(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 184."""
 
-    def __init__(self, rng=None):
-        super().__init__(2122, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(2122, resampling_strategy=resampling_strategy, rng=rng)
 
 
 class MNIST(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 554."""
 
-    def __init__(self, rng=None):
-        super().__init__(75098, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75098,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class Quake(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 772."""
 
-    def __init__(self, rng=None):
-        super().__init__(75157, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75157,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class fri_c1_1000_25(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 917."""
 
-    def __init__(self, rng=None):
-        super().__init__(75209, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75209,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class PC4(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 1049."""
 
-    def __init__(self, rng=None):
-        super().__init__(75092, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75092,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class KDDCup09_appetency(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 1111."""
 
-    def __init__(self, rng=None):
-        super().__init__(75105, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75105,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class MagicTelescope(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 1120."""
 
-    def __init__(self, rng=None):
-        super().__init__(75112, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75112,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class OVABreast(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 1128."""
 
-    def __init__(self, rng=None):
-        super().__init__(75114, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75114,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class Covertype(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 293."""
 
-    def __init__(self, rng=None):
-        super().__init__(75164, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75164,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 class FBIS_WC(MulticlassClassificationBenchmark):
     """A.K.A. OpenML ID 389."""
 
-    def __init__(self, rng=None):
-        super().__init__(75197, rng=rng)
+    def __init__(self, resampling_strategy='partial-cv', rng=None):
+        super().__init__(
+            75197,
+            resampling_strategy=resampling_strategy,
+            rng=rng,
+        )
 
 
 all_tasks = [
@@ -372,7 +408,8 @@ all_tasks = [
 for task_id in all_tasks:
     benchmark_string = """class OpenML100_%d(MulticlassClassificationBenchmark):
 
-     def __init__(self, rng=None):
-         super().__init__(%d, rng=rng) """ % (task_id, task_id)
+     def __init__(self, resampling_strategy='partial-cv', rng=None):
+         super().__init__(%d, resampling_strategy=resampling_strategy, rng=rng)
+""" % (task_id, task_id)
 
     exec(benchmark_string)
