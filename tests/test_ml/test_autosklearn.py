@@ -115,7 +115,7 @@ class TestIntegration(unittest.TestCase):
             for key in fixture:
                 self.assertAlmostEqual(rval[key], fixture[key])
 
-        fixture = {'function_value': 0.13629780445825113}
+        fixture = {'function_value': 0.1423953654338609}
         rval = auto.objective_function_test(
             configuration=config,
         )
