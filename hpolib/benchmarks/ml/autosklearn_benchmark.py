@@ -161,43 +161,51 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
         will evaluate the configuration on the test set instead of the
         validation set."""
 
-        if self.resampling_strategy == 'partial-cv':
-            fold = kwargs['fold']
-        else:
-            fold = None
-
         folds = kwargs.get('folds', 10)
         cutoff = kwargs.get('cutoff', 1800)
         memory_limit = kwargs.get('memory_limit', 3072)
         subsample = kwargs.get('subsample', None)
-        instance = json.dumps({'fold': fold, 'subsample': subsample})
 
         # (TODO) For now ignoring seed
         rng = kwargs.get("rng")
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
-        if fold == folds:
+
+        if self.resampling_strategy == 'partial-cv':
+            fold = kwargs['fold']
+            instance = json.dumps({'fold': fold, 'subsample': subsample})
+        else:
+            fold = None
+            instance = None
+
+        if fold and fold == folds:
             # run validation with the same memory limit and cutoff
             return self.objective_function_test(configuration,
                                                 cutoff=cutoff,
                                                 rng=rng,
                                                 memory_limit=memory_limit)
 
-        include, _ = self._get_include_exclude_info()
-        evaluator = autosklearn.evaluation.ExecuteTaFuncWithQueue(
-            backend=self.backend,
-            autosklearn_seed=1,
-            resampling_strategy='partial-cv',
-            folds=folds,
-            logger=self.logger,
-            memory_limit=memory_limit,
-            metric=self.metric,
-            include=include)
+        else:
+            include, _ = self._get_include_exclude_info()
+            evaluator = autosklearn.evaluation.ExecuteTaFuncWithQueue(
+                backend=self.backend,
+                autosklearn_seed=1,
+                resampling_strategy=self.resampling_strategy,
+                folds=folds,
+                logger=self.logger,
+                memory_limit=memory_limit,
+                metric=self.metric,
+                include=include,
+            )
 
-        status, cost, runtime, additional_run_info = evaluator.run(
-            config=configuration, cutoff=cutoff, instance=instance)
+            status, cost, runtime, additional_run_info = evaluator.run(
+                config=configuration, cutoff=cutoff, instance=instance)
 
-        return {'function_value': cost, 'cost': runtime,
-                'status': status, 'additional_run_info': additional_run_info}
+            return {
+                'function_value': cost,
+                'cost': runtime,
+                'status': status,
+                'additional_run_info': additional_run_info,
+            }
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, configuration, **kwargs):
