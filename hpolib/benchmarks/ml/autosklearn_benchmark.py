@@ -108,8 +108,6 @@ class AutoSklearnBenchmark(AbstractBenchmark):
             variable_types = dm.variable_types
             name = dm.name
 
-            # TODO in the future, the XYDataManager should have this as it's own
-            # attribute
             data_manager = autosklearn.data.xy_data_manager.XYDataManager(
                 X=X_train, y=y_train,
                 X_test=X_test, y_test=y_test,

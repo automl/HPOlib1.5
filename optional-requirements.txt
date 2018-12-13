@@ -9,7 +9,7 @@ scikit-learn>=0.19.0,<0.20.0
 openml
 
 # for benchmarks using auto-sklearn
-pynisher
+pynisher==0.5.0
 auto-sklearn==0.4.2
 
 
