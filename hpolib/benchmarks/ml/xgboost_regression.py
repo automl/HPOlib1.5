@@ -106,7 +106,7 @@ class XGBoostRegressionUCI(AbstractBenchmark):
                                      gamma=configuration["gamma"],
                                      reg_alpha=configuration["reg_alpha"],
                                      reg_lambda=configuration["reg_lambda"],
-                                     colsample_bylevel=configuration["colsample_bylevel"],
+                                     colsample_bytree=configuration["colsample_bytree"],
                                      subsample=configuration["subsample"],
                                      max_depth=configuration["max_depth"],
                                      min_child_weight=configuration["min_child_weight"])
@@ -139,7 +139,7 @@ class XGBoostRegressionUCI(AbstractBenchmark):
             'reg_lambda', lower=1e-5, upper=1e3, log=True))
 
         cs.add_hyperparameter(ConfigSpace.UniformFloatHyperparameter(
-            'colsample_bytree', lower=1e-2, upper=1, log=True))
+            'colsample_bytree', lower=1e-1, upper=1, log=True))
 
         cs.add_hyperparameter(ConfigSpace.UniformFloatHyperparameter(
             'subsample', lower=1e-1, upper=1))
