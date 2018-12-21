@@ -80,7 +80,7 @@ class XGBoostRegressionUCI(AbstractBenchmark):
                                      gamma=configuration["gamma"],
                                      reg_alpha=configuration["reg_alpha"],
                                      reg_lambda=configuration["reg_lambda"],
-                                     colsample_bytree=configuration["colsample_bytree"],
+                                     n_estimators=configuration["n_estimators"],
                                      subsample=configuration["subsample"],
                                      max_depth=configuration["max_depth"],
                                      min_child_weight=configuration["min_child_weight"])
@@ -106,7 +106,7 @@ class XGBoostRegressionUCI(AbstractBenchmark):
                                      gamma=configuration["gamma"],
                                      reg_alpha=configuration["reg_alpha"],
                                      reg_lambda=configuration["reg_lambda"],
-                                     colsample_bytree=configuration["colsample_bytree"],
+                                     n_estimators=configuration["n_estimators"],
                                      subsample=configuration["subsample"],
                                      max_depth=configuration["max_depth"],
                                      min_child_weight=configuration["min_child_weight"])
@@ -138,8 +138,8 @@ class XGBoostRegressionUCI(AbstractBenchmark):
         cs.add_hyperparameter(ConfigSpace.UniformFloatHyperparameter(
             'reg_lambda', lower=1e-5, upper=1e3, log=True))
 
-        cs.add_hyperparameter(ConfigSpace.UniformFloatHyperparameter(
-            'colsample_bytree', lower=1e-1, upper=1, log=True))
+        cs.add_hyperparameter(ConfigSpace.UniformIntegerHyperparameter(
+            'n_estimators', lower=10, upper=500, log=False))
 
         cs.add_hyperparameter(ConfigSpace.UniformFloatHyperparameter(
             'subsample', lower=1e-1, upper=1))
@@ -157,13 +157,3 @@ class XGBoostRegressionUCI(AbstractBenchmark):
         return {'name': 'XGBoost for regression on UCI datasets',
                 'references': []
                 }
-
-
-if __name__ == '__main__':
-    b = XGBoostRegressionUCI("/home/kleinaa/datasets/uci/slice_localization_data.csv")
-
-    cs = b.get_configuration_space()
-    config = cs.sample_configuration()
-    results = b.objective_function(config)
-
-    print(results)
