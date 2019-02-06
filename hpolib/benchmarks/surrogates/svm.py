@@ -48,11 +48,10 @@ class SurrogateSVM(SurrogateBenchmark):
         return {'name': 'Support Vector Machine',
                 'bounds': [[-10, 10],   # C
                            [-10, 10]],  # gamma
-                'references': ["@article{klein-corr16,"
+                'references': ["@INPROCEEDINGS{klein-ejs17,"
                                "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
-                               "title = {Fast Bayesian Optimization of Machine Learning"
-                               "Hyperparameters on Large Datasets},"
-                               "journal = corr,"
-                               "llvolume = {abs/1605.07079},"
-                               "lurl = {http://arxiv.org/abs/1605.07079}, year = {2016} }"]
+                               "title = {Fast Bayesian hyperparameter optimization on large datasets},"
+                               "booktitle = {Electronic Journal of Statistics},"
+                               "year = {2017},"
+                               "volume = {11}"]
                 }
