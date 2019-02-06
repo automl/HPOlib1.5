@@ -1,6 +1,3 @@
-import os
-import pickle
-import time
 import numpy as np
 import ConfigSpace as CS
 
@@ -13,6 +10,12 @@ from hpolib.benchmarks.surrogates.surrogate_benchmark import SurrogateBenchmark
 class SurrogateParamNet(SurrogateBenchmark):
 
     def __init__(self, dataset, **kwargs):
+        """
+
+        :param dataset: Dataset the network was trained on. Available: adult, higgs, letter, mnist, optdigits, poker
+
+        :param kwargs:
+        """
 
         self.n_epochs = 50
         self.dataset = dataset
@@ -20,7 +23,7 @@ class SurrogateParamNet(SurrogateBenchmark):
         objective_fn = "rf_surrogate_paramnet_%s.pkl" % dataset
         cost_fn = "rf_cost_surrogate_paramnet_%s.pkl" % dataset
 
-        super(SurrogateParamNet, self).__init__(objective_surrogate_fn = objective_fn, cost_surrogate_fn=cost_fn, **kwargs)
+        super(SurrogateParamNet, self).__init__(objective_surrogate_fn=objective_fn, cost_surrogate_fn=cost_fn, **kwargs)
 
 
     @AbstractBenchmark._check_configuration
@@ -84,7 +87,6 @@ class SurrogateParamNet(SurrogateBenchmark):
                 }
 
 
-
 class SurrogateReducedParamNetTime(SurrogateParamNet):
 
     @AbstractBenchmark._check_configuration
@@ -94,19 +96,17 @@ class SurrogateReducedParamNetTime(SurrogateParamNet):
         if budget is None:
             budget = np.inf
 
-        x_ = np.zeros([1,8], dtype=np.float)
+        x_ = np.zeros([1, 8], dtype=np.float)
         
-        x_[0,0] = 10 ** x[0]
-        x_[0,1] = 2 ** x[1]
-        x_[0,2] = 2 ** x[2]
-        x_[0,3] = 10 ** x[3]
-        x_[0,4] = 0.5
-        x_[0,5] = x[4]
-        x_[0,6] = x[5]
-        x_[0,7] = x[5]
+        x_[0, 0] = 10 ** x[0]
+        x_[0, 1] = 2 ** x[1]
+        x_[0, 2] = 2 ** x[2]
+        x_[0, 3] = 10 ** x[3]
+        x_[0, 4] = 0.5
+        x_[0, 5] = x[4]
+        x_[0, 6] = x[5]
+        x_[0, 7] = x[5]
 
-        
-        
         lc = self.surrogate_objective.predict(x_)[0]
         c = self.surrogate_cost.predict(x_)[0]
 

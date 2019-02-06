@@ -1,33 +1,30 @@
 import os
 import pickle
-import time
 import numpy as np
 import ConfigSpace as CS
 
-from copy import deepcopy
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.benchmarks.surrogates.surrogate_benchmark import SurrogateBenchmark
 
 
-class Surrogate2DWideResNet(AbstractBenchmark):
+class Surrogate2DWideResNet(SurrogateBenchmark):
 
-    def __init__(self, path=None, rng=None):
+    def __init__(self, rng=None, path=None):
 
         super(Surrogate2DWideResNet, self).__init__()
 
-        self.surrogate = pickle.load(open(os.path.join(path, "rf_surrogate_2d_wide_res_net.pkl"), "rb"))
-
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+        objective_fn = "rf_surrogate_2d_wide_res_net.pkl"
+        cost_fn = None
+        super(Surrogate2DWideResNet, self).__init__(objective_surrogate_fn=objective_fn, cost_surrogate_fn=cost_fn,
+                                                    path=path, rng=rng)
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function(self, x, budget=4000, **kwargs):
 
         x_ = np.append(x, budget)[None, :]
-        y = self.surrogate.predict(x_)[0]
+        y = self.surrogate_objective.predict(x_)[0]
 
         return {'function_value': (1 - y / 100.), "cost": budget}
 
@@ -36,7 +33,7 @@ class Surrogate2DWideResNet(AbstractBenchmark):
     def objective_function_test(self, x, **kwargs):
         budget = 4000
         x_ = np.append(x, budget)[None, :]
-        y = self.surrogate.predict(x_)[0]
+        y = self.surrogate_objective.predict(x_)[0]
 
         return {'function_value': (1 - y / 100.), "cost": budget}
 
