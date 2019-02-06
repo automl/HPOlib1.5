@@ -4,20 +4,20 @@ import numpy as np
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.benchmarks.surrogates.surrogate_benchmark import SurrogateBenchmark
 
 
-class SurrogateCNN(AbstractBenchmark):
+class SurrogateCNN(SurrogateBenchmark):
 
-    def __init__(self, path=None, rng=None):
-        super(SurrogateCNN, self).__init__()
+    def __init__(self, rng=None, path=None):
 
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_cnn.pkl"), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_cnn.pkl"), "rb"))
         self.n_epochs = 40
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+
+        objective_fn = "rf_surrogate_cnn.pkl"
+        cost_fn = "rf_cost_surrogate_cnn.pkl"
+        super(SurrogateCNN, self).__init__(objective_surrogate_fn=objective_fn, cost_surrogate_fn=cost_fn,
+                                           path=path, rng=rng)
+
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
