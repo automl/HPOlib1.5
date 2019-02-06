@@ -1,5 +1,3 @@
-import os
-import pickle
 import numpy as np
 import ConfigSpace as CS
 
@@ -17,7 +15,6 @@ class SurrogateCNN(SurrogateBenchmark):
         cost_fn = "rf_cost_surrogate_cnn.pkl"
         super(SurrogateCNN, self).__init__(objective_surrogate_fn=objective_fn, cost_surrogate_fn=cost_fn,
                                            path=path, rng=rng)
-
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
@@ -48,9 +45,16 @@ class SurrogateCNN(SurrogateBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'Convolutional Neural Network Surrogate',
-                'bounds': [[0, 1],  # init_learning_rate
-                           [0, 1],  # batch_size
-                           [0, 1],  # n_units_1
-                           [0, 1],  # n_units_2
-                           [0, 1]],  # n_units_3
+                'bounds': [[0, 1],  # init_learning_rate, [10**-6, 10**0]
+                           [0, 1],  # batch_size, [32, 512]
+                           [0, 1],  # n_units_1,  [2**4, 2**8]
+                           [0, 1],  # n_units_2,  [2**4, 2**8]
+                           [0, 1]],  # n_units_3, [2**4, 2**8]
+                'references': ["@article{klein-corr16,"
+                               "author = {A. Klein and S. Falkner and S. Bartels and P. Hennig and F. Hutter},"
+                               "title = {Fast Bayesian Optimization of Machine Learning Hyperparameters"
+                               " on Large Datasets},"
+                               "journal = corr,"
+                               "llvolume = {abs/1605.07079},"
+                               "lurl = {http://arxiv.org/abs/1605.07079}, year = {2016} }"]
                 }
