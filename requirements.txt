@@ -8,3 +8,4 @@ ConfigSpace>=0.4.0
 openml
 pynisher
 lockfile
+lightgbm
