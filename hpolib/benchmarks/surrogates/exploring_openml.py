@@ -22,14 +22,7 @@ from hpolib.util import rng_helper
 
 
 class ExploringOpenML(AbstractBenchmark):
-    """
-        Hyperparameter optimization task to optimize the regularization
-        parameter C and the kernel parameter gamma of a support vector machine.
-        Both hyperparameters are optimized on a log scale in [-10, 10].
-
-        The test data set is only used for a final offline evaluation of
-        a configuration. For that the validation and training data is
-        concatenated to form the whole training data set.
+    """https://figshare.com/articles/OpenML_R_Bot_Benchmark_Data_final_subset_/5882230
     """
 
     def __init__(self, dataset_id, rng=None):
@@ -139,8 +132,6 @@ class ExploringOpenML(AbstractBenchmark):
         features = np.array(features)
         targets = np.array(targets)
 
-        print(targets.shape, features.shape)
-
         n_splits = 5
         cv = sklearn.model_selection.KFold(n_splits=n_splits, random_state=1)
         cs = ConfigurationSpace()
@@ -213,13 +204,10 @@ class ExploringOpenML(AbstractBenchmark):
                     check_loss = False
                     break
 
-            print(n_iterations, np.nanmean(cv_errors), lowest_error, cv_errors)
             if check_loss and np.mean(cv_errors) < lowest_error:
                 lowest_error = np.mean(cv_errors)
                 lowest_error_by_fold = cv_errors
                 best_config = new_config
-
-        print(lowest_error)
 
         regressor = lightgbm.LGBMRegressor(
             n_estimators=500,
@@ -427,14 +415,14 @@ for model_class in all_model_classes:
         exec(benchmark_string)
 
 
-for model_class in all_model_classes:
-    print(model_class)
-    for dataset_id in all_datasets:
-        print(dataset_id)
-        exec('rval = %s_%d()' % (model_class.__name__, dataset_id))
-        print(rval)
-        cs = rval.get_configuration_space()
-        for i in range(10):
-            config = cs.sample_configuration()
-            print(config, rval.objective_function(config))
-
+if __name__ == '__main__':
+    for model_class in all_model_classes:
+        print(model_class)
+        for dataset_id in all_datasets:
+            print(dataset_id)
+            exec('rval = %s_%d()' % (model_class.__name__, dataset_id))
+            print(rval)
+            cs = rval.get_configuration_space()
+            for i in range(10):
+                config = cs.sample_configuration()
+                print(config, rval.objective_function(config))
