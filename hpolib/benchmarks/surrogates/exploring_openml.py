@@ -235,7 +235,9 @@ class ExploringOpenML(AbstractBenchmark):
 
     @staticmethod
     def get_meta_information():
-        return {}
+        return {'num_function_evals': 50,
+                'name': 'Exploring_OpenML',
+                'f_opt': 0}
 
 
 class GLMNET(ExploringOpenML):
