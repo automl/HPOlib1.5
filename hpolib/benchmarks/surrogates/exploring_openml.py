@@ -18,7 +18,6 @@ import numpy as np
 import scipy.stats
 import sklearn.metrics
 import sklearn.model_selection
-import sklearn.compose
 import sklearn.ensemble
 import sklearn.pipeline
 import sklearn.preprocessing
@@ -183,25 +182,24 @@ class ExploringOpenML(AbstractBenchmark):
             n_iterations += 1
 
             # Stopping condititions
-            if n_iterations > 100:
+            if n_iterations > 40:
                 break
-            if highest_correlations > 0.9 and n_iterations > 75:
+            if highest_correlations > 0.9 and n_iterations > 30:
                 break
-            elif highest_correlations > 0.95 and n_iterations > 50:
+            elif highest_correlations > 0.95 and n_iterations > 20:
                 break
-            elif highest_correlations > 0.99 and n_iterations > 25:
+            elif highest_correlations > 0.99 and n_iterations > 10:
                 break
             elif highest_correlations > 0.999:
                 break
             check_loss = True
             new_config = cs.sample_configuration()
-            regressor = self.get_unfitted_regressor(new_config, categorical_features, features)
+            regressor = self.get_unfitted_regressor(new_config, categorical_features)
 
             rank_correlations = np.ones((n_splits,)) * -np.NaN
             for n_fold, (train_idx, test_idx) in enumerate(
                     cv.split(features, targets)
             ):
-                print(n_iterations, n_fold)
                 train_features = features[train_idx]
                 train_targets = targets[train_idx]
 
@@ -232,27 +230,19 @@ class ExploringOpenML(AbstractBenchmark):
                 highest_correlations = np.mean(rank_correlations)
                 highest_correlations_by_fold = rank_correlations
                 best_config = new_config
-        regressor = self.get_unfitted_regressor(best_config, categorical_features, features)
+        regressor = self.get_unfitted_regressor(best_config, categorical_features)
         regressor.fit(
             X=features,
             y=targets,
         )
         return regressor
 
-    def get_unfitted_regressor(self, config, categorical_features, features):
+    def get_unfitted_regressor(self, config, categorical_features):
         return sklearn.pipeline.Pipeline([
-            ('ct', sklearn.compose.ColumnTransformer([
-                (
-                    'numerical',
-                    'passthrough',
-                    [i for i in range(features.shape[1]) if i not in categorical_features],
-                ),
-                (
-                    'categoricals',
-                    sklearn.preprocessing.OneHotEncoder(categories='auto'),
-                    categorical_features,
-                ),
-            ])),
+            (
+                'ohe',
+                sklearn.preprocessing.OneHotEncoder(categorical_features=categorical_features),
+            ),
             ('poly', sklearn.preprocessing.PolynomialFeatures(
                 degree=2,
                 interaction_only=True,
