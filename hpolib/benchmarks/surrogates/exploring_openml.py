@@ -29,13 +29,15 @@ class ExploringOpenML(AbstractBenchmark):
     """
     url = None
 
-    def __init__(self, dataset_id, rng=None):
+    def __init__(self, dataset_id, n_splits=10, rng=None):
         """
 
         Parameters
         ----------
         dataset_id: int
             Dataset Id as given in Table 2.
+        n_splits : int
+            Number of cross-validation splits for optimizing the surrogate hyperparameters.
         rng: int/None/RandomState
             set up rng
         """
@@ -140,7 +142,6 @@ class ExploringOpenML(AbstractBenchmark):
 
         self.impute_with_defaults(features)
 
-        n_splits = 10
         cv = sklearn.model_selection.KFold(n_splits=n_splits, random_state=1, shuffle=True)
         cs = ConfigurationSpace()
         min_samples_split = UniformIntegerHyperparameter(
@@ -157,6 +158,7 @@ class ExploringOpenML(AbstractBenchmark):
             bootstrap,
         ])
         cs.seed(1)
+
         highest_correlations = -np.inf
         highest_correlations_by_fold = np.array((n_splits, )) * -np.inf
         best_config = cs.get_default_configuration()
@@ -164,6 +166,8 @@ class ExploringOpenML(AbstractBenchmark):
 
         while True:
             n_iterations += 1
+
+            # Stopping condititions
             if n_iterations > 100:
                 break
             if highest_correlations > 0.9 and n_iterations > 75:
@@ -176,35 +180,13 @@ class ExploringOpenML(AbstractBenchmark):
                 break
             check_loss = True
             new_config = cs.sample_configuration()
-            regressor = sklearn.pipeline.Pipeline([
-                ('ct', sklearn.compose.ColumnTransformer([
-                    (
-                        'numerical',
-                        'passthrough',
-                        [i for i in range(features.shape[1]) if i not in categorical_features],
-                    ),
-                    (
-                        'categoricals',
-                        sklearn.preprocessing.OneHotEncoder(categories='auto'),
-                        categorical_features,
-                    ),
-                ])),
-                ('poly', sklearn.preprocessing.PolynomialFeatures(
-                    degree=2,
-                    interaction_only=True,
-                    include_bias=False,
-                )),
-                ('estimator', sklearn.ensemble.RandomForestRegressor(
-                    random_state=1,
-                    n_estimators=100,
-                    n_jobs=1,
-                    **new_config.get_dictionary()
-                ))
-            ])
+            regressor = self.get_unfitted_regressor(new_config, categorical_features, features)
+
             rank_correlations = np.ones((n_splits, )) * -np.NaN
             for n_fold, (train_idx, test_idx) in enumerate(
                     cv.split(features, targets)
             ):
+                print(n_iterations, n_fold)
                 train_features = features[train_idx]
                 train_targets = targets[train_idx]
 
@@ -218,18 +200,14 @@ class ExploringOpenML(AbstractBenchmark):
                 spearman_rank = scipy.stats.spearmanr(test_targets, y_hat)[0]
                 rank_correlations[n_fold] = spearman_rank
 
-                # Aggressive and simple pruning of folds based on the correlation
-                # print(
-                #     np.nanmean(highest_correlations),
-                #     np.nanmean(rank_correlations),
-                #     np.nanmean(highest_correlations_by_fold[: n_splits + 1]),
-                #     np.nanmean(rank_correlations[: n_splits + 1]),
-                # )
                 if (
-                    np.nanmean(highest_correlations) * 0.98
+                    np.nanmean(highest_correlations) * 0.99
                     > np.nanmean(rank_correlations)
                 ) and (
-                    np.nanmean(highest_correlations_by_fold[: n_splits + 1]) * 0.98
+                    (
+                        np.nanmean(highest_correlations_by_fold[: n_splits + 1])
+                        * (0.99 + n_fold * 0.001)
+                    )
                     > np.nanmean(rank_correlations[: n_splits + 1])
                 ):
                     check_loss = False
@@ -240,7 +218,15 @@ class ExploringOpenML(AbstractBenchmark):
                 highest_correlations_by_fold = rank_correlations
                 best_config = new_config
 
-        regressor = sklearn.pipeline.Pipeline([
+        regressor = self.get_unfitted_regressor(best_config, categorical_features, features)
+        regressor.fit(
+            X=features,
+            y=targets,
+        )
+        self.regressor = regressor
+
+    def get_unfitted_regressor(self, config, categorical_features, features):
+        return sklearn.pipeline.Pipeline([
             ('ct', sklearn.compose.ColumnTransformer([
                 (
                     'numerical',
@@ -262,14 +248,9 @@ class ExploringOpenML(AbstractBenchmark):
                 n_estimators=500,
                 n_jobs=1,
                 random_state=1,
-                **best_config.get_dictionary()
+                **config.get_dictionary()
             ))
         ])
-        regressor.fit(
-            X=features,
-            y=targets,
-        )
-        self.regressor = regressor
 
     def impute_with_defaults(self, features):
         for i, hp in enumerate(self.configuration_space.get_hyperparameters()):
@@ -466,9 +447,9 @@ all_datasets = [
     # 1485, 1486, 1487, 1489, 1494, 1504, 1510, 1570, 4134, 4534,
 ]
 all_model_classes = [
-    #GLMNET,
-    #RPART,
-    #KKNN,
+    GLMNET,
+    RPART,
+    KKNN,
     SVM,
     Ranger,
     XGBoost,
