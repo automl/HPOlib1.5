@@ -11,10 +11,14 @@ from ConfigSpace import (
     EqualsCondition,
 )
 import ConfigSpace.util
-import lightgbm
 import numpy as np
+import scipy.stats
 import sklearn.metrics
 import sklearn.model_selection
+import sklearn.compose
+import sklearn.ensemble
+import sklearn.pipeline
+import sklearn.preprocessing
 
 import hpolib
 from hpolib.abstract_benchmark import AbstractBenchmark
@@ -113,6 +117,8 @@ class ExploringOpenML(AbstractBenchmark):
                     # default and the OpenML R package did not upload the
                     # default in one of the earliest versions
                     continue
+            if float(evaluation[target_features]) > 1:
+                raise ValueError(i, evaluation)
             config = ConfigSpace.util.fix_types(
                 configuration=config,
                 configuration_space=self.configuration_space,
@@ -127,104 +133,176 @@ class ExploringOpenML(AbstractBenchmark):
                 raise e
             array = config.get_array()
             features.append(array)
-            targets.append(float(evaluation[target_features]))
+            # HPOlib is about minimization!
+            targets.append(1 - float(evaluation[target_features]))
 
         features = np.array(features)
         targets = np.array(targets)
 
-        n_splits = 5
-        cv = sklearn.model_selection.KFold(n_splits=n_splits, random_state=1)
+        self.impute_with_defaults(features)
+
+        n_splits = 10
+        cv = sklearn.model_selection.KFold(n_splits=n_splits, random_state=1, shuffle=True)
         cs = ConfigurationSpace()
-        max_depth = UniformIntegerHyperparameter('max_depth', 1, 10)
-        learning_rate = UniformFloatHyperparameter(
-            'learning_rate', 0.01, 0.2, log=True,
+        min_samples_split = UniformIntegerHyperparameter(
+            'min_samples_split', lower=2, upper=20, log=True,
         )
-        min_child_samples = UniformIntegerHyperparameter(
-            'min_child_samples', 1, 50, log=True,
-        )
-        subsample = UniformFloatHyperparameter('subsample', 0.5, 1.0)
-        colsample_bytree = UniformFloatHyperparameter(
-            'colsample_bytree', 0.5, 1.0,
-        )
-        reg_alpha = UniformFloatHyperparameter(
-            'reg_alpha', 1e-10, 1.0, log=True,
-        )
-        reg_lambda = UniformFloatHyperparameter(
-            'reg_lambda', 1e-10, 1.0, log=True
-        )
+        min_samples_leaf = UniformIntegerHyperparameter('min_samples_leaf', 1, 20, log=True)
+        max_features = UniformFloatHyperparameter('max_features', 0.5, 1.0)
+        bootstrap = CategoricalHyperparameter('bootstrap', [True, False])
+
         cs.add_hyperparameters([
-            max_depth, learning_rate, min_child_samples, subsample,
-            colsample_bytree, reg_alpha, reg_lambda,])
+            min_samples_split,
+            min_samples_leaf,
+            max_features,
+            bootstrap,
+        ])
         cs.seed(1)
         lowest_error = np.inf
         lowest_error_by_fold = np.ones((n_splits, )) * np.inf
+        highest_correlations = -np.inf
+        highest_correlations_by_fold = np.array((n_splits, )) * -np.inf
         best_config = cs.get_default_configuration()
         n_iterations = 0
+
         while True:
             n_iterations += 1
-            if lowest_error < 1 and n_iterations > 100:
+            #if lowest_error < 1 and n_iterations > 100:
+            #    break
+            if n_iterations > 100:
+                break
+            if highest_correlations > 0.9 and n_iterations > 75:
+                break
+            elif highest_correlations > 0.95 and n_iterations > 50:
+                break
+            elif highest_correlations > 0.99 and n_iterations > 25:
+                break
+            elif highest_correlations > 0.999:
                 break
             check_loss = True
             new_config = cs.sample_configuration()
-            regressor = lightgbm.LGBMRegressor(
-                n_estimators=500,
-                n_jobs=1,
-                num_leaves=2**new_config['max_depth'],
-                **new_config.get_dictionary()
-            )
+            regressor = sklearn.pipeline.Pipeline([
+                ('ct', sklearn.compose.ColumnTransformer([
+                    (
+                        'numerical',
+                        'passthrough',
+                        [i for i in range(features.shape[1]) if i not in categorical_features],
+                    ),
+                    (
+                        'categoricals',
+                        sklearn.preprocessing.OneHotEncoder(categories='auto'),
+                        categorical_features,
+                    ),
+                ])),
+                ('poly', sklearn.preprocessing.PolynomialFeatures(
+                    degree=2,
+                    interaction_only=True,
+                    include_bias=False,
+                )),
+                ('estimator', sklearn.ensemble.RandomForestRegressor(
+                    random_state=1,
+                    n_estimators=100,
+                    n_jobs=1,
+                    **new_config
+                ))
+            ])
             cv_errors = np.ones((n_splits, )) * np.NaN
+            rank_correlations = np.ones((n_splits, )) * -np.NaN
             for n_fold, (train_idx, test_idx) in enumerate(
                     cv.split(features, targets)
             ):
                 train_features = features[train_idx]
                 train_targets = targets[train_idx]
 
-                regressor.fit(train_features, train_targets)
+                regressor.fit(train_features, np.log(train_targets))
 
                 test_features = features[test_idx]
 
-                y_hat = regressor.predict(test_features)
+                y_hat = np.exp(regressor.predict(test_features))
 
                 test_targets = targets[test_idx]
                 error = np.sqrt(sklearn.metrics.mean_squared_error(test_targets, y_hat))
                 cv_errors[n_fold] = error
+                spearman_rank = scipy.stats.spearmanr(test_targets, y_hat)[0]
+                rank_correlations[n_fold] = spearman_rank
 
-                # Aggressive and simple pruning of folds
+                # # Aggressive and simple pruning of folds based on the error
+                # if (
+                #     np.nanmean(lowest_error_by_fold) * 1.2
+                #     < np.nanmean(cv_errors)
+                # ) and (
+                #     np.nanmean(lowest_error_by_fold[: n_splits + 1]) * 1.2
+                #     < np.nanmean(cv_errors[: n_splits + 1])
+                # ):
+                #     check_loss = False
+                #     break
+                # # Reject large error immediately
+                # if cv_errors[n_fold] > 100:
+                #     check_loss = False
+                #     break
+
+                # Aggressive and simple pruning of folds based on the correlation
+                # print(np.nanmean(highest_correlations), np.nanmean(rank_correlations),
+                #       np.nanmean(highest_correlations_by_fold[: n_splits + 1]), np.nanmean(rank_correlations[: n_splits + 1]))
                 if (
-                    np.nanmean(lowest_error_by_fold) * 1.2
-                    < np.nanmean(cv_errors)
+                    np.nanmean(highest_correlations) * 0.98
+                    > np.nanmean(rank_correlations)
                 ) and (
-                    np.nanmean(lowest_error_by_fold[: n_splits + 1]) * 1.2
-                    < np.nanmean(cv_errors[: n_splits + 1])
+                    np.nanmean(highest_correlations_by_fold[: n_splits + 1]) * 0.98
+                    > np.nanmean(rank_correlations[: n_splits + 1])
                 ):
                     check_loss = False
                     break
-                # Reject large error immediately
-                if cv_errors[n_fold] > 100:
-                    check_loss = False
-                    break
 
-            if check_loss and np.mean(cv_errors) < lowest_error:
-                lowest_error = np.mean(cv_errors)
-                lowest_error_by_fold = cv_errors
+            # if check_loss and np.mean(cv_errors) < lowest_error:
+            #     lowest_error = np.mean(cv_errors)
+            #     lowest_error_by_fold = cv_errors
+            #     best_config = new_config
+            if check_loss and np.mean(rank_correlations) > highest_correlations:
+                highest_correlations = np.mean(rank_correlations)
+                highest_correlations_by_fold = rank_correlations
                 best_config = new_config
 
-        regressor = lightgbm.LGBMRegressor(
-            n_estimators=500,
-            n_jobs=1,
-            num_leaves=2**new_config['max_depth'],
-            **best_config.get_dictionary()
-        )
+        regressor = sklearn.pipeline.Pipeline([
+            ('ct', sklearn.compose.ColumnTransformer([
+                (
+                    'numerical',
+                    'passthrough',
+                    [i for i in range(features.shape[1]) if i not in categorical_features],
+                ),
+                (
+                    'categoricals',
+                    sklearn.preprocessing.OneHotEncoder(categories='auto'),
+                    categorical_features,
+                ),
+            ])),
+            ('poly', sklearn.preprocessing.PolynomialFeatures(
+                degree=2,
+                interaction_only=True,
+                include_bias=False,
+            )),
+            ('estimator', sklearn.ensemble.RandomForestRegressor(
+                n_estimators=500,
+                n_jobs=1,
+                random_state=1,
+                **best_config
+            ))
+        ])
         regressor.fit(
             X=features,
             y=targets,
-            categorical_feature=categorical_features,
         )
         self.regressor = regressor
+
+    def impute_with_defaults(self, features):
+        for i, hp in enumerate(self.configuration_space.get_hyperparameters()):
+            nan_rows = ~np.isfinite(features[:, i])
+            features[nan_rows, i] = hp.normalized_default_value
 
     @AbstractBenchmark._check_configuration
     def objective_function(self, x, **kwargs):
         x = x.get_array().reshape((1, -1))
+        self.impute_with_defaults(x)
         y = self.regressor.predict(x)
         y = y[0]
         return {'function_value': y}
@@ -235,9 +313,19 @@ class ExploringOpenML(AbstractBenchmark):
 
     @staticmethod
     def get_meta_information():
-        return {'num_function_evals': 50,
-                'name': 'Exploring_OpenML',
-                'f_opt': 0}
+        return {
+            'num_function_evals': 50,
+            'name': 'Exploring_OpenML',
+            'f_opt': 0,
+            'references': [
+                """@article{kuhn_arxiv2018a,
+    title = {Automatic {Exploration} of {Machine} {Learning} {Experiments} on {OpenML}},
+    journal = {arXiv:1806.10961 [cs, stat]},
+    author = {Kühn, Daniel and Probst, Philipp and Thomas, Janek and Bischl, Bernd},
+    year = {2018},
+    }""",
+            ]
+        }
 
 
 class GLMNET(ExploringOpenML):
@@ -399,9 +487,9 @@ all_datasets = [
     #1485, 1486, 1487, 1489, 1494, 1504, 1510, 1570, 4134, 4534,
 ]
 all_model_classes = [
-    GLMNET,
-    RPART,
-    KKNN,
+    #GLMNET,
+    #RPART,
+    #KKNN,
     SVM,
     Ranger,
     XGBoost,
