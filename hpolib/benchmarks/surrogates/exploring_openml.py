@@ -1,4 +1,5 @@
 import csv
+import gzip
 import os
 import pickle
 from urllib.request import urlretrieve
@@ -53,16 +54,16 @@ class ExploringOpenML(AbstractBenchmark):
             os.makedirs(surrogate_dir, exist_ok=True)
         surrogate_file_name = os.path.join(
             surrogate_dir,
-            'surrogate_%s_%d.pkl' % (self.classifier, self.dataset_id),
+            'surrogate_%s_%d.pkl.gz' % (self.classifier, self.dataset_id),
         )
         if os.path.exists(surrogate_file_name):
             with lockfile.LockFile(surrogate_file_name):
-                with open(surrogate_file_name, 'rb') as fh:
+                with gzip.open(surrogate_file_name, 'rb') as fh:
                     regressor = pickle.load(fh)
         else:
             regressor = self.construct_surrogate(dataset_id, n_splits)
             with lockfile.LockFile(surrogate_file_name):
-                with open(surrogate_file_name, 'wb') as fh:
+                with gzip.open(surrogate_file_name, 'wb') as fh:
                     pickle.dump(regressor, fh)
 
         self.regressor = regressor
