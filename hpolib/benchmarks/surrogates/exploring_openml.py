@@ -158,8 +158,6 @@ class ExploringOpenML(AbstractBenchmark):
             bootstrap,
         ])
         cs.seed(1)
-        lowest_error = np.inf
-        lowest_error_by_fold = np.ones((n_splits, )) * np.inf
         highest_correlations = -np.inf
         highest_correlations_by_fold = np.array((n_splits, )) * -np.inf
         best_config = cs.get_default_configuration()
@@ -167,8 +165,6 @@ class ExploringOpenML(AbstractBenchmark):
 
         while True:
             n_iterations += 1
-            #if lowest_error < 1 and n_iterations > 100:
-            #    break
             if n_iterations > 100:
                 break
             if highest_correlations > 0.9 and n_iterations > 75:
@@ -206,7 +202,6 @@ class ExploringOpenML(AbstractBenchmark):
                     **new_config
                 ))
             ])
-            cv_errors = np.ones((n_splits, )) * np.NaN
             rank_correlations = np.ones((n_splits, )) * -np.NaN
             for n_fold, (train_idx, test_idx) in enumerate(
                     cv.split(features, targets)
@@ -221,25 +216,8 @@ class ExploringOpenML(AbstractBenchmark):
                 y_hat = np.exp(regressor.predict(test_features))
 
                 test_targets = targets[test_idx]
-                error = np.sqrt(sklearn.metrics.mean_squared_error(test_targets, y_hat))
-                cv_errors[n_fold] = error
                 spearman_rank = scipy.stats.spearmanr(test_targets, y_hat)[0]
                 rank_correlations[n_fold] = spearman_rank
-
-                # # Aggressive and simple pruning of folds based on the error
-                # if (
-                #     np.nanmean(lowest_error_by_fold) * 1.2
-                #     < np.nanmean(cv_errors)
-                # ) and (
-                #     np.nanmean(lowest_error_by_fold[: n_splits + 1]) * 1.2
-                #     < np.nanmean(cv_errors[: n_splits + 1])
-                # ):
-                #     check_loss = False
-                #     break
-                # # Reject large error immediately
-                # if cv_errors[n_fold] > 100:
-                #     check_loss = False
-                #     break
 
                 # Aggressive and simple pruning of folds based on the correlation
                 # print(np.nanmean(highest_correlations), np.nanmean(rank_correlations),
@@ -254,10 +232,6 @@ class ExploringOpenML(AbstractBenchmark):
                     check_loss = False
                     break
 
-            # if check_loss and np.mean(cv_errors) < lowest_error:
-            #     lowest_error = np.mean(cv_errors)
-            #     lowest_error_by_fold = cv_errors
-            #     best_config = new_config
             if check_loss and np.mean(rank_correlations) > highest_correlations:
                 highest_correlations = np.mean(rank_correlations)
                 highest_correlations_by_fold = rank_correlations
