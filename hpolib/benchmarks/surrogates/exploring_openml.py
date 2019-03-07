@@ -1,6 +1,9 @@
 import csv
 import os
+import pickle
 from urllib.request import urlretrieve
+
+import lockfile
 
 from ConfigSpace import (
     ConfigurationSpace,
@@ -46,10 +49,30 @@ class ExploringOpenML(AbstractBenchmark):
         self.dataset_id = dataset_id
         self.classifier = self.__class__.__name__.split('_')[0]
 
-        self.save_to = os.path.join(hpolib._config.data_dir, "ExploringOpenML")
-        if not os.path.isdir(self.save_to):
-            os.makedirs(self.save_to)
-        csv_path = os.path.join(self.save_to, self.classifier + '.csv')
+        surrogate_dir = os.path.join(hpolib._config.data_dir, "ExploringOpenML", 'surrogates')
+        if not os.path.exists(surrogate_dir):
+            os.makedirs(surrogate_dir, exist_ok=True)
+        surrogate_file_name = os.path.join(
+            surrogate_dir,
+            'surrogate_%s_%d.pkl' % (self.classifier, self.dataset_id),
+        )
+        if os.path.exists(surrogate_file_name):
+            with lockfile.LockFile(surrogate_file_name):
+                with open(surrogate_file_name, 'rb') as fh:
+                    regressor = pickle.load(fh)
+        else:
+            regressor = self.construct_surrogate(dataset_id, n_splits)
+            with lockfile.LockFile(surrogate_file_name):
+                with open(surrogate_file_name, 'wb') as fh:
+                    pickle.dump(regressor, fh)
+
+        self.regressor = regressor
+
+    def construct_surrogate(self, dataset_id, n_splits):
+        save_to = os.path.join(hpolib._config.data_dir, "ExploringOpenML")
+        if not os.path.isdir(save_to):
+            os.makedirs(save_to)
+        csv_path = os.path.join(save_to, self.classifier + '.csv')
         if not os.path.exists(csv_path):
             urlretrieve(self.url, csv_path)
 
@@ -63,7 +86,6 @@ class ExploringOpenML(AbstractBenchmark):
                     continue
                 evaluations.append(line)
                 line_no.append(i)
-
         hyperparameters_names = [
             hp.name for hp in self.configuration_space.get_hyperparameters()
         ]
@@ -75,7 +97,6 @@ class ExploringOpenML(AbstractBenchmark):
             )
         ]
         target_features = 'auc'
-
         features = []
         targets = []
         for i, evaluation in enumerate(evaluations):
@@ -91,8 +112,8 @@ class ExploringOpenML(AbstractBenchmark):
             if self.classifier == 'Ranger':
                 config['mtry'] = float(config['mtry']) / number_of_features
                 config['min.node.size'] = (
-                    np.log(float(config['min.node.size']))
-                    / np.log(number_of_datapoints)
+                        np.log(float(config['min.node.size']))
+                        / np.log(number_of_datapoints)
                 )
                 if config['min.node.size'] > 1.0:
                     # MF: according to Philipp it is unclear why this is in
@@ -136,12 +157,9 @@ class ExploringOpenML(AbstractBenchmark):
             features.append(array)
             # HPOlib is about minimization!
             targets.append(1 - float(evaluation[target_features]))
-
         features = np.array(features)
         targets = np.array(targets)
-
         self.impute_with_defaults(features)
-
         cv = sklearn.model_selection.KFold(n_splits=n_splits, random_state=1, shuffle=True)
         cs = ConfigurationSpace()
         min_samples_split = UniformIntegerHyperparameter(
@@ -150,7 +168,6 @@ class ExploringOpenML(AbstractBenchmark):
         min_samples_leaf = UniformIntegerHyperparameter('min_samples_leaf', 1, 20, log=True)
         max_features = UniformFloatHyperparameter('max_features', 0.5, 1.0)
         bootstrap = CategoricalHyperparameter('bootstrap', [True, False])
-
         cs.add_hyperparameters([
             min_samples_split,
             min_samples_leaf,
@@ -158,12 +175,10 @@ class ExploringOpenML(AbstractBenchmark):
             bootstrap,
         ])
         cs.seed(1)
-
         highest_correlations = -np.inf
-        highest_correlations_by_fold = np.array((n_splits, )) * -np.inf
+        highest_correlations_by_fold = np.array((n_splits,)) * -np.inf
         best_config = cs.get_default_configuration()
         n_iterations = 0
-
         while True:
             n_iterations += 1
 
@@ -182,7 +197,7 @@ class ExploringOpenML(AbstractBenchmark):
             new_config = cs.sample_configuration()
             regressor = self.get_unfitted_regressor(new_config, categorical_features, features)
 
-            rank_correlations = np.ones((n_splits, )) * -np.NaN
+            rank_correlations = np.ones((n_splits,)) * -np.NaN
             for n_fold, (train_idx, test_idx) in enumerate(
                     cv.split(features, targets)
             ):
@@ -201,14 +216,14 @@ class ExploringOpenML(AbstractBenchmark):
                 rank_correlations[n_fold] = spearman_rank
 
                 if (
-                    np.nanmean(highest_correlations) * 0.99
-                    > np.nanmean(rank_correlations)
+                        np.nanmean(highest_correlations) * 0.99
+                        > np.nanmean(rank_correlations)
                 ) and (
-                    (
-                        np.nanmean(highest_correlations_by_fold[: n_splits + 1])
-                        * (0.99 + n_fold * 0.001)
-                    )
-                    > np.nanmean(rank_correlations[: n_splits + 1])
+                        (
+                                np.nanmean(highest_correlations_by_fold[: n_splits + 1])
+                                * (0.99 + n_fold * 0.001)
+                        )
+                        > np.nanmean(rank_correlations[: n_splits + 1])
                 ):
                     check_loss = False
                     break
@@ -217,13 +232,12 @@ class ExploringOpenML(AbstractBenchmark):
                 highest_correlations = np.mean(rank_correlations)
                 highest_correlations_by_fold = rank_correlations
                 best_config = new_config
-
         regressor = self.get_unfitted_regressor(best_config, categorical_features, features)
         regressor.fit(
             X=features,
             y=targets,
         )
-        self.regressor = regressor
+        return regressor
 
     def get_unfitted_regressor(self, config, categorical_features, features):
         return sklearn.pipeline.Pipeline([
