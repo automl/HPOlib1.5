@@ -22,12 +22,12 @@ import sklearn.preprocessing
 
 import hpolib
 from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.util import rng_helper
 
 
 class ExploringOpenML(AbstractBenchmark):
     """https://figshare.com/articles/OpenML_R_Bot_Benchmark_Data_final_subset_/5882230
     """
+    url = None
 
     def __init__(self, dataset_id, rng=None):
         """
@@ -44,8 +44,7 @@ class ExploringOpenML(AbstractBenchmark):
         self.dataset_id = dataset_id
         self.classifier = self.__class__.__name__.split('_')[0]
 
-        self.save_to = os.path.join(hpolib._config.data_dir,
-                                    "ExploringOpenML")
+        self.save_to = os.path.join(hpolib._config.data_dir, "ExploringOpenML")
         if not os.path.isdir(self.save_to):
             os.makedirs(self.save_to)
         csv_path = os.path.join(self.save_to, self.classifier + '.csv')
@@ -199,7 +198,7 @@ class ExploringOpenML(AbstractBenchmark):
                     random_state=1,
                     n_estimators=100,
                     n_jobs=1,
-                    **new_config
+                    **new_config.get_dictionary()
                 ))
             ])
             rank_correlations = np.ones((n_splits, )) * -np.NaN
@@ -220,8 +219,12 @@ class ExploringOpenML(AbstractBenchmark):
                 rank_correlations[n_fold] = spearman_rank
 
                 # Aggressive and simple pruning of folds based on the correlation
-                # print(np.nanmean(highest_correlations), np.nanmean(rank_correlations),
-                #       np.nanmean(highest_correlations_by_fold[: n_splits + 1]), np.nanmean(rank_correlations[: n_splits + 1]))
+                # print(
+                #     np.nanmean(highest_correlations),
+                #     np.nanmean(rank_correlations),
+                #     np.nanmean(highest_correlations_by_fold[: n_splits + 1]),
+                #     np.nanmean(rank_correlations[: n_splits + 1]),
+                # )
                 if (
                     np.nanmean(highest_correlations) * 0.98
                     > np.nanmean(rank_correlations)
@@ -259,7 +262,7 @@ class ExploringOpenML(AbstractBenchmark):
                 n_estimators=500,
                 n_jobs=1,
                 random_state=1,
-                **best_config
+                **best_config.get_dictionary()
             ))
         ])
         regressor.fit(
@@ -365,7 +368,9 @@ class SVM(ExploringOpenML):
         cs.add_conditions([gamma_condition, degree_condition])
         return cs
 
+
 class Ranger(ExploringOpenML):
+
     url = 'https://ndownloader.figshare.com/files/10462306'
 
     @staticmethod
@@ -456,9 +461,9 @@ class XGBoost(ExploringOpenML):
 
 
 all_datasets = [
-    3, #31, 37, 44, 50, 151, 312, 333, 334, 335, 1036, 1038, 1043, 1046, 1049,
-    #1050, 1063, 1067, 1068, 1120, 1461, 1462, 1464, 1467, 1471, 1479, 1480,
-    #1485, 1486, 1487, 1489, 1494, 1504, 1510, 1570, 4134, 4534,
+    3,  # 31, 37, 44, 50, 151, 312, 333, 334, 335, 1036, 1038, 1043, 1046, 1049,
+    # 1050, 1063, 1067, 1068, 1120, 1461, 1462, 1464, 1467, 1471, 1479, 1480,
+    # 1485, 1486, 1487, 1489, 1494, 1504, 1510, 1570, 4134, 4534,
 ]
 all_model_classes = [
     #GLMNET,
@@ -470,11 +475,11 @@ all_model_classes = [
 ]
 
 for model_class in all_model_classes:
-    for dataset_id in all_datasets:
+    for dataset_id_ in all_datasets:
         benchmark_string = """class %s_%d(%s):
          def __init__(self, rng=None):
              super().__init__(dataset_id=%d, rng=rng)
-    """ % (model_class.__name__, dataset_id, model_class.__name__, dataset_id)
+    """ % (model_class.__name__, dataset_id_, model_class.__name__, dataset_id_)
 
         exec(benchmark_string)
 
@@ -482,11 +487,11 @@ for model_class in all_model_classes:
 if __name__ == '__main__':
     for model_class in all_model_classes:
         print(model_class)
-        for dataset_id in all_datasets:
-            print(dataset_id)
-            exec('rval = %s_%d()' % (model_class.__name__, dataset_id))
+        for dataset_id_ in all_datasets:
+            print(dataset_id_)
+            exec('rval = %s_%d()' % (model_class.__name__, dataset_id_))
             print(rval)
-            cs = rval.get_configuration_space()
-            for i in range(10):
-                config = cs.sample_configuration()
-                print(config, rval.objective_function(config))
+            model_class_cs = rval.get_configuration_space()
+            for _ in range(10):
+                tmp_config = model_class_cs.sample_configuration()
+                print(tmp_config, rval.objective_function(tmp_config))
