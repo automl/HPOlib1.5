@@ -194,7 +194,7 @@ class ExploringOpenML(AbstractBenchmark):
                 break
             check_loss = True
             new_config = cs.sample_configuration()
-            regressor = self.get_unfitted_regressor(new_config, categorical_features)
+            regressor = self.get_unfitted_regressor(new_config, categorical_features, 50)
 
             rank_correlations = np.ones((n_splits,)) * -np.NaN
             for n_fold, (train_idx, test_idx) in enumerate(
@@ -214,14 +214,14 @@ class ExploringOpenML(AbstractBenchmark):
                 rank_correlations[n_fold] = spearman_rank
 
                 if (
-                        np.nanmean(highest_correlations) * 0.99
-                        > np.nanmean(rank_correlations)
+                    np.nanmean(highest_correlations) * 0.99
+                    > np.nanmean(rank_correlations)
                 ) and (
-                        (
-                                np.nanmean(highest_correlations_by_fold[: n_splits + 1])
-                                * (0.99 + n_fold * 0.001)
-                        )
-                        > np.nanmean(rank_correlations[: n_splits + 1])
+                    (
+                        np.nanmean(highest_correlations_by_fold[: n_splits + 1])
+                        * (0.99 + n_fold * 0.001)
+                    )
+                    > np.nanmean(rank_correlations[: n_splits + 1])
                 ):
                     check_loss = False
                     break
@@ -230,18 +230,22 @@ class ExploringOpenML(AbstractBenchmark):
                 highest_correlations = np.mean(rank_correlations)
                 highest_correlations_by_fold = rank_correlations
                 best_config = new_config
-        regressor = self.get_unfitted_regressor(best_config, categorical_features)
+
+        regressor = self.get_unfitted_regressor(best_config, categorical_features, 500)
         regressor.fit(
             X=features,
             y=targets,
         )
         return regressor
 
-    def get_unfitted_regressor(self, config, categorical_features):
+    def get_unfitted_regressor(self, config, categorical_features, n_trees):
         return sklearn.pipeline.Pipeline([
             (
                 'ohe',
-                sklearn.preprocessing.OneHotEncoder(categorical_features=categorical_features),
+                sklearn.preprocessing.OneHotEncoder(
+                    categorical_features=categorical_features,
+                    sparse=False,
+                ),
             ),
             ('poly', sklearn.preprocessing.PolynomialFeatures(
                 degree=2,
@@ -249,7 +253,7 @@ class ExploringOpenML(AbstractBenchmark):
                 include_bias=False,
             )),
             ('estimator', sklearn.ensemble.RandomForestRegressor(
-                n_estimators=500,
+                n_estimators=n_trees,
                 n_jobs=1,
                 random_state=1,
                 **config.get_dictionary()
@@ -446,9 +450,9 @@ class XGBoost(ExploringOpenML):
 
 
 all_datasets = [
-    3,  # 31, 37, 44, 50, 151, 312, 333, 334, 335, 1036, 1038, 1043, 1046, 1049,
-    # 1050, 1063, 1067, 1068, 1120, 1461, 1462, 1464, 1467, 1471, 1479, 1480,
-    # 1485, 1486, 1487, 1489, 1494, 1504, 1510, 1570, 4134, 4534,
+    3, 31, 37, 44, 50, 151, 312, 333, 334, 335, 1036, 1038, 1043, 1046, 1049,
+    1050, 1063, 1067, 1068, 1120, 1461, 1462, 1464, 1467, 1471, 1479, 1480,
+    1485, 1486, 1487, 1489, 1494, 1504, 1510, 1570, 4134, 4534,
 ]
 all_model_classes = [
     GLMNET,
@@ -462,8 +466,8 @@ all_model_classes = [
 for model_class in all_model_classes:
     for dataset_id_ in all_datasets:
         benchmark_string = """class %s_%d(%s):
-         def __init__(self, rng=None):
-             super().__init__(dataset_id=%d, rng=rng)
+         def __init__(self, n_splits=10, rng=None):
+             super().__init__(dataset_id=%d, n_splits=n_splits, rng=rng)
     """ % (model_class.__name__, dataset_id_, model_class.__name__, dataset_id_)
 
         exec(benchmark_string)
