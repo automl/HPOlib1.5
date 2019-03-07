@@ -28,7 +28,11 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 
 
 class ExploringOpenML(AbstractBenchmark):
-    """https://figshare.com/articles/OpenML_R_Bot_Benchmark_Data_final_subset_/5882230
+    """Surrogate benchmarks based on the data from Automatic Exploration of Machine Learning
+    Benchmarks on OpenML by Kühn et al..
+
+    Data is obtained from:
+    https://figshare.com/articles/OpenML_R_Bot_Benchmark_Data_final_subset_/5882230
     """
     url = None
 
@@ -288,9 +292,17 @@ class ExploringOpenML(AbstractBenchmark):
                 """@article{kuhn_arxiv2018a,
     title = {Automatic {Exploration} of {Machine} {Learning} {Experiments} on {OpenML}},
     journal = {arXiv:1806.10961 [cs, stat]},
-    author = {Kühn, Daniel and Probst, Philipp and Thomas, Janek and Bischl, Bernd},
+    author = {Daniel Kühn and Philipp Probst and Janek Thomas and Bernd Bischl},
     year = {2018},
-    }""",
+    }""", """@inproceedings{eggensperger_aaai2015a,
+   author =       {Katharina Eggensperger and Frank Hutter and Holger H. Hoos and Kevin Leyton-Brown},
+   title =        {Efficient Benchmarking of Hyperparameter Optimizers via Surrogates},
+   booktitle =    {Proceedings of the Twenty-Ninth AAAI Conference on Artificial Intelligence},
+   conference = {AAAI Conference},
+   year =         {2015},
+}
+
+    """
             ]
         }
 
