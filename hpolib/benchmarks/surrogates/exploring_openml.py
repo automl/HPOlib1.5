@@ -1,5 +1,6 @@
 import csv
 import gzip
+import logging
 import os
 import pickle
 from urllib.request import urlretrieve
@@ -50,6 +51,7 @@ class ExploringOpenML(AbstractBenchmark):
         """
 
         super().__init__(rng=rng)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.dataset_id = dataset_id
         self.classifier = self.__class__.__name__.split('_')[0]
 
@@ -73,16 +75,21 @@ class ExploringOpenML(AbstractBenchmark):
         self.regressor = regressor
 
     def construct_surrogate(self, dataset_id, n_splits):
+        self.logger.info('Could not find surrogate pickle, constructing the surrogate.')
+
         save_to = os.path.join(hpolib._config.data_dir, "ExploringOpenML")
         if not os.path.isdir(save_to):
             os.makedirs(save_to)
         csv_path = os.path.join(save_to, self.classifier + '.csv')
         if not os.path.exists(csv_path):
+            self.logger.info('Could not find surrogate data, downloading from %s', self.url)
             urlretrieve(self.url, csv_path)
+            self.logger.info('Finished downloading surrogate data.')
 
         evaluations = []
         line_no = []
 
+        self.logger.info('Starting to read in surrogate data.')
         with open(csv_path) as fh:
             csv_reader = csv.DictReader(fh)
             for i, line in enumerate(csv_reader):
@@ -164,6 +171,9 @@ class ExploringOpenML(AbstractBenchmark):
         features = np.array(features)
         targets = np.array(targets)
         self.impute_with_defaults(features)
+        self.logger.info('Finished reading in surrogate data.')
+
+        self.logger.info('Start building the surrogate, this can take a few minutes...')
         cv = sklearn.model_selection.KFold(n_splits=n_splits, random_state=1, shuffle=True)
         cs = ConfigurationSpace()
         min_samples_split = UniformIntegerHyperparameter(
@@ -184,18 +194,23 @@ class ExploringOpenML(AbstractBenchmark):
         best_config = cs.get_default_configuration()
         n_iterations = 0
         while True:
+            self.logger.debug('Random search iteration %d/%d.', n_iterations, 40)
             n_iterations += 1
 
             # Stopping condititions
             if n_iterations > 40:
                 break
             if highest_correlations > 0.9 and n_iterations > 30:
+                self.logger.debug('Stopping random search due to good performance!')
                 break
             elif highest_correlations > 0.95 and n_iterations > 20:
+                self.logger.debug('Stopping random search due to good performance!')
                 break
             elif highest_correlations > 0.99 and n_iterations > 10:
+                self.logger.debug('Stopping random search due to good performance!')
                 break
             elif highest_correlations > 0.999:
+                self.logger.debug('Stopping random search due to good performance!')
                 break
             check_loss = True
             new_config = cs.sample_configuration()
@@ -241,6 +256,7 @@ class ExploringOpenML(AbstractBenchmark):
             X=features,
             y=targets,
         )
+        self.logger.info('Finished building the surrogate.')
         return regressor
 
     def get_unfitted_regressor(self, config, categorical_features, n_trees):
