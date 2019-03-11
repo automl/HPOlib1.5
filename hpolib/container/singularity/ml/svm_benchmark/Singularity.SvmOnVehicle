@@ -1,0 +1,22 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+%labels
+MAINTAINER Stefan Staeglich
+
+%post
+    apt update -y
+    apt install git -y
+    apt install python3-pip python3-numpy python-configparser cython3 -y
+    pip3 install git+https://github.com/automl/ConfigSpace.git@master
+    apt install python3-scipy python3-sklearn -y
+    pip3 install git+https://github.com/automl/HPOlib2@development
+    apt install pyro4 python3-pyro4 -y
+    pip3 install openml
+
+    mkdir /var/lib/hpolib/
+    python3 /usr/local/lib/python3.6/dist-packages/hpolib/container/util/download_data.py ml.svm_benchmark SvmOnVehicle
+    chmod -R 777 /var/lib/hpolib/
+
+%runscript
+    python3 -s /usr/local/lib/python3.6/dist-packages/hpolib/container/server/abstract_benchmark.py ml.svm_benchmark $@

@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+
+%labels
+MAINTAINER Stefan Staeglich
+
+%post
+    apt update -y
+    apt install git -y
+    apt install libopenblas-base libopenblas-dev libblas3 liblas-c3 -y
+    apt install python3-pip python3-numpy python-configparser -y
+    pip3 install git+https://github.com/automl/ConfigSpace.git@master
+    apt install python3-scipy -y
+    pip3 install git+https://github.com/automl/HPOlib2@development
+    pip3 install pyro4
+    pip3 install Theano
+    pip3 install git+https://github.com/Lasagne/Lasagne.git
+    pip3 install git+https://github.com/automl/sgmcmc.git
+    
+    pip3 install cython
+    apt install cmake gcc g++ -y
+    git clone https://github.com/Theano/libgpuarray.git
+    cd libgpuarray
+    mkdir Build
+    cd Build
+    # you can pass -DCMAKE_INSTALL_PREFIX=/path/to/somewhere to install to an alternate location
+    cmake .. -DCMAKE_BUILD_TYPE=Release # or Debug if you are investigating a crash
+    make
+    make install
+    cd ..
+    # This must be done after libgpuarray is installed as per instructions above.
+    python3 setup.py build
+    python3 setup.py install
+    
+    mkdir /var/lib/hpolib/
+    python3 /usr/local/lib/python3.6/dist-packages/hpolib/container/util/download_data.py ml.bnn_benchmark BNNOnYearPrediction
+    chmod -R 777 /var/lib/hpolib/
+
+%environment
+    export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+
+%runscript
+    python3 -s /usr/local/lib/python3.6/dist-packages/hpolib/container/server/abstract_benchmark.py ml.bnn_benchmark $@
+
