@@ -124,12 +124,12 @@ class TestRandomConfig(unittest.TestCase):
 
     def test_random_config_exploring_openml(self):
         for b in [
-            hpolib.benchmarks.surrogates.exploring_openml.GLMNET_4134(n_splits=2),
-            hpolib.benchmarks.surrogates.exploring_openml.RPART_4134(n_splits=2),
-            hpolib.benchmarks.surrogates.exploring_openml.KKNN_3(n_splits=2),
-            hpolib.benchmarks.surrogates.exploring_openml.SVM_1486(n_splits=2),
-            hpolib.benchmarks.surrogates.exploring_openml.Ranger_1043(n_splits=2),
-            hpolib.benchmarks.surrogates.exploring_openml.XGBoost_4534(n_splits=2),
+            hpolib.benchmarks.surrogates.exploring_openml.GLMNET_4134(n_splits=2, n_iterations=2),
+            hpolib.benchmarks.surrogates.exploring_openml.RPART_4134(n_splits=2, n_iterations=2),
+            hpolib.benchmarks.surrogates.exploring_openml.KKNN_3(n_splits=2, n_iterations=2),
+            hpolib.benchmarks.surrogates.exploring_openml.SVM_1486(n_splits=2, n_iterations=2),
+            hpolib.benchmarks.surrogates.exploring_openml.Ranger_1043(n_splits=2, n_iterations=2),
+            hpolib.benchmarks.surrogates.exploring_openml.XGBoost_4534(n_splits=2, n_iterations=2),
         ]:
 
             cfg = b.get_configuration_space()
@@ -146,6 +146,7 @@ class TestRandomConfig(unittest.TestCase):
                 res = obj(c)
                 if res is not None:
                     self.assertTrue(np.isfinite(res['function_value']))
+                    self.assertTrue(np.isfinite(res['cost']))
                 else:
                     self.assertTrue(
                         obj.exit_status in (

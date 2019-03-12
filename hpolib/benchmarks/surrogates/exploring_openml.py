@@ -1,3 +1,4 @@
+import copy
 import csv
 import gzip
 import logging
@@ -66,16 +67,18 @@ class ExploringOpenML(AbstractBenchmark):
             'surrogate_%s_%d.pkl.gz' % (self.classifier, self.dataset_id),
         )
         if rebuild or not os.path.exists(surrogate_file_name):
-            regressor = self.construct_surrogate(dataset_id, n_splits, n_iterations)
+            regressor_loss, regressor_runtime = self.construct_surrogate(
+                dataset_id, n_splits, n_iterations,
+            )
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'wb') as fh:
-                    pickle.dump(regressor, fh)
+                    pickle.dump((regressor_loss, regressor_runtime), fh)
         else:
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'rb') as fh:
-                    regressor = pickle.load(fh)
+                    regressor_loss, regressor_runtime = pickle.load(fh)
 
-        self.regressor = regressor
+        self.regressor_loss, self.regressor_runtime = regressor_loss, regressor_runtime
 
     def construct_surrogate(self, dataset_id, n_splits, n_iterations_rs):
         self.logger.info('Could not find surrogate pickle, constructing the surrogate.')
@@ -113,6 +116,7 @@ class ExploringOpenML(AbstractBenchmark):
         target_features = 'auc'
         features = []
         targets = []
+        runtimes = []
         for i, evaluation in enumerate(evaluations):
             number_of_features = float(evaluation['NumberOfFeatures'])
             number_of_datapoints = float(evaluation['NumberOfInstances'])
@@ -171,8 +175,11 @@ class ExploringOpenML(AbstractBenchmark):
             features.append(array)
             # HPOlib is about minimization!
             targets.append(1 - float(evaluation[target_features]))
+            runtimes.append(float(evaluation['runtime']))
+
         features = np.array(features)
         targets = np.array(targets) + 1e-14
+        runtimes = np.array(runtimes)
         features = self.impute_with_defaults(features)
         self.logger.info('Finished reading in surrogate data.')
 
@@ -192,66 +199,95 @@ class ExploringOpenML(AbstractBenchmark):
             bootstrap,
         ])
         cs.seed(1)
-        highest_correlations = -np.inf
-        highest_correlations_by_fold = np.array((n_splits,)) * -np.inf
-        best_config = cs.get_default_configuration()
-        n_iterations = 0
-        while True:
+        highest_correlations_loss = -np.inf
+        highest_correlations_loss_by_fold = np.array((n_splits,)) * -np.inf
+        highest_correlations_runtime = -np.inf
+        highest_correlations_runtime_by_fold = np.array((n_splits,)) * -np.inf
+        best_config_loss = cs.get_default_configuration()
+        best_config_runtime = cs.get_default_configuration()
+        for n_iterations in range(n_iterations_rs):
             self.logger.debug('Random search iteration %d/%d.', n_iterations, n_iterations_rs)
-            n_iterations += 1
-
-            # Stopping condititions
-            if n_iterations > n_iterations_rs:
-                break
-            elif highest_correlations > 0.999:
-                self.logger.debug('Stopping random search due to good performance!')
-                break
             check_loss = True
-            new_config = cs.sample_configuration()
-            regressor = self.get_unfitted_regressor(new_config, categorical_features, 50)
+            new_config_loss = cs.sample_configuration()
+            new_config_runtime = copy.deepcopy(new_config_loss)
+            regressor_loss = self.get_unfitted_regressor(new_config_loss, categorical_features, 50)
+            regressor_runtime = self.get_unfitted_regressor(new_config_runtime, categorical_features, 50)
 
-            rank_correlations = np.ones((n_splits,)) * -np.NaN
+            rank_correlations_loss = np.ones((n_splits, )) * -np.NaN
+            rank_correlations_runtime = np.ones((n_splits, )) * -np.NaN
             for n_fold, (train_idx, test_idx) in enumerate(
                     cv.split(features, targets)
             ):
                 train_features = features[train_idx]
-                train_targets = targets[train_idx]
+                train_targets_loss = targets[train_idx]
+                train_targets_runtime = runtimes[train_idx]
 
-                regressor.fit(train_features, np.log(train_targets))
+                regressor_loss.fit(train_features, np.log(train_targets_loss))
+                regressor_runtime.fit(train_features, np.log(train_targets_runtime))
 
                 test_features = features[test_idx]
 
-                y_hat = np.exp(regressor.predict(test_features))
+                y_hat_loss = np.exp(regressor_loss.predict(test_features))
+                y_hat_runtime = np.exp(regressor_runtime.predict(test_features))
 
-                test_targets = targets[test_idx]
-                spearman_rank = scipy.stats.spearmanr(test_targets, y_hat)[0]
-                rank_correlations[n_fold] = spearman_rank
+                test_targets_loss = targets[test_idx]
+                spearman_rank_loss = scipy.stats.spearmanr(test_targets_loss, y_hat_loss)[0]
+                rank_correlations_loss[n_fold] = spearman_rank_loss
+
+                test_targets_runtime = runtimes[test_idx]
+                spearman_rank_runtime = scipy.stats.spearmanr(test_targets_runtime, y_hat_runtime)[0]
+                rank_correlations_runtime[n_fold] = spearman_rank_runtime
+
 
                 if (
-                    np.nanmean(highest_correlations) * 0.99
-                    > np.nanmean(rank_correlations)
+                    np.nanmean(highest_correlations_loss) * 0.99
+                    > np.nanmean(rank_correlations_loss)
                 ) and (
                     (
-                        np.nanmean(highest_correlations_by_fold[: n_splits + 1])
+                        np.nanmean(highest_correlations_loss_by_fold[: n_splits + 1])
                         * (0.99 + n_fold * 0.001)
                     )
-                    > np.nanmean(rank_correlations[: n_splits + 1])
+                    > np.nanmean(rank_correlations_loss[: n_splits + 1])
+                ) and (
+                    np.nanmean(highest_correlations_runtime) * 0.99
+                    > np.nanmean(rank_correlations_runtime)
+                ) and (
+                    (
+                        np.nanmean(highest_correlations_runtime_by_fold[: n_splits + 1])
+                        * (0.99 + n_fold * 0.001)
+                    )
+                    > np.nanmean(rank_correlations_runtime[: n_splits + 1])
                 ):
                     check_loss = False
                     break
 
-            if check_loss and np.mean(rank_correlations) > highest_correlations:
-                highest_correlations = np.mean(rank_correlations)
-                highest_correlations_by_fold = rank_correlations
-                best_config = new_config
+            if (
+                check_loss
+                and np.mean(rank_correlations_loss) > highest_correlations_loss
+            ):
+                highest_correlations_loss = np.mean(rank_correlations_loss)
+                highest_correlations_loss_by_fold = rank_correlations_loss
+                best_config_loss = new_config_loss
+            if (
+                check_loss
+                and np.mean(rank_correlations_runtime) > highest_correlations_runtime
+            ):
+                highest_correlations_runtime = np.mean(rank_correlations_runtime)
+                highest_correlations_runtime_by_fold = rank_correlations_runtime
+                best_config_runtime = new_config_runtime
 
-        regressor = self.get_unfitted_regressor(best_config, categorical_features, 500)
-        regressor.fit(
+        regressor_loss = self.get_unfitted_regressor(best_config_loss, categorical_features, 500)
+        regressor_loss.fit(
             X=features,
             y=np.log(targets),
         )
+        regressor_runtime = self.get_unfitted_regressor(best_config_runtime, categorical_features, 500)
+        regressor_runtime.fit(
+            X=features,
+            y=np.log(runtimes)
+        )
         self.logger.info('Finished building the surrogate.')
-        return regressor
+        return regressor_loss, regressor_runtime
 
     def get_unfitted_regressor(self, config, categorical_features, n_trees):
         return sklearn.pipeline.Pipeline([
@@ -285,11 +321,14 @@ class ExploringOpenML(AbstractBenchmark):
     def objective_function(self, x, **kwargs):
         x = x.get_array().reshape((1, -1))
         x = self.impute_with_defaults(x)
-        y = self.regressor.predict(x)
+        y = self.regressor_loss.predict(x)
         y = y[0]
+        runtime = self.regressor_runtime.predict(x)
+        runtime = runtime[0]
         # Untransform and round to the resolution of the data file.
         y = np.round(np.exp(y) - 1e-14, 6)
-        return {'function_value': y}
+        runtime = np.round(np.exp(runtime), 6)
+        return {'function_value': y, 'cost': runtime}
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, x, **kwargs):
