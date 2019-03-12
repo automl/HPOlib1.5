@@ -32,12 +32,15 @@ class ExploringOpenML(AbstractBenchmark):
     """Surrogate benchmarks based on the data from Automatic Exploration of Machine Learning
     Benchmarks on OpenML by Kühn et al..
 
+    This is a base class that should not be used directly. Instead, use one of the automatically
+    constructed classes at the bottom of the file.
+
     Data is obtained from:
     https://figshare.com/articles/OpenML_R_Bot_Benchmark_Data_final_subset_/5882230
     """
     url = None
 
-    def __init__(self, dataset_id, n_splits=10, rng=None):
+    def __init__(self, dataset_id, n_splits=10, n_iterations=30, rebuild=False, rng=None):
         """
 
         Parameters
@@ -62,19 +65,19 @@ class ExploringOpenML(AbstractBenchmark):
             surrogate_dir,
             'surrogate_%s_%d.pkl.gz' % (self.classifier, self.dataset_id),
         )
-        if os.path.exists(surrogate_file_name):
-            with lockfile.LockFile(surrogate_file_name):
-                with gzip.open(surrogate_file_name, 'rb') as fh:
-                    regressor = pickle.load(fh)
-        else:
-            regressor = self.construct_surrogate(dataset_id, n_splits)
+        if rebuild or not os.path.exists(surrogate_file_name):
+            regressor = self.construct_surrogate(dataset_id, n_splits, n_iterations)
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'wb') as fh:
                     pickle.dump(regressor, fh)
+        else:
+            with lockfile.LockFile(surrogate_file_name):
+                with gzip.open(surrogate_file_name, 'rb') as fh:
+                    regressor = pickle.load(fh)
 
         self.regressor = regressor
 
-    def construct_surrogate(self, dataset_id, n_splits):
+    def construct_surrogate(self, dataset_id, n_splits, n_iterations_rs):
         self.logger.info('Could not find surrogate pickle, constructing the surrogate.')
 
         save_to = os.path.join(hpolib._config.data_dir, "ExploringOpenML")
@@ -169,8 +172,8 @@ class ExploringOpenML(AbstractBenchmark):
             # HPOlib is about minimization!
             targets.append(1 - float(evaluation[target_features]))
         features = np.array(features)
-        targets = np.array(targets)
-        self.impute_with_defaults(features)
+        targets = np.array(targets) + 1e-14
+        features = self.impute_with_defaults(features)
         self.logger.info('Finished reading in surrogate data.')
 
         self.logger.info('Start building the surrogate, this can take a few minutes...')
@@ -194,20 +197,11 @@ class ExploringOpenML(AbstractBenchmark):
         best_config = cs.get_default_configuration()
         n_iterations = 0
         while True:
-            self.logger.debug('Random search iteration %d/%d.', n_iterations, 40)
+            self.logger.debug('Random search iteration %d/%d.', n_iterations, n_iterations_rs)
             n_iterations += 1
 
             # Stopping condititions
-            if n_iterations > 40:
-                break
-            if highest_correlations > 0.9 and n_iterations > 30:
-                self.logger.debug('Stopping random search due to good performance!')
-                break
-            elif highest_correlations > 0.95 and n_iterations > 20:
-                self.logger.debug('Stopping random search due to good performance!')
-                break
-            elif highest_correlations > 0.99 and n_iterations > 10:
-                self.logger.debug('Stopping random search due to good performance!')
+            if n_iterations > n_iterations_rs:
                 break
             elif highest_correlations > 0.999:
                 self.logger.debug('Stopping random search due to good performance!')
@@ -254,7 +248,7 @@ class ExploringOpenML(AbstractBenchmark):
         regressor = self.get_unfitted_regressor(best_config, categorical_features, 500)
         regressor.fit(
             X=features,
-            y=targets,
+            y=np.log(targets),
         )
         self.logger.info('Finished building the surrogate.')
         return regressor
@@ -285,13 +279,16 @@ class ExploringOpenML(AbstractBenchmark):
         for i, hp in enumerate(self.configuration_space.get_hyperparameters()):
             nan_rows = ~np.isfinite(features[:, i])
             features[nan_rows, i] = hp.normalized_default_value
+        return features
 
     @AbstractBenchmark._check_configuration
     def objective_function(self, x, **kwargs):
         x = x.get_array().reshape((1, -1))
-        self.impute_with_defaults(x)
+        x = self.impute_with_defaults(x)
         y = self.regressor.predict(x)
         y = y[0]
+        # Untransform and round to the resolution of the data file.
+        y = np.round(np.exp(y) - 1e-14, 6)
         return {'function_value': y}
 
     @AbstractBenchmark._check_configuration
@@ -495,8 +492,8 @@ all_model_classes = [
 for model_class in all_model_classes:
     for dataset_id_ in all_datasets:
         benchmark_string = """class %s_%d(%s):
-         def __init__(self, n_splits=10, rng=None):
-             super().__init__(dataset_id=%d, n_splits=n_splits, rng=rng)
+         def __init__(self, n_splits=10, n_iterations=30, rng=None):
+             super().__init__(dataset_id=%d, n_splits=n_splits, n_iterations=n_iterations, rebuild=False, rng=rng)
     """ % (model_class.__name__, dataset_id_, model_class.__name__, dataset_id_)
 
         exec(benchmark_string)
