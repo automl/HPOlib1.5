@@ -375,7 +375,6 @@ class ExploringOpenML(AbstractBenchmark):
         return {
             'num_function_evals': 50,
             'name': 'Exploring_OpenML',
-            'f_opt': 0,
             'references': [
                 """@article{kuhn_arxiv2018a,
     title = {Automatic {Exploration} of {Machine} {Learning} {Experiments} on {OpenML}},
