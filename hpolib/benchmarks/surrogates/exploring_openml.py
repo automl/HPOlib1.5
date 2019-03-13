@@ -50,7 +50,7 @@ class ExploringOpenML(AbstractBenchmark):
         Parameters
         ----------
         dataset_id: int
-            Dataset Id as given in Table 2.
+            Dataset Id as given in Table 2 of the paper by Kühn et al..
         n_splits : int
             Number of cross-validation splits for optimizing the surrogate hyperparameters.
         n_iterations : int
@@ -173,6 +173,9 @@ class ExploringOpenML(AbstractBenchmark):
                     continue
             if float(evaluation[target_features]) > 1:
                 raise ValueError(i, evaluation)
+            # For unknown reasons, the runtimes can be negative...
+            if float(evaluation['runtime']) < 0:
+                continue
             config = ConfigSpace.util.fix_types(
                 configuration=config,
                 configuration_space=self.configuration_space,
@@ -194,8 +197,8 @@ class ExploringOpenML(AbstractBenchmark):
             runtimes.append(float(evaluation['runtime']))
 
         features = np.array(features)
-        targets = np.array(targets) + 1e-14
-        runtimes = np.array(runtimes) + 1e-14
+        targets = np.array(targets) + 1e-10
+        runtimes = np.array(runtimes) + 1e-10
         features = self.impute(features)
         self.logger.info('Finished reading in surrogate data.')
 
@@ -359,8 +362,8 @@ class ExploringOpenML(AbstractBenchmark):
         runtime = self.regressor_runtime.predict(x)
         runtime = runtime[0]
         # Untransform and round to the resolution of the data file.
-        y = np.round(np.exp(y) - 1e-14, 6)
-        runtime = np.round(np.exp(runtime) - 1e-14, 6)
+        y = np.round(np.exp(y) - 1e-10, 6)
+        runtime = np.round(np.exp(runtime) - 1e-10, 6)
         return {'function_value': y, 'cost': runtime}
 
     @AbstractBenchmark._check_configuration
