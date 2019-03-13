@@ -29,6 +29,9 @@ import hpolib
 from hpolib.abstract_benchmark import AbstractBenchmark
 
 
+__version__ = 0.1
+
+
 class ExploringOpenML(AbstractBenchmark):
     """Surrogate benchmarks based on the data from Automatic Exploration of Machine Learning
     Benchmarks on OpenML by Kühn et al..
@@ -50,6 +53,12 @@ class ExploringOpenML(AbstractBenchmark):
             Dataset Id as given in Table 2.
         n_splits : int
             Number of cross-validation splits for optimizing the surrogate hyperparameters.
+        n_iterations : int
+            Number of iterations of random search to construct a surrogate model
+        rebuild : bool
+            Whether to construct a new surrogate model if there is already one stored to disk.
+            This is important because changing the ``n_splits`` and the ``n_iterations``
+            arguments do not trigger a rebuild of the surrogate.
         rng: int/None/RandomState
             set up rng
         """
@@ -67,18 +76,22 @@ class ExploringOpenML(AbstractBenchmark):
             'surrogate_%s_%d.pkl.gz' % (self.classifier, self.dataset_id),
         )
         if rebuild or not os.path.exists(surrogate_file_name):
-            regressor_loss, regressor_runtime = self.construct_surrogate(
-                dataset_id, n_splits, n_iterations,
-            )
+            self.construct_surrogate(dataset_id, n_splits, n_iterations)
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'wb') as fh:
-                    pickle.dump((regressor_loss, regressor_runtime), fh)
+                    pickle.dump(
+                        (self.regressor_loss, self.regressor_runtime, self.f_opt, self.f_max),
+                        fh,
+                    )
         else:
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'rb') as fh:
-                    regressor_loss, regressor_runtime = pickle.load(fh)
-
-        self.regressor_loss, self.regressor_runtime = regressor_loss, regressor_runtime
+                    (
+                        self.regressor_loss,
+                        self.regressor_runtime,
+                        self.f_opt,
+                        self.f_max,
+                    ) = pickle.load(fh)
 
     def construct_surrogate(self, dataset_id, n_splits, n_iterations_rs):
         self.logger.info('Could not find surrogate pickle, constructing the surrogate.')
@@ -114,6 +127,7 @@ class ExploringOpenML(AbstractBenchmark):
             )
         ]
         target_features = 'auc'
+        configurations = []
         features = []
         targets = []
         runtimes = []
@@ -164,23 +178,25 @@ class ExploringOpenML(AbstractBenchmark):
                 configuration_space=self.configuration_space,
             )
             try:
-                config = Configuration(
+                config = ConfigSpace.util.deactivate_inactive_hyperparameters(
                     configuration_space=self.configuration_space,
-                    values=config,
+                    configuration=config,
                 )
             except ValueError as e:
                 print(line_no[i], config, evaluation)
                 raise e
+            self.configuration_space.check_configuration(config)
             array = config.get_array()
             features.append(array)
+            configurations.append(config)
             # HPOlib is about minimization!
             targets.append(1 - float(evaluation[target_features]))
             runtimes.append(float(evaluation['runtime']))
 
         features = np.array(features)
         targets = np.array(targets) + 1e-14
-        runtimes = np.array(runtimes)
-        features = self.impute_with_defaults(features)
+        runtimes = np.array(runtimes) + 1e-14
+        features = self.impute(features)
         self.logger.info('Finished reading in surrogate data.')
 
         self.logger.info('Start building the surrogate, this can take a few minutes...')
@@ -198,6 +214,7 @@ class ExploringOpenML(AbstractBenchmark):
             max_features,
             bootstrap,
         ])
+        # This makes HPO deterministic
         cs.seed(1)
         highest_correlations_loss = -np.inf
         highest_correlations_loss_by_fold = np.array((n_splits,)) * -np.inf
@@ -210,8 +227,12 @@ class ExploringOpenML(AbstractBenchmark):
             check_loss = True
             new_config_loss = cs.sample_configuration()
             new_config_runtime = copy.deepcopy(new_config_loss)
-            regressor_loss = self.get_unfitted_regressor(new_config_loss, categorical_features, 50)
-            regressor_runtime = self.get_unfitted_regressor(new_config_runtime, categorical_features, 50)
+            regressor_loss = self.get_unfitted_regressor(
+                new_config_loss, categorical_features, 25,
+            )
+            regressor_runtime = self.get_unfitted_regressor(
+                new_config_runtime, categorical_features, 25,
+            )
 
             rank_correlations_loss = np.ones((n_splits, )) * -np.NaN
             rank_correlations_runtime = np.ones((n_splits, )) * -np.NaN
@@ -235,9 +256,10 @@ class ExploringOpenML(AbstractBenchmark):
                 rank_correlations_loss[n_fold] = spearman_rank_loss
 
                 test_targets_runtime = runtimes[test_idx]
-                spearman_rank_runtime = scipy.stats.spearmanr(test_targets_runtime, y_hat_runtime)[0]
+                spearman_rank_runtime = scipy.stats.spearmanr(
+                    test_targets_runtime, y_hat_runtime,
+                )[0]
                 rank_correlations_runtime[n_fold] = spearman_rank_runtime
-
 
                 if (
                     np.nanmean(highest_correlations_loss) * 0.99
@@ -281,13 +303,23 @@ class ExploringOpenML(AbstractBenchmark):
             X=features,
             y=np.log(targets),
         )
-        regressor_runtime = self.get_unfitted_regressor(best_config_runtime, categorical_features, 500)
+        regressor_runtime = self.get_unfitted_regressor(
+            best_config_runtime, categorical_features, 500,
+        )
         regressor_runtime.fit(
             X=features,
             y=np.log(runtimes)
         )
         self.logger.info('Finished building the surrogate.')
-        return regressor_loss, regressor_runtime
+
+        # Obtain the configuration for the best predictable value
+        predictions = regressor_loss.predict(features)
+        argmin = np.argmin(predictions)
+        argmax = np.argmax(predictions)
+        self.f_opt = configurations[argmin]
+        self.f_max = configurations[argmax]
+        self.regressor_loss = regressor_loss
+        self.regressor_runtime = regressor_runtime
 
     def get_unfitted_regressor(self, config, categorical_features, n_trees):
         return sklearn.pipeline.Pipeline([
@@ -311,23 +343,24 @@ class ExploringOpenML(AbstractBenchmark):
             ))
         ])
 
-    def impute_with_defaults(self, features):
+    def impute(self, features):
+        features = features.copy()
         for i, hp in enumerate(self.configuration_space.get_hyperparameters()):
             nan_rows = ~np.isfinite(features[:, i])
-            features[nan_rows, i] = hp.normalized_default_value
+            features[nan_rows, i] = -1
         return features
 
     @AbstractBenchmark._check_configuration
     def objective_function(self, x, **kwargs):
         x = x.get_array().reshape((1, -1))
-        x = self.impute_with_defaults(x)
+        x = self.impute(x)
         y = self.regressor_loss.predict(x)
         y = y[0]
         runtime = self.regressor_runtime.predict(x)
         runtime = runtime[0]
         # Untransform and round to the resolution of the data file.
         y = np.round(np.exp(y) - 1e-14, 6)
-        runtime = np.round(np.exp(runtime), 6)
+        runtime = np.round(np.exp(runtime) - 1e-14, 6)
         return {'function_value': y, 'cost': runtime}
 
     @AbstractBenchmark._check_configuration
@@ -347,16 +380,41 @@ class ExploringOpenML(AbstractBenchmark):
     author = {Daniel Kühn and Philipp Probst and Janek Thomas and Bernd Bischl},
     year = {2018},
     }""", """@inproceedings{eggensperger_aaai2015a,
-   author =       {Katharina Eggensperger and Frank Hutter and Holger H. Hoos and Kevin Leyton-Brown},
-   title =        {Efficient Benchmarking of Hyperparameter Optimizers via Surrogates},
-   booktitle =    {Proceedings of the Twenty-Ninth AAAI Conference on Artificial Intelligence},
+   author = {Katharina Eggensperger and Frank Hutter and Holger H. Hoos and Kevin Leyton-Brown},
+   title = {Efficient Benchmarking of Hyperparameter Optimizers via Surrogates},
+   booktitle = {Proceedings of the Twenty-Ninth AAAI Conference on Artificial Intelligence},
    conference = {AAAI Conference},
-   year =         {2015},
+   year = {2015},
 }
 
     """
             ]
         }
+
+    def get_empirical_f_opt(self):
+        """Return the empirical f_opt.
+
+        Because ``get_meta_information`` is a static function it has no access to the actual
+        function values predicted by the surrogate. This helper function gives access.
+
+        Returns
+        -------
+        Configuration
+        """
+        return self.f_opt
+
+    def get_empirical_f_max(self):
+        """Return the empirical f_max.
+
+        This is the configuration resulting in the worst predictive performance. Necessary to
+        compute the average distance to the minimum metric typically used by Wistuba,
+        Schilling and Schmidt-Thieme.
+
+        Returns
+        -------
+        Configuration
+        """
+        return self.f_max
 
 
 class GLMNET(ExploringOpenML):
@@ -539,6 +597,7 @@ for model_class in all_model_classes:
 
 
 if __name__ == '__main__':
+    # Call this script to construct all surrogates
     for model_class in all_model_classes:
         print(model_class)
         for dataset_id_ in all_datasets:
