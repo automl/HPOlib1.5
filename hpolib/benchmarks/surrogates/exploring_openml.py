@@ -37,7 +37,8 @@ class ExploringOpenML(AbstractBenchmark):
     Benchmarks on OpenML by Kühn et al..
 
     This is a base class that should not be used directly. Instead, use one of the automatically
-    constructed classes at the bottom of the file.
+    constructed classes at the bottom of the file. This benchmark does not contain the KKNN
+    algorithm as it only allows for 30 different hyperparameter settings.
 
     Data is obtained from:
     https://figshare.com/articles/OpenML_R_Bot_Benchmark_Data_final_subset_/5882230
@@ -453,17 +454,6 @@ class RPART(ExploringOpenML):
         return cs
 
 
-class KKNN(ExploringOpenML):
-    url = 'https://ndownloader.figshare.com/files/10811312'
-
-    @staticmethod
-    def get_configuration_space():
-        cs = ConfigurationSpace()
-        k = UniformIntegerHyperparameter('k', lower=1, upper=30)
-        cs.add_hyperparameters([k])
-        return cs
-
-
 class SVM(ExploringOpenML):
     url = 'https://ndownloader.figshare.com/files/10462312'
 
@@ -582,7 +572,6 @@ all_datasets = [
 all_model_classes = [
     GLMNET,
     RPART,
-    KKNN,
     SVM,
     Ranger,
     XGBoost,
