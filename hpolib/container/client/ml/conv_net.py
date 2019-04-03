@@ -21,7 +21,7 @@ class ConvolutionalNeuralNetwork(AbstractBenchmarkClient):
         return self._convertResultData(super().objective_function_test(x, **kwargs))
 
     def test(self, *args, **kwargs):
-        return self._convertResultData(super().objective_function_test(*args, **kwargs))
+        return self._convertResultData(super().test(*args, **kwargs))
 
 
 class ConvolutionalNeuralNetworkOnMNIST(ConvolutionalNeuralNetwork):

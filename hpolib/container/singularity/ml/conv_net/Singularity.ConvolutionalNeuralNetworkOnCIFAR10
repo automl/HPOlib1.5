@@ -15,12 +15,9 @@ MAINTAINER Stefan Staeglich
     pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
     pip3 install torchvision
 
-%environment
-    export CUDA_ROOT=/usr/local/cuda 
-    export LD_LIBRARY_PATH=${CUDA_ROOT}/lib64:$LD_LIBRARY_PATH 
-    export LIBRARY_PATH=${CUDA_ROOT}/lib64:$LIBRARY_PATH
-    PATH=${CUDA_ROOT}/bin:${PATH}
-    export PATH
+    mkdir /var/lib/hpolib/
+    python3 /usr/local/lib/python3.6/dist-packages/hpolib/container/util/download_data.py ml.conv_net ConvolutionalNeuralNetworkOnCIFAR10
+    chmod -R 777 /var/lib/hpolib/
 
 %runscript
     python3 -s /usr/local/lib/python3.6/dist-packages/hpolib/container/server/abstract_benchmark.py ml.conv_net $@

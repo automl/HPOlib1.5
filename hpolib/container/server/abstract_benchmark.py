@@ -92,7 +92,7 @@ class BenchmarkServer():
     def test(self, argsStr, kwargsStr):
         result = self.b.test(*json.loads(argsStr), **json.loads(kwargsStr))
         # Handle SMAC runhistory
-        return json.dumps(result)
+        return json.dumps(result, indent=None, cls=BenchmarkEncoder)
 
     def get_meta_information(self):
         return json.dumps(self.b.get_meta_information(), indent=None)
