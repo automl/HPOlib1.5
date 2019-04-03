@@ -10,7 +10,7 @@ MAINTAINER Stefan Staeglich
     apt install python3-pip python-configparser cython3 -y
     pip3 install numpy scipy sklearn
     pip3 install git+https://github.com/automl/ConfigSpace.git@master
-    pip3 install git+https://github.com/staeglis/HPOlib2@container
+    pip3 install git+https://github.com/automl/HPOlib2@container
     pip3 install pyro4
     pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
     pip3 install torchvision
