@@ -11,7 +11,7 @@ requirements = [requirement.strip() for requirement in requirements]
 
 
 setuptools.setup(
-    name='hpolib2',
+    name='hpolib',
     description='Automated machine learning.',
     version=version,
     packages=setuptools.find_packages(exclude=['test']),
