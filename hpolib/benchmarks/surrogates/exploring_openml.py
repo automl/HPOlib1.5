@@ -81,7 +81,7 @@ class ExploringOpenML(AbstractBenchmark):
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'wb') as fh:
                     pickle.dump(
-                        (self.regressor_loss, self.regressor_runtime, self.f_opt, self.f_max),
+                        (self.regressor_loss, self.regressor_runtime, self.c_opt, self.c_max, self.f_opt, self.f_max),
                         fh,
                     )
         else:
@@ -90,8 +90,8 @@ class ExploringOpenML(AbstractBenchmark):
                     (
                         self.regressor_loss,
                         self.regressor_runtime,
-                        self.f_opt,
-                        self.f_max,
+                        self.c_opt, self.c_max,
+                        self.f_opt, self.f_max
                     ) = pickle.load(fh)
 
     def construct_surrogate(self, dataset_id, n_splits, n_iterations_rs):
@@ -320,8 +320,10 @@ class ExploringOpenML(AbstractBenchmark):
         predictions = regressor_loss.predict(features)
         argmin = np.argmin(predictions)
         argmax = np.argmax(predictions)
-        self.f_opt = configurations[argmin]
-        self.f_max = configurations[argmax]
+        self.c_opt = configurations[argmin]
+        self.c_max = configurations[argmax]
+        self.f_opt = predictions[argmin]
+        self.f_max = predictions[argmax]
         self.regressor_loss = regressor_loss
         self.regressor_runtime = regressor_runtime
 

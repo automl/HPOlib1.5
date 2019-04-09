@@ -48,3 +48,6 @@ class SurrogateBenchmark(AbstractBenchmark):
     def objective_function_test(self, configuration, **kwargs):
         raise NotImplementedError()
 
+    def get_empirical_f_opt(self):
+        raise NotImplementedError()
+
