@@ -81,7 +81,7 @@ class ExploringOpenML(AbstractBenchmark):
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'wb') as fh:
                     pickle.dump(
-                        (self.regressor_loss, self.regressor_runtime, self.c_opt, self.c_max, self.f_opt, self.f_max),
+                        (self.regressor_loss, self.regressor_runtime),
                         fh,
                     )
         else:
@@ -90,8 +90,6 @@ class ExploringOpenML(AbstractBenchmark):
                     (
                         self.regressor_loss,
                         self.regressor_runtime,
-                        self.c_opt, self.c_max,
-                        self.f_opt, self.f_max
                     ) = pickle.load(fh)
 
     def construct_surrogate(self, dataset_id, n_splits, n_iterations_rs):
@@ -316,14 +314,6 @@ class ExploringOpenML(AbstractBenchmark):
         )
         self.logger.info('Finished building the surrogate.')
 
-        # Obtain the configuration for the best predictable value
-        predictions = regressor_loss.predict(features)
-        argmin = np.argmin(predictions)
-        argmax = np.argmax(predictions)
-        self.c_opt = configurations[argmin]
-        self.c_max = configurations[argmax]
-        self.f_opt = predictions[argmin]
-        self.f_max = predictions[argmax]
         self.regressor_loss = regressor_loss
         self.regressor_runtime = regressor_runtime
 
@@ -406,7 +396,10 @@ class ExploringOpenML(AbstractBenchmark):
         -------
         Configuration
         """
-        return self.f_opt
+        ms = []
+        for t in self.regressor_loss.steps[-1][-1].estimators_:
+            ms.append(np.min(t.tree_.value))
+        return np.exp(np.mean(ms))
 
     def get_empirical_f_max(self):
         """Return the empirical f_max.
@@ -419,7 +412,10 @@ class ExploringOpenML(AbstractBenchmark):
         -------
         Configuration
         """
-        return self.f_max
+        ms = []
+        for t in self.regressor_loss.steps[-1][-1].estimators_:
+            ms.append(np.max(t.tree_.value))
+        return np.exp(np.mean(ms))
 
 
 class GLMNET(ExploringOpenML):
