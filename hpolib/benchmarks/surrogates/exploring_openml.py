@@ -24,6 +24,7 @@ import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.pipeline
 import sklearn.preprocessing
+import sklearn.utils.validation
 
 import hpolib
 from hpolib.abstract_benchmark import AbstractBenchmark
@@ -81,7 +82,7 @@ class ExploringOpenML(AbstractBenchmark):
             with lockfile.LockFile(surrogate_file_name):
                 with gzip.open(surrogate_file_name, 'wb') as fh:
                     pickle.dump(
-                        (self.regressor_loss, self.regressor_runtime, self.c_opt, self.c_max, self.f_opt, self.f_max),
+                        (self.regressor_loss, self.regressor_runtime),
                         fh,
                     )
         else:
@@ -90,8 +91,6 @@ class ExploringOpenML(AbstractBenchmark):
                     (
                         self.regressor_loss,
                         self.regressor_runtime,
-                        self.c_opt, self.c_max,
-                        self.f_opt, self.f_max
                     ) = pickle.load(fh)
 
     def construct_surrogate(self, dataset_id, n_splits, n_iterations_rs):
@@ -316,14 +315,6 @@ class ExploringOpenML(AbstractBenchmark):
         )
         self.logger.info('Finished building the surrogate.')
 
-        # Obtain the configuration for the best predictable value
-        predictions = regressor_loss.predict(features)
-        argmin = np.argmin(predictions)
-        argmax = np.argmax(predictions)
-        self.c_opt = configurations[argmin]
-        self.c_max = configurations[argmax]
-        self.f_opt = predictions[argmin]
-        self.f_max = predictions[argmax]
         self.regressor_loss = regressor_loss
         self.regressor_runtime = regressor_runtime
 
@@ -406,7 +397,10 @@ class ExploringOpenML(AbstractBenchmark):
         -------
         Configuration
         """
-        return self.f_opt
+        ms = []
+        for t in self.regressor_loss.steps[-1][-1].estimators_:
+            ms.append(np.min(t.tree_.value))
+        return np.exp(np.mean(ms))
 
     def get_empirical_f_max(self):
         """Return the empirical f_max.
@@ -419,7 +413,36 @@ class ExploringOpenML(AbstractBenchmark):
         -------
         Configuration
         """
-        return self.f_max
+        ms = []
+        for t in self.regressor_loss.steps[-1][-1].estimators_:
+            ms.append(np.max(t.tree_.value))
+        return np.exp(np.mean(ms))
+
+    def get_rs_difficulty(self, diff, n_evals, seed=None):
+        rng = sklearn.utils.validation.check_random_state(seed)
+
+        # Use the (optimistic) best value possible, but 0.5 as worst possible because an AUC of
+        # 0.5 is random and we don't really care about anything below 0.5.
+        f_opt = self.get_empirical_f_opt()
+        f_max = 0.5
+        difference = f_max - f_opt
+        difference = difference if difference != 0 else 1
+        cs = self.get_configuration_space()
+        cs.seed(rng.randint(100000))
+        configurations = cs.sample_configuration(n_evals * 100)
+        scores = np.array(
+            [self.objective_function(config)['function_value'] for config in configurations]
+        )
+
+        # Compute a bootstrapped score
+        lower = 0
+        for i in range(100000):
+            subsample = rng.choice(scores, size=n_evals, replace=False)
+            min_score = np.min(subsample)
+            rescaled_min_score = (min_score - f_opt) / difference
+            if rescaled_min_score < diff:
+                lower += 1
+        return lower / 100000
 
 
 class GLMNET(ExploringOpenML):
