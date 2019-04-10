@@ -24,6 +24,7 @@ import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.pipeline
 import sklearn.preprocessing
+import sklearn.utils.validation
 
 import hpolib
 from hpolib.abstract_benchmark import AbstractBenchmark
@@ -416,6 +417,32 @@ class ExploringOpenML(AbstractBenchmark):
         for t in self.regressor_loss.steps[-1][-1].estimators_:
             ms.append(np.max(t.tree_.value))
         return np.exp(np.mean(ms))
+
+    def get_rs_difficulty(self, diff, n_evals, seed=None):
+        rng = sklearn.utils.validation.check_random_state(seed)
+
+        # Use the (optimistic) best value possible, but 0.5 as worst possible because an AUC of
+        # 0.5 is random and we don't really care about anything below 0.5.
+        f_opt = self.get_empirical_f_opt()
+        f_max = 0.5
+        difference = f_max - f_opt
+        difference = difference if difference != 0 else 1
+        cs = self.get_configuration_space()
+        cs.seed(rng.randint(100000))
+        configurations = cs.sample_configuration(n_evals * 100)
+        scores = np.array(
+            [self.objective_function(config)['function_value'] for config in configurations]
+        )
+
+        # Compute a bootstrapped score
+        lower = 0
+        for i in range(100000):
+            subsample = rng.choice(scores, size=n_evals, replace=False)
+            min_score = np.min(subsample)
+            rescaled_min_score = (min_score - f_opt) / difference
+            if rescaled_min_score < diff:
+                lower += 1
+        return lower / 100000
 
 
 class GLMNET(ExploringOpenML):
