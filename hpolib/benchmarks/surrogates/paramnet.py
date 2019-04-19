@@ -34,7 +34,7 @@ class SurrogateParamNet(SurrogateBenchmark):
         lc = self.surrogate_objective.predict(x_[None, :])[0]
         c = self.surrogate_cost.predict(x_[None, :])[0]
 
-        if step is None or step > len(lc):
+        if step is None or step > len(lc) - 1:
             y = lc[-1]
             cost = c
         else:
