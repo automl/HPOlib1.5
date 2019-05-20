@@ -1,5 +1,6 @@
 import os
 import pickle
+import tarfile
 
 from urllib.request import urlretrieve
 import hpolib
@@ -7,7 +8,7 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 
 
 class SurrogateBenchmark(AbstractBenchmark):
-    surrogate_base_url = 'https://ml.informatik.uni-freiburg.de/~sfalkner/surrogates/'
+    surrogate_base_url = 'https://www.automl.org/wp-content/uploads/2019/05/surrogates.tar.gz'
 
     def __init__(self, objective_surrogate_fn=None, cost_surrogate_fn=None, path=None, rng=None):
 
@@ -33,10 +34,13 @@ class SurrogateBenchmark(AbstractBenchmark):
         fn = os.path.join(self.surrogate_path, filename)
         
         if not os.path.exists(fn):
-            print("Downloading %s to %s" % (self.surrogate_base_url + filename, fn))
-            
-            urlretrieve(self.surrogate_base_url + filename, fn) 
-        
+            print("Downloading %s to %s" % (self.surrogate_base_url,
+                                            os.path.join(self.surrogate_path, "surrogates.tar.gz")))
+            urlretrieve(self.surrogate_base_url, os.path.join(self.surrogate_path, "surrogates.tar.gz"))
+            tar = tarfile.open(os.path.join(self.surrogate_path, "surrogates.tar.gz"), "r")
+            tar.extractall(self.surrogate_path)
+            tar.close()
+
         with open(fn, 'rb') as fh:
             surrogate = pickle.load(fh)
 
