@@ -175,9 +175,3 @@ class MLPOnMnist(MLP):
                     "publisher={IEEE}"]
         d["references"].append(data_ref)
         return d
-
-class MLPOnVehicle(MLP):
-
-    def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75191, rng=self.rng)
-        return dm.load()
