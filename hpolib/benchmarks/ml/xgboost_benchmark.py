@@ -133,10 +133,3 @@ class XGBoostOnMnist(XGBoost):
     def get_data(self):
         dm = MNISTData()
         return dm.load()
-
-
-class XGBoostOnVehicle(XGBoost):
-
-    def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75191, rng=self.rng)
-        return dm.load()
