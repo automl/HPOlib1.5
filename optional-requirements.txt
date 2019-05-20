@@ -19,3 +19,7 @@ git+https://github.com/automl/sgmcmc.git
 pytorch
 torchvision
 xgboost
+
+# rl benchmark
+tensorforce
+gym
