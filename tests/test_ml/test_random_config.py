@@ -5,6 +5,7 @@ import pkgutil
 import os
 import sys
 
+import unittest
 import unittest.mock
 
 from ConfigSpace import Configuration
@@ -68,12 +69,12 @@ class TestRandomConfig(unittest.TestCase):
 
             if abstract_class is not None:
                 for name, obj in inspect.getmembers(mod_name, inspect.isclass):
+
                     if issubclass(obj, abstract_class) and \
                             inspect.isclass(obj) and \
                             abstract_class in obj.__bases__:
-                        # Make sure to only test correct implementations
-                        print(obj, name)
 
+                        # Make sure to only test correct implementations
                         if issubclass(obj, AutoSklearnBenchmark) and not \
                                 MulticlassClassificationBenchmark in obj.__bases__:
                             # Special case for auto-sklearn which has
@@ -93,29 +94,47 @@ class TestRandomConfig(unittest.TestCase):
                             if sys.version_info > (3, 5, 0):
                                 theano.config.optimizer = 'None'
 
+                        # Print these to avoid travis-ci failing!
+                        print(name, obj)
+
                         b = getattr(mod_name, name)()
                         cfg = b.get_configuration_space()
                         for i in range(5):
+                            # Print this to avoid travis-ci failing!
+                            print('Testing configuration', i)
                             c = cfg.sample_configuration()
 
                             # Limit Wallclocktime using pynisher
                             obj = pynisher.enforce_limits(
-                                wall_time_in_s=10,
-                                mem_in_mb=3000,
+                                wall_time_in_s=15,
+                                mem_in_mb=1500,
                                 grace_period_in_s=5,
-                                logger=self.logger
+                                logger=self.logger,
+                                capture_output=True,
                             )(b.objective_function)
                             res = obj(c)
                             if res is not None:
                                 self.assertTrue(np.isfinite(res['cost']))
-                                self.assertTrue(np.isfinite(res['function_value']))
+                                self.assertTrue(np.isfinite(
+                                    res['function_value']
+                                ))
                             else:
-                                self.assertTrue(
-                                    obj.exit_status in (
+                                self.assertIn(
+                                    obj.exit_status,
+                                    (
                                         pynisher.TimeoutException,
                                         pynisher.MemorylimitException,
                                     ),
-                                    msg=str(obj.exit_status)
+                                    msg=(
+                                        'Failed on testing %s with pynisher '
+                                        'return status %s.\nstdout: %s'
+                                        '\nstderr: %s'% (
+                                            name,
+                                            str(obj.exit_status),
+                                            obj.stdout,
+                                            obj.stderr,
+                                        )
+                                    ),
                                 )
             else:
                 raise ValueError("{:s} does not contain a basic benchmark that is"
