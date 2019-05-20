@@ -16,6 +16,8 @@ class SurrogateParamNet(SurrogateBenchmark):
 
         :param kwargs:
         """
+        if dataset not in ("adult", "higgs", "letter", "mnist", "optdigits", "poker"):
+            raise ValueError("No surrogate found for %s" % dataset)
 
         self.n_epochs = 50
         self.dataset = dataset
@@ -135,11 +137,16 @@ class SurrogateReducedParamNetTime(SurrogateParamNet):
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
     def objective_function_test(self, x, **kwargs):
-        x_ = deepcopy(x)
-        x_[0] = 10 ** x_[0]
-        x_[1] = 2 ** x_[1]
-        x_[2] = 2 ** x_[2]
-        x_[3] = 10 ** x_[3]
+        x_ = np.zeros([1, 8], dtype=np.float)
+
+        x_[0, 0] = 10 ** x[0]
+        x_[0, 1] = 2 ** x[1]
+        x_[0, 2] = 2 ** x[2]
+        x_[0, 3] = 10 ** x[3]
+        x_[0, 4] = 0.5
+        x_[0, 5] = x[4]
+        x_[0, 6] = x[5]
+        x_[0, 7] = x[5]
         lc = self.surrogate_objective.predict(x_)[0]
         c = self.surrogate_cost.predict(x_)[0]
         y = lc[-1]
