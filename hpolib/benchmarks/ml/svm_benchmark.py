@@ -65,7 +65,8 @@ class SupportVectorMachine(AbstractBenchmark):
 
         # Stratified shuffle training data
         if np.round(dataset_fraction, 3) < 1.0:
-            sss = StratifiedShuffleSplit(n_splits=1, train_size=np.round(dataset_fraction, 3), test_size=None)
+            sss = StratifiedShuffleSplit(n_splits=1, train_size=np.round(dataset_fraction, 3), test_size=None,
+                                         random_state=self.rng)
             idx = list(sss.split(self.train, self.train_targets))[0][0]
 
             train = self.train[idx]
@@ -240,11 +241,15 @@ class SvmOnNormalizedMnist(SvmOnMnist):
                        "publisher={IEEE}"]
         d["references"] = dataset_ref
         d["num_function_evals"] = 20
-        d["note"] = "This is an updated version using normalized data to speed up training."
+        d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
         return d
 
 
 class SvmOnNormalizedVehicle(SvmOnVehicle):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=75191, rng=self.rng)
+        return dm.load()
 
     def _get_pipeline(self, C, gamma):
         clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
@@ -256,14 +261,14 @@ class SvmOnNormalizedVehicle(SvmOnVehicle):
         d = SvmOnVehicle.get_meta_information()
         d["references"] = []
         d["num_function_evals"] = 20
-        d["note"] = "This is an updated version using normalized data to speed up training."
+        d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
         return d
 
 
 class SvmOnNormalizedHiggs(SvmOnHiggs):
 
     def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75101)
+        dm = OpenMLHoldoutDataManager(openml_task_id=75101, rng=self.rng)
         X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
         return X_train, y_train, X_val, y_val, X_test, y_test
 
@@ -278,5 +283,67 @@ class SvmOnNormalizedHiggs(SvmOnHiggs):
         d = SvmOnHiggs.get_meta_information()
         d["references"] = []
         d["num_function_evals"] = 20
-        d["note"] = "This is an updated version using normalized data to speed up training."
+        d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
+        return d
+
+
+class SvmOnNormalizedCovertype(SvmOnCovertype):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=2118, rng=self.rng)
+        return dm.load()
+
+    def _get_pipeline(self, C, gamma):
+        clf = pipeline.Pipeline([('preproc2', preprocessing.StandardScaler()),
+                                 ('svm', svm.SVC(C=C, gamma=gamma, random_state=self.rng, cache_size=self.cache_size))])
+        return clf
+
+    @staticmethod
+    def get_meta_information():
+        d = SvmOnCovertype.get_meta_information()
+        d["references"] = []
+        d["num_function_evals"] = 20
+        d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
+        return d
+
+
+class SvmOnNormalizedLetter(SvmOnLetter):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=236, rng=self.rng)
+        return dm.load()
+
+    def _get_pipeline(self, C, gamma):
+        clf = pipeline.Pipeline([('preproc2', preprocessing.StandardScaler()),
+                                 ('svm', svm.SVC(C=C, gamma=gamma, random_state=self.rng, cache_size=self.cache_size))])
+        return clf
+
+    @staticmethod
+    def get_meta_information():
+        d = SvmOnLetter.get_meta_information()
+        d["references"] = []
+        d["num_function_evals"] = 20
+        d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
+        return d
+
+
+class SvmOnNormalizedAdult(SvmOnAdult):
+
+    def get_data(self):
+        dm = OpenMLHoldoutDataManager(openml_task_id=2117, rng=self.rng)
+        X_train, y_train, X_val, y_val, X_test, y_test = dm.load()
+        return X_train, y_train, X_val, y_val, X_test, y_test
+
+    def _get_pipeline(self, C, gamma):
+        clf = pipeline.Pipeline([('preproc1', preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)),
+                                 ('preproc2', preprocessing.StandardScaler()),
+                                 ('svm', svm.SVC(C=C, gamma=gamma, random_state=self.rng, cache_size=self.cache_size))])
+        return clf
+
+    @staticmethod
+    def get_meta_information():
+        d = SvmOnNormalizedAdult.get_meta_information()
+        d["references"] = []
+        d["num_function_evals"] = 20
+        d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
         return d
