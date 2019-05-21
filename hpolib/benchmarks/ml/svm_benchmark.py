@@ -35,8 +35,9 @@ class SupportVectorMachine(AbstractBenchmark):
         cache_size: int
             kernel cache size (in MB) for the SVM
         """
-        self.train, self.train_targets, self.valid, self.valid_targets, \
-            self.test, self.test_targets = self.get_data()
+        super(SupportVectorMachine, self).__init__(rng=rng)
+        self.train_x, self.train_targets, self.valid, self.valid_targets, \
+        self.test_x, self.test_targets = self.get_data()
 
         # Use 10 time the number of classes as lower bound for the dataset
         # fraction
@@ -45,12 +46,8 @@ class SupportVectorMachine(AbstractBenchmark):
         if os.environ.get("TRAVIS", 0) == "true":
             # If run on travis.ci, don't use higher cache size
             self.cache_size = 200
-        self.s_min = float(10 * n_classes) / self.train.shape[0]
-
-        super(SupportVectorMachine, self).__init__()
-
+        self.s_min = float(10 * n_classes) / self.train_x.shape[0]
         self.n_calls = 0
-        self.rng = rng_helper.create_rng(rng)
 
     def get_data(self):
         raise NotImplementedError()
@@ -67,12 +64,12 @@ class SupportVectorMachine(AbstractBenchmark):
         if np.round(dataset_fraction, 3) < 1.0:
             sss = StratifiedShuffleSplit(n_splits=1, train_size=np.round(dataset_fraction, 3), test_size=None,
                                          random_state=self.rng)
-            idx = list(sss.split(self.train, self.train_targets))[0][0]
+            idx = list(sss.split(self.train_x, self.train_targets))[0][0]
 
-            train = self.train[idx]
+            train = self.train_x[idx]
             train_targets = self.train_targets[idx]
         else:
-            train = self.train
+            train = self.train_x
             train_targets = self.train_targets
 
         # Transform hyperparameters to linear scale
@@ -98,10 +95,10 @@ class SupportVectorMachine(AbstractBenchmark):
         self.rng = rng_helper.get_rng(rng=rng, self_rng=self.rng)
 
         # Concatenate training and validation dataset
-        if type(self.train) == sparse.csr.csr_matrix or type(self.valid) == sparse.csr.csr_matrix:
-            train = sparse.vstack((self.train, self.valid))
+        if type(self.train_x) == sparse.csr.csr_matrix or type(self.valid) == sparse.csr.csr_matrix:
+            train = sparse.vstack((self.train_x, self.valid))
         else:
-            train = np.concatenate((self.train, self.valid))
+            train = np.concatenate((self.train_x, self.valid))
 
         train_targets = np.concatenate((self.train_targets, self.valid_targets))
 
@@ -114,7 +111,7 @@ class SupportVectorMachine(AbstractBenchmark):
         clf.fit(train, train_targets)
 
         # Compute test error
-        y = 1 - clf.score(self.test, self.test_targets)
+        y = 1 - clf.score(self.test_x, self.test_targets)
         c = time.time() - start_time
 
         return {'function_value': y, "cost": c}
