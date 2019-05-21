@@ -242,26 +242,6 @@ class SvmOnNormalizedMnist(SvmOnMnist):
         return d
 
 
-class SvmOnNormalizedVehicle(SvmOnVehicle):
-
-    def get_data(self):
-        dm = OpenMLHoldoutDataManager(openml_task_id=75191, rng=self.rng)
-        return dm.load()
-
-    def _get_pipeline(self, C, gamma):
-        clf = pipeline.Pipeline([('preproc', preprocessing.StandardScaler()),
-                                 ('svm', svm.SVC(C=C, gamma=gamma, random_state=self.rng, cache_size=self.cache_size))])
-        return clf
-
-    @staticmethod
-    def get_meta_information():
-        d = SvmOnVehicle.get_meta_information()
-        d["references"] = []
-        d["num_function_evals"] = 20
-        d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
-        return d
-
-
 class SvmOnNormalizedHiggs(SvmOnHiggs):
 
     def get_data(self):
@@ -339,7 +319,7 @@ class SvmOnNormalizedAdult(SvmOnAdult):
 
     @staticmethod
     def get_meta_information():
-        d = SvmOnNormalizedAdult.get_meta_information()
+        d = SvmOnAdult.get_meta_information()
         d["references"] = []
         d["num_function_evals"] = 20
         d["note"] = "This is an updated version using normalized data to speed up training and a fixed set."
