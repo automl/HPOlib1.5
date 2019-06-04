@@ -74,8 +74,6 @@ class TestAutoSklearnBenchmark(unittest.TestCase):
                                auto._get_data_manager, 10107)
 
 
-
-
 class TestIntegration(unittest.TestCase):
 
     def test_multiclass_on_iris(self):
@@ -101,9 +99,9 @@ class TestIntegration(unittest.TestCase):
         auto = hpolib.benchmarks.ml.autosklearn_benchmark.MulticlassClassificationBenchmark(3043)
 
         fixtures = [
-            {'function_value': 0.15126103404791924},
-            {'function_value': 0.053152585119798257},
-            {'function_value': 0.11350593200710302},
+            {'function_value': 0.14126103404791923},
+            {'function_value': 0.06315258511979827},
+            {'function_value': 0.12371001363975598},
         ]
 
         cs = auto.get_configuration_space()
@@ -117,7 +115,7 @@ class TestIntegration(unittest.TestCase):
             for key in fixture:
                 self.assertAlmostEqual(rval[key], fixture[key])
 
-        fixture = {'function_value': 0.13629780445825113}
+        fixture = {'function_value': 0.1423953654338609}
         rval = auto.objective_function_test(
             configuration=config,
         )

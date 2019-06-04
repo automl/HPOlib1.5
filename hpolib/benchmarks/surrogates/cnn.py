@@ -1,23 +1,20 @@
-import os
-import pickle
 import numpy as np
 import ConfigSpace as CS
 
 from hpolib.abstract_benchmark import AbstractBenchmark
+from hpolib.benchmarks.surrogates.surrogate_benchmark import SurrogateBenchmark
 
 
-class SurrogateCNN(AbstractBenchmark):
+class SurrogateCNN(SurrogateBenchmark):
 
-    def __init__(self, path=None, rng=None):
-        super(SurrogateCNN, self).__init__()
+    def __init__(self, rng=None, path=None):
 
-        self.surrogate_objective = pickle.load(open(os.path.join(path, "rf_surrogate_cnn.pkl"), "rb"))
-        self.surrogate_cost = pickle.load(open(os.path.join(path, "rf_cost_surrogate_cnn.pkl"), "rb"))
         self.n_epochs = 40
-        if rng is None:
-            self.rng = np.random.RandomState()
-        else:
-            self.rng = rng
+
+        objective_fn = "rf_surrogate_cnn.pkl"
+        cost_fn = "rf_cost_surrogate_cnn.pkl"
+        super(SurrogateCNN, self).__init__(objective_surrogate_fn=objective_fn, cost_surrogate_fn=cost_fn,
+                                           path=path, rng=rng)
 
     @AbstractBenchmark._check_configuration
     @AbstractBenchmark._configuration_as_array
@@ -48,9 +45,16 @@ class SurrogateCNN(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'Convolutional Neural Network Surrogate',
-                'bounds': [[0, 1],  # init_learning_rate
-                           [0, 1],  # batch_size
-                           [0, 1],  # n_units_1
-                           [0, 1],  # n_units_2
-                           [0, 1]],  # n_units_3
+                'bounds': [[0, 1],  # init_learning_rate, [10**-6, 10**0]
+                           [0, 1],  # batch_size, [32, 512]
+                           [0, 1],  # n_units_1,  [2**4, 2**8]
+                           [0, 1],  # n_units_2,  [2**4, 2**8]
+                           [0, 1]],  # n_units_3, [2**4, 2**8]
+                'references': ["@InProceedings{klein-iclr17,"
+                               "author = {A. Klein and S. Falkner and J. T. Springenberg and F. Hutter},"
+                               "title = {Learning Curve Prediction with {Bayesian} Neural Networks},"
+                               "booktitle = {International Conference on Learning Representations (ICLR)"
+                               " 2017 Conference Track},"
+                               "year = {2017},"
+                               "month = apr"]
                 }
