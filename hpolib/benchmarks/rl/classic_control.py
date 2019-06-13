@@ -1,4 +1,5 @@
 import time
+import logging
 
 import ConfigSpace as CS
 import numpy as np
@@ -226,7 +227,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     benchmark = ClassicControlFull(env=args.env, max_budget=args.budget)
+    benchmark.logger.setLevel(logging.INFO)
     config_space = benchmark.get_configuration_space()
     sample_config = config_space.sample_configuration()
     result = benchmark.objective_function(sample_config)
-    print(result)
+    benchmark.logger.info(result)
