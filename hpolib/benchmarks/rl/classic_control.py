@@ -201,3 +201,19 @@ class ClassicControlReduced(ClassicControlBase):
         cs.add_hyperparameter(CS.UniformFloatHyperparameter(
             "entropy_regularization", lower=0, default_value=0.01, upper=1))
         return cs
+
+
+# Allow simple runs via the command line for testing and exploring the benchmark
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Run a random configuration on classic control benchmark.')
+    parser.add_argument('--env', default="CartPole-v1", help='Open AI gym classic control id.')
+    parser.add_argument('--budget', type=int, default=1, help='Number of repetitions of a configuration.')
+    args = parser.parse_args()
+
+    benchmark = ClassicControlFull(env=args.env, max_budget=args.budget)
+    config_space = benchmark.get_configuration_space()
+    sample_config = config_space.sample_configuration()
+    result = benchmark.objective_function(sample_config)
+    print(result)
