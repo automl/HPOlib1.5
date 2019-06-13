@@ -120,8 +120,7 @@ class ClassicControlBase(AbstractBenchmark):
             )
 
             runner = Runner(agent=agent, environment=self.env)
-            runner.run(episodes=self.max_episodes, max_episode_timesteps=200,
-                       episode_finished=self._on_episode_finished)
+            runner.run(episodes=self.max_episodes, episode_finished=self._on_episode_finished)
 
             converged_episodes.append(len(runner.episode_rewards))
 
