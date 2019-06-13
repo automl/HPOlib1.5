@@ -138,9 +138,23 @@ class ClassicControlBase(AbstractBenchmark):
             converged = False
         else:
             mean_reward = np.mean(runner.episode_rewards[-self.avg_n_episodes:])
-            reward_threshold = runner.environment.gym.unwrapped.spec.reward_threshold
-            converged = mean_reward >= reward_threshold
+            converged = mean_reward >= self._reward_threshold()
         return not converged
+
+    _fallback_reward_thresholds = {  # according to gym 0.12.5
+        'Acrobot-v1': 500,
+        'Pendulum-v0': 200,
+    }
+
+    def _reward_threshold(self):
+        """ Shim reward thresholds not available
+            in gym==0.9.5 (required by tensorforce)
+        """
+        threshold = self.env.gym.unwrapped.spec.reward_threshold
+        if threshold is None:
+            return self._fallback_reward_thresholds[self.env.gym_id]
+        else:
+            return threshold
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, config, **kwargs):
