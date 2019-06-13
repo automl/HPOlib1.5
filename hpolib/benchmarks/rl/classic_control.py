@@ -118,22 +118,28 @@ class ClassicControlBase(AbstractBenchmark):
                 likelihood_ratio_clipping=config["likelihood_ratio_clipping"],
             )
 
-            def episode_finished(r):
-                # Check if we have converged
-                if np.mean(r.episode_rewards[-self.avg_n_episodes:]) == 200:
-                    return False
-                else:
-                    return True
-
             runner = Runner(agent=agent, environment=self.env)
-
-            runner.run(episodes=self.max_episodes, max_episode_timesteps=200, episode_finished=episode_finished)
+            runner.run(episodes=self.max_episodes, max_episode_timesteps=200,
+                       episode_finished=self._on_episode_finished)
 
             converged_episodes.append(len(runner.episode_rewards))
 
         cost = time.time() - st
 
         return {'function_value': np.mean(converged_episodes), "cost": cost, "all_runs": converged_episodes}
+
+    def _on_episode_finished(self, runner, worker_id):
+        if runner.global_episode % 10 == 0:
+            self.logger.info("Finished episode {} at timestep {} with {} reward and {} timesteps"
+                             .format(runner.global_episode, runner.global_timestep,
+                                     runner.episode_rewards[-1], runner.episode_timesteps[-1]))
+        if self.avg_n_episodes is None:
+            converged = False
+        else:
+            mean_reward = np.mean(runner.episode_rewards[-self.avg_n_episodes:])
+            reward_threshold = runner.environment.gym.unwrapped.spec.reward_threshold
+            converged = mean_reward >= reward_threshold
+        return not converged
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, config, **kwargs):
