@@ -130,9 +130,9 @@ class ClassicControlBase(AbstractBenchmark):
 
     def _on_episode_finished(self, runner, worker_id):
         if runner.global_episode % 10 == 0:
-            self.logger.info("Finished episode {} at timestep {} with {} reward and {} timesteps"
+            self.logger.info("Finished episode {} at timestep {}. Avg recent episodes: reward {:.1f}, timesteps {:.1f}"
                              .format(runner.global_episode, runner.global_timestep,
-                                     runner.episode_rewards[-1], runner.episode_timesteps[-1]))
+                                     np.mean(runner.episode_rewards[-10:]), np.mean(runner.episode_timesteps[-10:])))
         if self.avg_n_episodes is None:
             converged = False
         else:
