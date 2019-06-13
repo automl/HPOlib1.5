@@ -4,9 +4,14 @@ import ConfigSpace as CS
 import numpy as np
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util import rng_helper
-from tensorforce.agents import PPOAgent
-from tensorforce.contrib.openai_gym import OpenAIGym
-from tensorforce.execution import Runner
+try:
+    from tensorforce.agents import PPOAgent
+    from tensorforce.contrib.openai_gym import OpenAIGym
+    from tensorforce.execution import Runner
+except ImportError:
+    raise ImportError(
+        "Missing tensorforce dependency. "
+        "Install extra 'rl': pip install hpolib2[rl].")
 
 
 class ClassicControlBase(AbstractBenchmark):
