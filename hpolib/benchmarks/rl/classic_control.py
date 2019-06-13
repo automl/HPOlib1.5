@@ -234,14 +234,14 @@ class ClassicControlReduced(ClassicControlBase):
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='Run a random configuration on classic control benchmark.')
+    parser = argparse.ArgumentParser(description='Run a default configuration on classic control benchmark.')
     parser.add_argument('--env', default="CartPole-v1", help='Open AI gym classic control id.')
     parser.add_argument('--budget', type=int, default=1, help='Number of repetitions of a configuration.')
     args = parser.parse_args()
 
-    benchmark = ClassicControlFull(env=args.env, max_budget=args.budget)
+    benchmark = ClassicControlReduced(env=args.env, max_budget=args.budget)
     benchmark.logger.setLevel(logging.INFO)
     config_space = benchmark.get_configuration_space()
-    sample_config = config_space.sample_configuration()
-    result = benchmark.objective_function(sample_config)
+    config = config_space.get_default_configuration()
+    result = benchmark.objective_function(config)
     benchmark.logger.info(result)
