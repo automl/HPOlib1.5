@@ -15,7 +15,8 @@ except ImportError:
 
 
 class ClassicControlBase(AbstractBenchmark):
-    def __init__(self, env="CartPole-v1", rng=None, defaults=None, max_budget=9):
+    def __init__(self, env="CartPole-v1", rng=None, defaults=None, max_budget=9,
+                 avg_n_episodes=20, max_episodes=3000):
         """
         Parameters
         ----------
@@ -23,17 +24,23 @@ class ClassicControlBase(AbstractBenchmark):
             set up rng
         defaults: dict
             default configuration used for the PPO agent
+        avg_n_episodes: Optional[int]
+            number of episodes of which average reward is above threshold for convergence
+        max_episodes: int
+            maximum number of episodes to run
         """
 
         super(ClassicControlBase, self).__init__()
 
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.rng = rng_helper.create_rng(rng)
 
-        assert env in ["CartPole-v1", "Acrobot-v1", "MountainCar-v0", "Pendulum-v0", "MountainCarContinuous-v0"]
+        allowed_envs = ["CartPole-v1", "Acrobot-v1", "MountainCar-v0", "Pendulum-v0", "MountainCarContinuous-v0"]
+        assert env in allowed_envs, "Expected env in {}, got {}".format(", ".join(allowed_envs), env)
 
         self.env = OpenAIGym(env, visualize=False)
-        self.max_episodes = 3000
-        self.avg_n_episodes = 20
+        self.max_episodes = max_episodes
+        self.avg_n_episodes = avg_n_episodes
         self.max_budget = max_budget
         self.defaults = {
             "n_units_1": 64,
