@@ -84,7 +84,7 @@ class ClassicControlBase(AbstractBenchmark):
             dict(type='dense', size=config["n_units_2"], activation=config['activation_2'])
         ]
 
-        converged_episodes = []
+        terminated_episodes = []
 
         for i in range(budget):
             agent = PPOAgent(
@@ -120,20 +120,24 @@ class ClassicControlBase(AbstractBenchmark):
             )
 
             runner = Runner(agent=agent, environment=self.env)
-            runner.run(episodes=self.max_episodes, episode_finished=self._on_episode_finished)
+            runner.run(num_episodes=self.max_episodes, episode_finished=self._on_episode_finished)
 
-            converged_episodes.append(len(runner.episode_rewards))
+            terminated_episodes.append(np.sum(runner.episode_rewards) / self.max_episodes)
+            leftover_episodes = self.max_episodes - runner.global_episode
+            if leftover_episodes > 0:  # converged
+                converged_value = np.mean(runner.episode_rewards[-self.avg_n_episodes:])
+                terminated_episodes[-1] += leftover_episodes / self.max_episodes * converged_value
 
         cost = time.time() - st
 
-        return {'function_value': np.mean(converged_episodes), "cost": cost, "all_runs": converged_episodes}
+        return {'function_value': np.mean(terminated_episodes), "cost": cost, "all_runs": terminated_episodes}
 
     def _on_episode_finished(self, runner, worker_id):
         if runner.global_episode % 10 == 0:
             self.logger.info("Finished episode {} at timestep {}. Avg recent episodes: reward {:.1f}, timesteps {:.1f}"
                              .format(runner.global_episode, runner.global_timestep,
                                      np.mean(runner.episode_rewards[-10:]), np.mean(runner.episode_timesteps[-10:])))
-        if self.avg_n_episodes is None:
+        if self.avg_n_episodes is None:  # no convergence criterion
             converged = False
         else:
             mean_reward = np.mean(runner.episode_rewards[-self.avg_n_episodes:])
