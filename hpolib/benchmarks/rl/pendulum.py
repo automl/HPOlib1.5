@@ -10,8 +10,8 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util import rng_helper
 
 
-class CartpoleBase(AbstractBenchmark):
-    def __init__(self, rng=None, defaults=None, max_budget=9):
+class PendulumBase(AbstractBenchmark):
+    def __init__(self, rng=None, defaults=None, max_budget=200):
         """
         Parameters
         ----------
@@ -21,11 +21,11 @@ class CartpoleBase(AbstractBenchmark):
             default configuration used for the PPO agent
         """
 
-        super(CartpoleBase, self).__init__()
+        super(PendulumBase, self).__init__()
 
         self.rng = rng_helper.create_rng(rng)
 
-        self.env = OpenAIGym('CartPole-v0', visualize=False)
+        self.env = OpenAIGym('Pendulum-v0', visualize=False)
         self.max_episodes = 3000
         self.avg_n_episodes = 20
         self.max_budget = max_budget
@@ -72,8 +72,7 @@ class CartpoleBase(AbstractBenchmark):
         ]
 
         converged_episodes = []
-
-        for i in range(budget):
+        for i in range(5):
             agent = PPOAgent(
                 states=self.env.states,
                 actions=self.env.actions,
@@ -114,16 +113,18 @@ class CartpoleBase(AbstractBenchmark):
 
             def episode_finished(r):
                 # Check if we have converged
-                if np.mean(r.episode_rewards[-self.avg_n_episodes:]) == 200:
+                if np.mean(r.episode_rewards[-self.avg_n_episodes:]) == budget:
                     return False
                 else:
                     return True
 
             runner = Runner(agent=agent, environment=self.env)
 
-            runner.run(episodes=self.max_episodes, max_episode_timesteps=200, episode_finished=episode_finished)
+            runner.run(max_episode_timesteps=budget,
+                       num_episodes=self.max_episodes,
+                       episode_finished=episode_finished)
 
-            converged_episodes.append(len(runner.episode_rewards))
+            converged_episodes.append(np.mean(runner.episode_rewards)*-1)
 
         cost = time.time() - st
 
@@ -135,12 +136,12 @@ class CartpoleBase(AbstractBenchmark):
 
     @staticmethod
     def get_meta_information():
-        return {'name': 'Cartpole',
+        return {'name': 'Pendulum',
                 'references': []
                 }
 
 
-class CartpoleFull(CartpoleBase):
+class PendulumFull(PendulumBase):
 
     @staticmethod
     def get_configuration_space():
@@ -181,7 +182,7 @@ class CartpoleFull(CartpoleBase):
         return cs
 
 
-class CartpoleReduced(CartpoleBase):
+class PendulumReduced(PendulumBase):
 
     @staticmethod
     def get_configuration_space():
