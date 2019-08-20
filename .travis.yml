@@ -35,8 +35,8 @@ script:
   # - nosetests -sv --with-coverage --cover-package=hpolib
   - source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
 
-# after_success:
-#   - codecov
+after_deploy:
+  - nosetests -sv --with-coverage --cover-package=hpolib
 
 deploy:
   provider: pages
@@ -45,5 +45,6 @@ deploy:
   keep-history: true
   committer-from-gh: true
   on:
+    all_branches: true
     condition: $doc_result = "success"
   local_dir: doc/$TRAVIS_BRANCH
