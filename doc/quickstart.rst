@@ -11,7 +11,7 @@ Download & Install HPOlib2
 
 .. code-block:: bash
 
-  git clone git@github.com:automl/HPOlib2.git
+  git clone https://github.com/automl/HPOlib2.git
   cd HPOlib2
   for i in `cat requirements.txt`; do pip install $i; done
   python setup.py install
