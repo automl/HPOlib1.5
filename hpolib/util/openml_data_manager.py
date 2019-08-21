@@ -45,9 +45,8 @@ def _load_data(task_id):
     # TODO replace by more efficient function which only reads in the data
     # saved in the arff file describing the attributes/features
     dataset = task.get_dataset()
-    _, _, categorical_indicator = dataset.get_data(
-        target=task.target_name,
-        return_categorical_indicator=True)
+    _, _, categorical_indicator, _ = dataset.get_data(
+        target=task.target_name)
     variable_types = ['categorical' if ci else 'numerical'
                       for ci in categorical_indicator]
 
