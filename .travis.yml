@@ -30,8 +30,8 @@ before_install:
 install:
   - source ci_scripts/install.sh
 
-# command to run tests, e.g. python setup.py test
 script:
+  # Deactivated the tests in this step, so that documentation is always pushed
   # - nosetests -sv --with-coverage --cover-package=hpolib
   - source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
 
@@ -41,7 +41,7 @@ after_deploy:
 deploy:
   provider: pages
   skip-cleanup: true
-  github-token: $HPOlib2
+  github-token: $HPOLIB2_TOKEN
   keep-history: true
   committer-from-gh: true
   on:

@@ -29,7 +29,7 @@ if ! [[ -z ${DOCPUSH+x} ]]; then
         mkdir $1
 
         # get previous documentation from github
-        git clone https://github.com/PhMueller/HPOlib2.git --branch gh-pages --single-branch
+        git clone https://github.com/automl/HPOlib2.git --branch gh-pages --single-branch
 
         # copy previous documentation
         cp -r HPOlib2/. $1
