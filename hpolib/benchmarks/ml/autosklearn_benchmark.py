@@ -21,7 +21,7 @@ from hpolib.util.openml_data_manager import OpenMLCrossvalidationDataManager
 from hpolib.util import rng_helper
 import hpolib
 
-__version__ = 0.2
+__version__ = 0.3
 
 
 class AutoSklearnBenchmark(AbstractBenchmark):
@@ -125,7 +125,7 @@ class AutoSklearnBenchmark(AbstractBenchmark):
                         'scipy>=0.14.1',
                         'scikit-learn>=0.19.0',
                         'pynisher==0.5.0',
-                        'auto-sklearn==0.4.2']
+                        'auto-sklearn==0.5.2']
         dependencies = '\n'.join(dependencies)
         verify_packages(dependencies)
 
