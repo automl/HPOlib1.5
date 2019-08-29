@@ -17,7 +17,8 @@ import numpy as np
 
 from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util.dependencies import verify_packages
-from hpolib.util.openml_data_manager import OpenMLCrossvalidationDataManager
+from hpolib.util.openml_data_manager import OpenMLCrossvalidationDataManager, get_openml100_taskids, \
+    get_openmlcc18_taskids
 from hpolib.util import rng_helper
 import hpolib
 
@@ -397,22 +398,17 @@ class FBIS_WC(MulticlassClassificationBenchmark):
         )
 
 
-all_tasks = [
-    258, 259, 261, 262, 266, 267, 271, 273, 275, 279, 283, 288, 2120,
-    2121, 2125, 336, 75093, 75092, 75095, 75097, 75099, 75103, 75107,
-    75106, 75109, 75108, 75112, 75129, 75128, 75135, 146574, 146575,
-    146572, 146573, 146578, 146579, 146576, 146577, 75154, 146582,
-    146583, 75156, 146580, 75159, 146581, 146586, 146587, 146584,
-    146585, 146590, 146591, 146588, 146589, 75169, 146594, 146595,
-    146592, 146593, 146598, 146599, 146596, 146597, 146602, 146603,
-    146600, 146601, 75181, 146604, 146605, 75215, 75217, 75219, 75221,
-    75225, 75227, 75231, 75230, 75232, 75235, 3043, 75236, 75239, 3047,
-    232, 233, 236, 3053, 3054, 3055, 241, 242, 244, 245, 246, 248, 250,
-    251, 252, 253, 254,
-]
-
-for task_id in all_tasks:
+for task_id in get_openml100_taskids():
     benchmark_string = """class OpenML100_%d(MulticlassClassificationBenchmark):
+
+     def __init__(self, resampling_strategy='partial-cv', rng=None):
+         super().__init__(%d, resampling_strategy=resampling_strategy, rng=rng)
+""" % (task_id, task_id)
+
+    exec(benchmark_string)
+
+for task_id in get_openmlcc18_taskids():
+    benchmark_string = """class OpenMLCC18_%d(MulticlassClassificationBenchmark):
 
      def __init__(self, resampling_strategy='partial-cv', rng=None):
          super().__init__(%d, resampling_strategy=resampling_strategy, rng=rng)
