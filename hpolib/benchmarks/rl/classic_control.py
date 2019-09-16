@@ -17,7 +17,7 @@ except ImportError:
 
 class ClassicControlBase(AbstractBenchmark):
     def __init__(self, env="CartPole-v1", rng=None, defaults=None, max_budget=9,
-                 avg_n_episodes=20, max_episodes=3000):
+                 avg_n_episodes=20, max_episodes=3000, max_timesteps=None):
         """
         Parameters
         ----------
@@ -41,6 +41,7 @@ class ClassicControlBase(AbstractBenchmark):
 
         self.env = OpenAIGym(env, visualize=False)
         self.max_episodes = max_episodes
+        self.max_timesteps = max_timesteps
         self.avg_n_episodes = avg_n_episodes
         self.max_budget = max_budget
         self.defaults = {
@@ -120,7 +121,8 @@ class ClassicControlBase(AbstractBenchmark):
             )
 
             runner = Runner(agent=agent, environment=self.env)
-            runner.run(num_episodes=self.max_episodes, episode_finished=self._on_episode_finished)
+            runner.run(num_episodes=self.max_episodes, num_timesteps=self.max_timesteps,
+                       episode_finished=self._on_episode_finished)
 
             terminated_episodes.append(np.sum(runner.episode_rewards) / self.max_episodes)
             leftover_episodes = self.max_episodes - runner.global_episode
