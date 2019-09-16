@@ -124,24 +124,18 @@ class ClassicControlBase(AbstractBenchmark):
             runner.run(num_episodes=self.max_episodes, num_timesteps=self.max_timesteps,
                        episode_finished=self._on_episode_finished)
 
-            reward_per_timestep = np.sum(runner.episode_rewards) / np.sum(runner.episode_timesteps)
-            if self.max_episodes and self.max_episodes > runner.global_episode:  # converged, interpolate leftover episodes
-                leftover_episodes = self.max_episodes - runner.global_episode
-                converged_reward = max(np.mean(runner.episode_rewards[-self.avg_n_episodes:]), self._reward_threshold())
-                interpolated_leftover_episodes = (reward_per_timestep * runner.global_episode
-                                                  + converged_reward * leftover_episodes) / self.max_episodes
-                terminated_runs[-1] = max(terminated_runs[-1], interpolated_leftover_episodes)
+            reward_per_episode = np.mean(runner.episode_rewards)
+            if self.max_episodes:  # converged, interpolate leftover episodes
+                interpolated_leftover_episodes = self._interpolate_reward(
+                    runner, reward_per_episode, runner.global_episode, self.max_episodes)
             else:
-                interpolated_leftover_episodes = reward_per_timestep
-
-            if self.max_timesteps and self.max_timesteps > runner.global_timestep:  # converged, interpolate leftover timesteps
-                leftover_timesteps = self.max_timesteps - runner.global_timestep
-                converged_reward = max(np.mean(runner.episode_rewards[-self.avg_n_episodes:]), self._reward_threshold())
-                interpolated_leftover_timesteps = (reward_per_timestep * runner.global_timestep
-                                                   + converged_reward * leftover_timesteps) / self.max_timesteps
+                interpolated_leftover_episodes = reward_per_episode
+            if self.max_timesteps:  # converged, interpolate leftover timesteps
+                interpolated_leftover_timesteps = self._interpolate_reward(
+                    runner, reward_per_episode, runner.global_timestep, self.max_timesteps)
             else:
-                interpolated_leftover_timesteps = reward_per_timestep
-            terminated_runs.append(max(reward_per_timestep,
+                interpolated_leftover_timesteps = reward_per_episode
+            terminated_runs.append(max(reward_per_episode,
                                        min(interpolated_leftover_episodes, interpolated_leftover_timesteps)))
 
         cost = time.time() - st
@@ -174,6 +168,14 @@ class ClassicControlBase(AbstractBenchmark):
             return self._fallback_reward_thresholds[self.env.gym_id]
         else:
             return threshold
+
+    def _interpolate_reward(self, runner, current_reward_per_episode, current_time, max_time):
+        leftover_time = max_time - current_time
+        if leftover_time <= 0:
+            return current_reward_per_episode
+        converged_reward_per_episode = max(np.mean(runner.episode_rewards[-self.avg_n_episodes:]),
+                                           self._reward_threshold())
+        return (current_reward_per_episode * current_time + converged_reward_per_episode * leftover_time) / max_time
 
     @AbstractBenchmark._check_configuration
     def objective_function_test(self, config, **kwargs):
