@@ -134,10 +134,10 @@ class ClassicControlBase(AbstractBenchmark):
             else:
                 interpolated_leftover_episodes = reward_per_timestep
 
-            if self.max_timesteps and self.max_timesteps > runner.global_timesteps:  # converged, interpolate leftover timesteps
-                leftover_timesteps = self.max_timesteps - runner.global_timesteps
+            if self.max_timesteps and self.max_timesteps > runner.global_timestep:  # converged, interpolate leftover timesteps
+                leftover_timesteps = self.max_timesteps - runner.global_timestep
                 converged_reward = max(np.mean(runner.episode_rewards[-self.avg_n_episodes:]), self._reward_threshold())
-                interpolated_leftover_timesteps = (reward_per_timestep * runner.global_timesteps
+                interpolated_leftover_timesteps = (reward_per_timestep * runner.global_timestep
                                                    + converged_reward * leftover_timesteps) / self.max_timesteps
             else:
                 interpolated_leftover_timesteps = reward_per_timestep
