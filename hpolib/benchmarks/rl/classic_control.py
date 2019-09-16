@@ -125,12 +125,13 @@ class ClassicControlBase(AbstractBenchmark):
             terminated_episodes.append(np.sum(runner.episode_rewards) / self.max_episodes)
             leftover_episodes = self.max_episodes - runner.global_episode
             if leftover_episodes > 0:  # converged
-                converged_value = np.mean(runner.episode_rewards[-self.avg_n_episodes:])
-                terminated_episodes[-1] += leftover_episodes / self.max_episodes * converged_value
+                converged_reward = max(np.mean(runner.episode_rewards[-self.avg_n_episodes:]), self._reward_threshold())
+                terminated_episodes[-1] += leftover_episodes / self.max_episodes * converged_reward
 
         cost = time.time() - st
 
-        return {'function_value': np.mean(terminated_episodes), "cost": cost, "all_runs": terminated_episodes}
+        negative_mean_reward = -np.mean(terminated_episodes)  # minimization task
+        return {'function_value': negative_mean_reward, "cost": cost, "all_runs": terminated_episodes}
 
     def _on_episode_finished(self, runner, worker_id):
         if runner.global_episode % 10 == 0:
