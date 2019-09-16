@@ -85,7 +85,7 @@ class ClassicControlBase(AbstractBenchmark):
             dict(type='dense', size=config["n_units_2"], activation=config['activation_2'])
         ]
 
-        terminated_episodes = []
+        terminated_runs = []
 
         for i in range(budget):
             agent = PPOAgent(
@@ -124,16 +124,29 @@ class ClassicControlBase(AbstractBenchmark):
             runner.run(num_episodes=self.max_episodes, num_timesteps=self.max_timesteps,
                        episode_finished=self._on_episode_finished)
 
-            terminated_episodes.append(np.sum(runner.episode_rewards) / self.max_episodes)
-            leftover_episodes = self.max_episodes - runner.global_episode
-            if leftover_episodes > 0:  # converged
+            reward_per_timestep = np.sum(runner.episode_rewards) / np.sum(runner.episode_timesteps)
+            if self.max_episodes and self.max_episodes > runner.global_episode:  # converged, interpolate leftover episodes
+                leftover_episodes = self.max_episodes - runner.global_episode
                 converged_reward = max(np.mean(runner.episode_rewards[-self.avg_n_episodes:]), self._reward_threshold())
-                terminated_episodes[-1] += leftover_episodes / self.max_episodes * converged_reward
+                interpolated_leftover_episodes = (reward_per_timestep * runner.global_episode
+                                                  + converged_reward * leftover_episodes) / self.max_episodes
+                terminated_runs[-1] = max(terminated_runs[-1], interpolated_leftover_episodes)
+            else:
+                interpolated_leftover_episodes = reward_per_timestep
+
+            if self.max_timesteps and self.max_timesteps > runner.global_timesteps:  # converged, interpolate leftover timesteps
+                leftover_timesteps = self.max_timesteps - runner.global_timesteps
+                converged_reward = max(np.mean(runner.episode_rewards[-self.avg_n_episodes:]), self._reward_threshold())
+                interpolated_leftover_timesteps = (reward_per_timestep * runner.global_timesteps
+                                                   + converged_reward * leftover_timesteps) / self.max_timesteps
+            else:
+                interpolated_leftover_timesteps = reward_per_timestep
+            terminated_runs.append(max(reward_per_timestep,
+                                       min(interpolated_leftover_episodes, interpolated_leftover_timesteps)))
 
         cost = time.time() - st
-
-        negative_mean_reward = -np.mean(terminated_episodes)  # minimization task
-        return {'function_value': negative_mean_reward, "cost": cost, "all_runs": terminated_episodes}
+        negative_mean_reward = -np.mean(terminated_runs)  # minimization task
+        return {'function_value': negative_mean_reward, "cost": cost, "all_runs": terminated_runs}
 
     def _on_episode_finished(self, runner, worker_id):
         if runner.global_episode % 10 == 0:
