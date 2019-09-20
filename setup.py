@@ -11,7 +11,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=['cython', 'numpy>=1.9.0', 'scipy>=0.14.1', 'ConfigSpace>=0.4.0', 'configparser', 'matplotlib'],
     extras_require={
-        'rl': ["tensorforce[tf]", "gym[classic_control]"]
+        'rl': ["tensorforce[tf]==0.5.1", "gym[classic_control]==0.14.0"]
     },
     test_suite='nose.collector',
     scripts=[],

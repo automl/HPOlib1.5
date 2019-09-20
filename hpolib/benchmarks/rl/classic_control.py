@@ -7,7 +7,7 @@ from hpolib.abstract_benchmark import AbstractBenchmark
 from hpolib.util import rng_helper
 try:
     from tensorforce.agents import PPOAgent
-    from tensorforce.contrib.openai_gym import OpenAIGym
+    from tensorforce.environments.openai_gym import OpenAIGym
     from tensorforce.execution import Runner
 except ImportError:
     raise ImportError(
