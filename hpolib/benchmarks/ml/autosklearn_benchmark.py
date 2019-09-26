@@ -194,6 +194,7 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
                 memory_limit=memory_limit,
                 metric=self.metric,
                 include=include,
+                disable_file_output=True,
             )
 
             status, cost, runtime, additional_run_info = evaluator.run(
@@ -224,7 +225,9 @@ url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-l
             logger=self.logger,
             memory_limit=memory_limit,
             metric=self.metric,
-            include=include)
+            include=include,
+            disable_file_output=True,
+        )
 
         status, cost, runtime, additional_run_info = test_evaluator.run(
             config=configuration, cutoff=cutoff, instance=instance)
