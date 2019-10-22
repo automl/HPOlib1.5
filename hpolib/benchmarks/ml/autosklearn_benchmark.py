@@ -25,15 +25,6 @@ import hpolib
 __version__ = 0.3
 
 
-class NoFileSavingBackend(autosklearn.util.backend.Backend):
-
-    def save_datamanager(self, datamanager):
-        self.datamanager = datamanager
-
-    def load_datamanager(self):
-        return self.datamanager
-
-
 class AutoSklearnBenchmark(AbstractBenchmark):
     """Base class for auto-sklearn benchmarks.
 
@@ -82,15 +73,11 @@ class AutoSklearnBenchmark(AbstractBenchmark):
     def _setup_backend(self):
         tmp_folder = os.path.join(self._tmpdir, 'tmp')
         output_folder = os.path.join(self._tmpdir, 'out')
-
-        context = autosklearn.util.backend.BackendContext(
+        self.backend = autosklearn.util.backend.create(
             temporary_directory=tmp_folder,
             output_directory=output_folder,
             delete_tmp_folder_after_terminate=True,
-            delete_output_folder_after_terminate=True,
-            shared_mode=False)
-        self.backend = NoFileSavingBackend(context)
-
+            delete_output_folder_after_terminate=True)
         self.backend.save_datamanager(self.data_manager)
         self.logger = logging.getLogger(self.__class__.__name__)
 
