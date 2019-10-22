@@ -43,11 +43,15 @@ class AutoSklearnBenchmark(AbstractBenchmark):
         instances.
     """
 
-    def __init__(self, task_id, resampling_strategy='partial-cv', rng=None):
+    def __init__(self, task_id, resampling_strategy='partial-cv', tmpdir=None, rng=None):
 
         self._check_dependencies()
         self._get_data_manager(task_id)
-        self._tmpdir = tempfile.mkdtemp()
+
+        if tmpdir is None:
+            self._tmpdir = tempfile.mkdtemp()
+        else:
+            self._tmpdir = tmpdir
         self._setup_backend()
 
         # Setup of the datamanager etc has to be done before call to super
@@ -404,8 +408,8 @@ class FBIS_WC(MulticlassClassificationBenchmark):
 for task_id in get_openml100_taskids():
     benchmark_string = """class OpenML100_%d(MulticlassClassificationBenchmark):
 
-     def __init__(self, resampling_strategy='partial-cv', rng=None):
-         super().__init__(%d, resampling_strategy=resampling_strategy, rng=rng)
+     def __init__(self, resampling_strategy='partial-cv', tmpdir=None, rng=None):
+         super().__init__(%d, resampling_strategy=resampling_strategy, tmpdir=tmpdir, rng=rng)
 """ % (task_id, task_id)
 
     exec(benchmark_string)
@@ -413,8 +417,8 @@ for task_id in get_openml100_taskids():
 for task_id in get_openmlcc18_taskids():
     benchmark_string = """class OpenMLCC18_%d(MulticlassClassificationBenchmark):
 
-     def __init__(self, resampling_strategy='partial-cv', rng=None):
-         super().__init__(%d, resampling_strategy=resampling_strategy, rng=rng)
+     def __init__(self, resampling_strategy='partial-cv', tmpdir=None, rng=None):
+         super().__init__(%d, resampling_strategy=resampling_strategy, tmpdir=tmpdir, rng=rng)
 """ % (task_id, task_id)
 
     exec(benchmark_string)
