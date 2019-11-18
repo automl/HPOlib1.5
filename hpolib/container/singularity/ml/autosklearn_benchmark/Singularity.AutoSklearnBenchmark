@@ -11,7 +11,6 @@ MAINTAINER Stefan Staeglich
     apt install libopenblas-base libopenblas-dev libblas3 liblas-c3 -y
     pip3 install scipy numpy
     pip3 install git+https://github.com/automl/ConfigSpace.git@master
-    apt install python3-sklearn -y
     pip3 install git+https://github.com/automl/HPOlib2@development
     pip3 install pyro4
     apt install swig swig3.0 python3-jsonpickle -y
