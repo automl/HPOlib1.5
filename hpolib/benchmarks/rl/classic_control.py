@@ -12,7 +12,10 @@ try:
 except ImportError:
     raise ImportError(
         "Missing tensorforce dependency. "
-        "Install extra 'rl': pip install hpolib2[rl].")
+        "Install extra 'rl': pip install hpolib2[rl]==0.0.1 .")
+
+
+__version__ = "0.2"
 
 
 class ClassicControlBase(AbstractBenchmark):
@@ -184,7 +187,14 @@ class ClassicControlBase(AbstractBenchmark):
     @staticmethod
     def get_meta_information():
         return {'name': 'ClassicControl with PPO',
-                'references': []
+                'references': [],
+                'note': ("Version 0.2:\n"
+                         "- Predefine reward thresholds of convergence criteria for the particular environment\n"
+                         "- Use max episode timesteps predefined by the particular environment\n"
+                         "- Use mean of episode rewards as run performance\n"
+                         "- Log mean performance every 10th episode\n"
+                         "- Command line interface for running default configuration\n"
+                         "- Stop at maximum episodes OR maximum timesteps")
                 }
 
 
@@ -250,20 +260,3 @@ class ClassicControlReduced(ClassicControlBase):
         cs.add_hyperparameter(CS.UniformFloatHyperparameter(
             "entropy_regularization", lower=0, default_value=0.01, upper=1))
         return cs
-
-
-# Allow simple runs via the command line for testing and exploring the benchmark
-if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Run a default configuration on classic control benchmark.')
-    parser.add_argument('--env', default="CartPole-v1", help='Open AI gym classic control id.')
-    parser.add_argument('--budget', type=int, default=1, help='Number of repetitions of a configuration.')
-    args = parser.parse_args()
-
-    benchmark = ClassicControlReduced(env=args.env, max_budget=args.budget)
-    benchmark.logger.setLevel(logging.INFO)
-    config_space = benchmark.get_configuration_space()
-    config = config_space.get_default_configuration()
-    result = benchmark.objective_function(config)
-    benchmark.logger.info(result)
