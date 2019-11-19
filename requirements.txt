@@ -1,6 +1,17 @@
-cython
+configparser
+unittest2
+nose
+setuptools
+
+six
+
 numpy>=1.9.0
 scipy>=0.14.1
 matplotlib
-ConfigSpace>=0.4.0
-configparser
+
+# We need lasagne 0.2dev1 + corresponding theano version
+theano==0.8.2
+git+https://github.com/Lasagne/Lasagne.git@master
+
+scikit-learn
+ConfigSpace>=0.3.3
