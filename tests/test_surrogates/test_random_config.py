@@ -30,7 +30,6 @@ class TestRandomConfig(unittest.TestCase):
 
             cfg = b.get_configuration_space()
             for i in range(5):
-                raise ValueError((b, i))
                 c = cfg.sample_configuration()
 
                 # Limit Wallclocktime using pynisher
