@@ -28,20 +28,20 @@ class TestRandomConfig(unittest.TestCase):
             hpolib.benchmarks.surrogates.exploring_openml.XGBoost_4534(n_splits=2, n_iterations=2),
         ]:
 
+            # Limit Wallclocktime using pynisher
+            obj = pynisher.enforce_limits(
+                wall_time_in_s=10,
+                mem_in_mb=3000,
+                grace_period_in_s=5,
+                logger=self.logger
+            )(b.objective_function)
+
+            f_opt = b.get_empirical_f_opt()
+            f_max = b.get_empirical_f_max()
+
             cfg = b.get_configuration_space()
             for i in range(5):
                 c = cfg.sample_configuration()
-
-                # Limit Wallclocktime using pynisher
-                obj = pynisher.enforce_limits(
-                    wall_time_in_s=10,
-                    mem_in_mb=3000,
-                    grace_period_in_s=5,
-                    logger=self.logger
-                )(b.objective_function)
-
-                f_opt = b.get_empirical_f_opt()
-                f_max = b.get_empirical_f_max()
 
                 res = obj(c)
                 if res is not None:
