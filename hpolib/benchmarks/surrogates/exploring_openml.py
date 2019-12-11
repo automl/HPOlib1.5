@@ -46,7 +46,7 @@ class ExploringOpenML(AbstractBenchmark):
     """
     url = None
 
-    def __init__(self, dataset_id, n_splits=10, n_iterations=30, rebuild=False, rng=None):
+    def __init__(self, dataset_id, n_splits=10, n_iterations=30, rebuild=False, rng=None, n_jobs=1):
         """
 
         Parameters
@@ -69,6 +69,7 @@ class ExploringOpenML(AbstractBenchmark):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.dataset_id = dataset_id
         self.classifier = self.__class__.__name__.split('_')[0]
+        self.n_jobs = n_jobs
 
         surrogate_dir = os.path.join(hpolib._config.data_dir, "ExploringOpenML", 'surrogates')
         if not os.path.exists(surrogate_dir):
@@ -77,21 +78,49 @@ class ExploringOpenML(AbstractBenchmark):
             surrogate_dir,
             'surrogate_%s_%d.pkl.gz' % (self.classifier, self.dataset_id),
         )
-        if rebuild or not os.path.exists(surrogate_file_name):
-            self.construct_surrogate(dataset_id, n_splits, n_iterations)
-            with lockfile.LockFile(surrogate_file_name):
-                with gzip.open(surrogate_file_name, 'wb') as fh:
-                    pickle.dump(
-                        (self.regressor_loss, self.regressor_runtime),
-                        fh,
-                    )
-        else:
-            with lockfile.LockFile(surrogate_file_name):
-                with gzip.open(surrogate_file_name, 'rb') as fh:
-                    (
-                        self.regressor_loss,
-                        self.regressor_runtime,
-                    ) = pickle.load(fh)
+        while True:
+            try:
+                if rebuild or not os.path.exists(surrogate_file_name):
+                    with lockfile.LockFile(surrogate_file_name, timeout=10):
+                        self.construct_surrogate(dataset_id, n_splits, n_iterations)
+                        with gzip.open(surrogate_file_name, 'wb') as fh:
+                            pickle.dump(
+                                (
+                                    self.regressor_loss,
+                                    self.regressor_runtime,
+                                    self.configurations,
+                                    self.features,
+                                    self.targets,
+                                    self.runtimes,
+                                ), fh,
+                            )
+                    break
+                else:
+                    try:
+                        with gzip.open(surrogate_file_name, 'rb') as fh:
+                            (
+                                self.regressor_loss,
+                                self.regressor_runtime,
+                                self.configurations,
+                                self.features,
+                                self.targets,
+                                self.runtimes
+                            ) = pickle.load(fh)
+                        break
+                    except:
+                        with lockfile.LockFile(surrogate_file_name, timeout=10):
+                            with gzip.open(surrogate_file_name, 'rb') as fh:
+                                (
+                                    self.regressor_loss,
+                                    self.regressor_runtime,
+                                    self.configurations,
+                                    self.features,
+                                    self.targets,
+                                    self.runtimes
+                                ) = pickle.load(fh)
+                        break
+            except lockfile.LockTimeout:
+                self.logger.debug('Could not obtain file lock for %s', surrogate_file_name)
 
     def construct_surrogate(self, dataset_id, n_splits, n_iterations_rs):
         self.logger.info('Could not find surrogate pickle, constructing the surrogate.')
@@ -201,6 +230,11 @@ class ExploringOpenML(AbstractBenchmark):
         runtimes = np.array(runtimes) + 1e-10
         features = self.impute(features)
         self.logger.info('Finished reading in surrogate data.')
+
+        self.configurations = configurations
+        self.features = features
+        self.targets = targets
+        self.runtimes = runtimes
 
         self.logger.info('Start building the surrogate, this can take a few minutes...')
         cv = sklearn.model_selection.KFold(n_splits=n_splits, random_state=1, shuffle=True)
@@ -334,7 +368,7 @@ class ExploringOpenML(AbstractBenchmark):
             )),
             ('estimator', sklearn.ensemble.RandomForestRegressor(
                 n_estimators=n_trees,
-                n_jobs=1,
+                n_jobs=self.n_jobs,
                 random_state=1,
                 **config.get_dictionary()
             ))
@@ -605,21 +639,25 @@ all_model_classes = [
 for model_class in all_model_classes:
     for dataset_id_ in all_datasets:
         benchmark_string = """class %s_%d(%s):
-         def __init__(self, n_splits=10, n_iterations=30, rng=None):
-             super().__init__(dataset_id=%d, n_splits=n_splits, n_iterations=n_iterations, rebuild=False, rng=rng)
+         def __init__(self, n_splits=10, n_iterations=30, rng=None, n_jobs=1):
+             super().__init__(dataset_id=%d, n_splits=n_splits, n_iterations=n_iterations, rebuild=False, rng=rng, n_jobs=n_jobs)
     """ % (model_class.__name__, dataset_id_, model_class.__name__, dataset_id_)
 
         exec(benchmark_string)
 
 
 if __name__ == '__main__':
+    FORMAT = '%(asctime)-15s %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+
     # Call this script to construct all surrogates
     for model_class in all_model_classes:
         print(model_class)
         for dataset_id_ in all_datasets:
             print(dataset_id_)
-            exec('rval = %s_%d()' % (model_class.__name__, dataset_id_))
+            exec('rval = %s_%d(n_jobs=-1)' % (model_class.__name__, dataset_id_))
             print(rval)
+
             model_class_cs = rval.get_configuration_space()
             for _ in range(10):
                 tmp_config = model_class_cs.sample_configuration()
