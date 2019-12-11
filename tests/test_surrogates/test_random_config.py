@@ -41,23 +41,14 @@ class TestRandomConfig(unittest.TestCase):
                 )(b.objective_function)
 
                 f_opt = b.get_empirical_f_opt()
-                y_opt = b.objective_function(f_opt)['function_value']
-                self.assertIsInstance(f_opt, Configuration)
-                self.assertGreaterEqual(y_opt, 0)
-                self.assertLessEqual(y_opt, 1)
-
                 f_max = b.get_empirical_f_max()
-                y_max = b.objective_function(f_max)['function_value']
-                self.assertIsInstance(f_max, Configuration)
-                self.assertGreaterEqual(y_max, 0)
-                self.assertLessEqual(y_max, 1)
 
                 res = obj(c)
                 if res is not None:
                     self.assertTrue(np.isfinite(res['function_value']))
                     self.assertTrue(np.isfinite(res['cost']))
-                    self.assertGreaterEqual(res['function_value'], y_opt)
-                    self.assertLessEqual(res['function_value'], y_max)
+                    self.assertGreaterEqual(res['function_value'], f_opt)
+                    self.assertLessEqual(res['function_value'], f_max)
                 else:
                     self.assertTrue(
                         obj.exit_status in (
