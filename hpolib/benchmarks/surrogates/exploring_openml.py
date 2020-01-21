@@ -30,7 +30,7 @@ import hpolib
 from hpolib.abstract_benchmark import AbstractBenchmark
 
 
-__version__ = 0.1
+__version__ = 0.2
 
 
 class ExploringOpenML(AbstractBenchmark):
@@ -190,12 +190,12 @@ class ExploringOpenML(AbstractBenchmark):
                     # default and the OpenML R package did not upload the
                     # default in one of the earliest versions
                     continue
-                elif 'colsample_bytree' not in config:
+                elif 'colsample_bytree' not in config and config['booster'] == 'gbtree':
                     # MF: according to Philipp, the algorithm was run in the
                     # default and the OpenML R package did not upload the
                     # default in one of the earliest versions
                     continue
-                elif 'colsample_bylevel' not in config:
+                elif 'colsample_bylevel' not in config and config['booster'] == 'gbtree':
                     # MF: according to Philipp, the algorithm was run in the
                     # default and the OpenML R package did not upload the
                     # default in one of the earliest versions
