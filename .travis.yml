@@ -1,10 +1,8 @@
 language: python
-python:
-  - "3.5"
-  - "3.6"
-os: linux
+dist: bionic
 
 cache:
+  apt: true
   directories:
     - $HOME/.cache/pip
     - $HOME/.hpolib/
@@ -15,27 +13,38 @@ sudo: false
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
 
+env:
+  matrix:
+    - DISTRIB="conda" PYTHON_VERSION=3.4
+    - DISTRIB="conda" PYTHON_VERSION=3.5
+    - DISTRIB="conda" PYTHON_VERSION=3.6
+    - DISTRIB="conda" PYTHON_VERSION=3.7 DOCPUSH="true"
 
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
-  - conda update --yes conda
-  - conda create -n testenv --yes python=$TRAVIS_PYTHON_VERSION pip wheel nose gxx_linux-64 gcc_linux-64 swig gfortran_linux-64
-  - source activate testenv
+  - sudo apt-get install libatlas-base-dev
+  - sudo apt-get install liblapack-dev
+  - sudo apt-get install gfortran
+  - sudo apt-get install build-essential
+  - sudo apt-get install swig
 
 install:
-  - pip install coverage pep8 codecov
-  # Temporarily pin the numpy version for travis-ci
-  - pip install "numpy<1.15"
-  # Inverse grep allows comments in requirements file
-  - cat requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
-  - cat optional-requirements.txt | grep -v '#' | xargs -n 1 -L 1 pip install
-  - python setup.py install
+  - source ci_scripts/install.sh
 
-# command to run tests, e.g. python setup.py test
 script:
+  # Deactivated the tests in this step, so that documentation is always pushed
+  # - nosetests -sv --with-coverage --cover-package=hpolib
+  - source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
+
+after_deploy:
   - nosetests -sv --with-coverage --cover-package=hpolib
-after_success:
-  - codecov
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $HPOLIB2_TOKEN
+  keep-history: true
+  committer-from-gh: true
+  on:
+    all_branches: true
+    condition: $doc_result = "success"
+  local_dir: doc/$TRAVIS_BRANCH
