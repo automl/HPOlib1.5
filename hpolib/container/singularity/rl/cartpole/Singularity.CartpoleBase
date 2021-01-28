@@ -1,0 +1,20 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+%labels
+MAINTAINER Stefan Staeglich
+
+%post
+    apt update -y
+    apt install git -y
+    apt install python3-pip python3-numpy python-configparser cython3 -y
+    pip3 install git+https://github.com/automl/ConfigSpace.git@master
+    apt install python3-sklearn -y
+    pip3 install scikit-learn==0.19.1 scipy==0.19.1
+    pip3 install git+https://github.com/automl/HPOlib2@development
+    pip3 install pyro4
+    pip3 install recommonmark
+    pip3 install tensorflow==1.12.0 gym==0.10.9 tensorforce==0.4.3
+
+%runscript
+    python3 -s /usr/local/lib/python3.6/dist-packages/hpolib/container/server/abstract_benchmark.py rl.cartpole $@

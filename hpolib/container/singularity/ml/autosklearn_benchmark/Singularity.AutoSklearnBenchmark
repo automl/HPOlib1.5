@@ -1,0 +1,22 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+%labels
+MAINTAINER Stefan Staeglich
+
+%post
+    apt update -y
+    apt install git -y
+    apt install python3-pip python-configparser cython3 -y
+    apt install libopenblas-base libopenblas-dev libblas3 liblas-c3 -y
+    pip3 install scipy numpy
+    pip3 install git+https://github.com/automl/ConfigSpace.git@master
+    pip3 install git+https://github.com/automl/HPOlib2@development
+    pip3 install pyro4
+    apt install swig swig3.0 python3-jsonpickle -y
+    pip3 install --upgrade pynisher==0.5.0
+    pip3 install scikit-learn
+    pip3 install auto-sklearn==0.4.2
+
+%runscript
+    python3 -s /usr/local/lib/python3.6/dist-packages/hpolib/container/server/abstract_benchmark.py ml.autosklearn_benchmark $@

@@ -1,0 +1,27 @@
+Bootstrap: docker
+From: nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+
+%labels
+MAINTAINER Stefan Staeglich
+
+%post
+    apt update -y
+    apt install git -y
+    apt install python3-pip python-configparser cython3 -y
+    pip3 install numpy scipy sklearn
+    pip3 install git+https://github.com/automl/ConfigSpace.git@master
+    pip3 install git+https://github.com/automl/HPOlib2@container
+    pip3 install pyro4
+    pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
+    pip3 install torchvision
+
+%environment
+    export CUDA_ROOT=/usr/local/cuda 
+    export LD_LIBRARY_PATH=${CUDA_ROOT}/lib64:$LD_LIBRARY_PATH 
+    export LIBRARY_PATH=${CUDA_ROOT}/lib64:$LIBRARY_PATH
+    PATH=${CUDA_ROOT}/bin:${PATH}
+    export PATH
+
+%runscript
+    python3 -s /usr/local/lib/python3.6/dist-packages/hpolib/container/server/abstract_benchmark.py ml.conv_net $@
+
