@@ -4,15 +4,12 @@ import pkgutil
 import os
 import sys
 
-import unittest
 import unittest.mock
 
 import hpolib
 import hpolib.benchmarks.ml
 
 from hpolib.abstract_benchmark import AbstractBenchmark
-from hpolib.benchmarks.ml.autosklearn_benchmark import \
-    MulticlassClassificationBenchmark
 
 
 class TestInitRng(unittest.TestCase):
